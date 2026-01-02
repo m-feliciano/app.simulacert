@@ -1,19 +1,19 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { AuthFacade } from '../auth/auth.facade';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage],
   template: `
     <div class="app-layout">
       <header class="topbar">
         <div class="topbar-left">
           <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
-          <img src="/simulaaws-logo.svg" alt="SimulaAWS" class="logo">
+          <img ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="logo" height="96" width="360">
         </div>
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser?.name }}</span>
@@ -44,7 +44,7 @@ import { Router } from '@angular/router';
         </aside>
 
         <main class="main-content">
-          <router-outlet />
+          <router-outlet/>
         </main>
       </div>
     </div>

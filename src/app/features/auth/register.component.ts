@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -7,12 +7,12 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgOptimizedImage],
   styleUrls: ['./register.component.css'],
   template: `
     <div class="auth-card">
       <div class="logo-container">
-        <img src="/simulaaws-logo.svg" alt="SimulaAWS" class="auth-logo">
+        <img ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="auth-logo" height="96" width="360">
       </div>
 
       <h2>Registrar</h2>
