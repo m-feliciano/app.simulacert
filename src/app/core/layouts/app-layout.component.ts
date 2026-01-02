@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
       <header class="topbar">
         <div class="topbar-left">
           <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
-          <h1 class="logo">SimulaAWS</h1>
+          <img src="/simulaaws-logo.svg" alt="SimulaAWS" class="logo">
         </div>
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser?.name }}</span>
@@ -91,10 +91,11 @@ import { Router } from '@angular/router';
     }
 
     .logo {
-      font-size: 20px;
-      font-weight: bold;
-      margin: 0;
+      height: 36px;
+      width: auto;
+      object-fit: contain;
     }
+
 
     .topbar-right {
       display: flex;

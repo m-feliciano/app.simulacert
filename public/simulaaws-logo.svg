@@ -1,0 +1,48 @@
+<svg
+  width="360"
+  height="96"
+  viewBox="0 0 360 96"
+  xmlns="http://www.w3.org/2000/svg"
+  role="img"
+  aria-label="Simula AWS Logo"
+>
+  <!-- Cloud -->
+  <path
+    d="M48 60
+       C36 60, 28 52, 28 42
+       C28 32, 36 24, 46 24
+       C50 14, 60 8, 72 8
+       C88 8, 100 20, 102 34
+       C116 36, 126 46, 126 58
+       C126 70, 116 80, 102 80
+       H48 Z"
+    fill="#E5E7EB"
+  />
+
+  <!-- Check -->
+  <path
+    d="M56 44 L68 56 L88 36"
+    fill="none"
+    stroke="#FF9900"
+    stroke-width="5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <!-- Text -->
+  <text
+    x="150"
+    y="58"
+    font-family="system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Arial, sans-serif"
+    font-size="32"
+    font-weight="600"
+    fill="#E5E7EB"
+  >
+    Simula
+    <tspan
+      dx="6"
+      fill="#FF9900"
+      font-weight="700"
+    >AWS</tspan>
+  </text>
+</svg>
