@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExamsApiService } from '../../api/exams.service';
@@ -16,17 +16,17 @@ import { ExamResponse } from '../../api/domain';
         <a (click)="goBack()" class="back-link">← Voltar</a>
       </div>
 
-      @if (loadingExam) {
+      @if (loadingExam()) {
         <div class="loading-state">
           <p>Carregando detalhes do exame...</p>
         </div>
       }
 
-      @if (!loadingExam && exam) {
+      @if (!loadingExam() && exam()) {
         <div class="exam-header">
-          <h1>{{ exam.title }}</h1>
-          @if (exam.description) {
-            <p class="exam-description">{{ exam.description }}</p>
+          <h1>{{ exam()!.title }}</h1>
+          @if (exam()!.description) {
+            <p class="exam-description">{{ exam()!.description }}</p>
           }
         </div>
 
@@ -35,8 +35,8 @@ import { ExamResponse } from '../../api/domain';
             <h3>Informações do Exame</h3>
             <ul>
               <li><strong>Tipo:</strong> Simulado AWS</li>
-              <li><strong>Duração:</strong> {{ calculateDuration() }} minutos</li>
-              <li><strong>Questões:</strong> {{ questionCount }}</li>
+              <li><strong>Duração:</strong> {{ duration() }} minutos</li>
+              <li><strong>Questões:</strong> {{ questionCount() }}</li>
               <li><strong>Pontuação mínima:</strong> 72%</li>
             </ul>
           </div>
@@ -44,8 +44,8 @@ import { ExamResponse } from '../../api/domain';
           <div class="info-card">
             <h3>Regras</h3>
             <ul>
-              <li>Você terá {{ calculateDuration() }} minutos para completar o exame</li>
-              <li>São {{ questionCount }} questões de múltipla escolha</li>
+              <li>Você terá {{ duration() }} minutos para completar o exame</li>
+              <li>São {{ questionCount() }} questões de múltipla escolha</li>
               <li>Não é possível pausar o exame</li>
               <li>Você pode revisar suas respostas antes de finalizar</li>
             </ul>
@@ -58,7 +58,7 @@ import { ExamResponse } from '../../api/domain';
             @for (count of questionCountOptions; track count) {
               <button
                 class="question-option"
-                [class.selected]="questionCount === count"
+                [class.selected]="questionCount() === count"
                 (click)="selectQuestionCount(count)"
                 type="button">
                 {{ count }} questões
@@ -68,14 +68,14 @@ import { ExamResponse } from '../../api/domain';
         </div>
 
         <div class="actions">
-          <button class="btn-primary" (click)="startExam()" [disabled]="loading">
-            {{ loading ? 'Iniciando...' : 'Iniciar Exame com ' + questionCount + ' questões' }}
+          <button class="btn-primary" (click)="startExam()" [disabled]="loading()">
+            {{ loading() ? 'Iniciando...' : 'Iniciar Exame com ' + questionCount() + ' questões' }}
           </button>
         </div>
       }
 
-      @if (errorMessage) {
-        <div class="error">{{ errorMessage }}</div>
+      @if (errorMessage()) {
+        <div class="error">{{ errorMessage() }}</div>
       }
     </div>
   `,
@@ -328,20 +328,21 @@ import { ExamResponse } from '../../api/domain';
   `]
 })
 export class ExamDetailComponent implements OnInit {
-  exam: ExamResponse | null = null;
-  loading = false;
-  loadingExam = false;
-  errorMessage = '';
-  questionCount = 50;
+  exam = signal<ExamResponse | null>(null);
+  loading = signal(false);
+  loadingExam = signal(false);
+  errorMessage = signal('');
+  questionCount = signal(50);
   questionCountOptions = [10, 20, 30, 40, 50];
+
+  duration = computed(() => Math.round(this.questionCount() * 2));
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private examsApi: ExamsApiService,
     private attemptsApi: AttemptsApiService,
-    private authFacade: AuthFacade,
-    private cdr: ChangeDetectorRef
+    private authFacade: AuthFacade
   ) {}
 
   ngOnInit(): void {
@@ -352,55 +353,47 @@ export class ExamDetailComponent implements OnInit {
   }
 
   loadExam(examId: string): void {
-    this.loadingExam = true;
-    this.errorMessage = '';
-    this.cdr.markForCheck();
+    this.loadingExam.set(true);
+    this.errorMessage.set('');
 
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
-        this.exam = exam;
-        this.loadingExam = false;
-        this.cdr.detectChanges();
+        console.log('Exam loaded:', exam);
+        this.exam.set(exam);
+        this.loadingExam.set(false);
       },
       error: (error) => {
         console.error('Error loading exam:', error);
-        this.errorMessage = 'Erro ao carregar exame';
-        this.loadingExam = false;
-        this.cdr.detectChanges();
+        this.errorMessage.set('Erro ao carregar exame');
+        this.loadingExam.set(false);
       }
     });
   }
 
   selectQuestionCount(count: number): void {
-    this.questionCount = count;
-    this.cdr.detectChanges();
-  }
-
-  calculateDuration(): number {
-    return Math.round(this.questionCount * 2);
+    this.questionCount.set(count);
   }
 
   startExam(): void {
-    if (!this.exam || !this.authFacade.currentUser) {
+    const currentExam = this.exam();
+    if (!currentExam || !this.authFacade.currentUser) {
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
-    this.cdr.markForCheck();
+    this.loading.set(true);
+    this.errorMessage.set('');
 
     this.attemptsApi.startAttempt({
-      examId: this.exam.id,
+      examId: currentExam.id,
       userId: this.authFacade.currentUser.id,
-      questionCount: this.questionCount
+      questionCount: this.questionCount()
     }).subscribe({
       next: (attempt) => {
         this.router.navigate(['/attempt', attempt.id, 'run']);
       },
       error: (error) => {
-        this.loading = false;
-        this.errorMessage = error.error?.message || 'Erro ao iniciar exame';
-        this.cdr.detectChanges();
+        this.loading.set(false);
+        this.errorMessage.set(error.error?.message || 'Erro ao iniciar exame');
       }
     });
   }

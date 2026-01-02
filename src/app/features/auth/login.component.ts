@@ -15,20 +15,28 @@ import { AuthFacade } from '../../core/auth/auth.facade';
         <div class="form-group">
           <label>Email</label>
           <input type="email" formControlName="email" class="form-control" />
-          <div class="error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid">
-            Email é obrigatório
-          </div>
+
+          @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
+            <div class="error">
+              Email é obrigatório
+            </div>
+          }
         </div>
 
         <div class="form-group">
           <label>Senha</label>
           <input type="password" formControlName="password" class="form-control" />
-          <div class="error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
-            Senha é obrigatória
-          </div>
+
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+            <div class="error">
+              Senha é obrigatória
+            </div>
+          }
         </div>
 
-        <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        @if (errorMessage) {
+          <div class="error">{{ errorMessage }}</div>
+        }
 
         <button type="submit" class="btn-primary" [disabled]="loginForm.invalid || loading">
           {{ loading ? 'Entrando...' : 'Entrar' }}

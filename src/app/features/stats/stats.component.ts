@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -13,53 +13,61 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
     <div class="stats-container">
       <h1>Estatísticas</h1>
 
-      @if (userStats) {
+      @if (userStats()) {
         <div class="stats-overview">
           <div class="stat-card">
-            <div class="stat-value">{{ userStats.totalAttempts }}</div>
+            <div class="stat-value">{{ userStats()!.totalAttempts }}</div>
             <div class="stat-label">Total de Tentativas</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-value">{{ userStats.completedAttempts }}</div>
+            <div class="stat-value">{{ userStats()!.completedAttempts }}</div>
             <div class="stat-label">Tentativas Completas</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-value">{{ userStats.averageScore.toFixed(1) }}%</div>
+            <div class="stat-value">{{ userStats()!.averageScore.toFixed(1) }}%</div>
             <div class="stat-label">Pontuação Média</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-value">{{ userStats.bestScore }}%</div>
+            <div class="stat-value">{{ userStats()!.bestScore }}%</div>
             <div class="stat-label">Melhor Pontuação</div>
           </div>
         </div>
       }
 
-      @if (domainStats.length > 0) {
+      @if (domainStats().length > 0) {
         <div class="section">
           <h2>Performance por Domínio AWS</h2>
           <div class="domain-stats">
-            @for (domain of domainStats; track domain.awsDomain) {
+            @for (domain of domainStats(); track domain.awsDomain) {
               <div class="domain-item">
                 <div class="domain-header">
-                  <span class="domain-name">{{ domain.awsDomain }}</span>
-                  <span class="domain-accuracy">{{ (domain.accuracyRate * 100).toFixed(1) }}%</span>
+                  <span class="domain-name">{{ domain.awsDomain || 'Domínio Geral' }}</span>
+                  <span class="domain-accuracy">{{ (domain.accuracyRate).toFixed(1) }}%</span>
                 </div>
                 <div class="domain-bar">
-                  <div class="domain-fill" [style.width.%]="domain.accuracyRate * 100"></div>
+                  <div class="domain-fill" [style.width.%]="domain.accuracyRate"></div>
                 </div>
                 <div class="domain-details">
                   {{ domain.correctAnswers }} / {{ domain.totalQuestions }} corretas
+                  @if (domain.totalQuestions === 0) {
+                    <span class="no-data"> - Sem dados disponíveis</span>
+                  }
                 </div>
               </div>
             }
           </div>
         </div>
+      } @else {
+        <div class="section empty-section">
+          <h2>Performance por Domínio AWS</h2>
+          <p class="empty-message">Nenhum dado de domínio disponível. Complete alguns exames para ver suas estatísticas por domínio.</p>
+        </div>
       }
 
-      @if (attemptHistory.length > 0) {
+      @if (attemptHistory().length > 0) {
         <div class="section">
           <h2>Histórico de Tentativas</h2>
           <div class="history-table">
@@ -69,8 +77,8 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
               <div class="col-status">Status</div>
               <div class="col-score">Pontuação</div>
             </div>
-            @for (attempt of attemptHistory; track attempt.attemptId) {
-              <div class="history-row">
+            @for (attempt of attemptHistory(); track attempt.attemptId) {
+              <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, 'result']">
                 <div class="col-date">{{ formatDate(attempt.startedAt) }}</div>
                 <div class="col-exam">{{ attempt.examTitle }}</div>
                 <div class="col-status">
@@ -87,7 +95,7 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
                     <span>-</span>
                   }
                 </div>
-              </div>
+              </a>
             }
           </div>
         </div>
@@ -286,6 +294,21 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
       }
     }
 
+    .domain-details .no-data {
+      color: var(--color-warning);
+      font-style: italic;
+    }
+
+    .empty-section {
+      text-align: center;
+    }
+
+    .empty-message {
+      color: var(--color-text-secondary);
+      font-style: italic;
+      margin: var(--spacing-md) 0;
+    }
+
     .history-table {
       display: flex;
       flex-direction: column;
@@ -319,6 +342,9 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
       border-bottom: 1px solid var(--color-border-light);
       transition: var(--transition-fast);
       font-size: 13px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
     }
 
     @media (min-width: 768px) {
@@ -329,6 +355,13 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
 
     .history-row:hover {
       background: var(--color-bg-primary);
+      transform: translateX(4px);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .history-row:hover {
+        transform: none;
+      }
     }
 
     .col-date {
@@ -466,14 +499,13 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
   `]
 })
 export class StatsComponent implements OnInit {
-  userStats: UserStatsDto | null = null;
-  domainStats: AwsDomainStatsDto[] = [];
-  attemptHistory: AttemptHistoryItemDto[] = [];
+  userStats = signal<UserStatsDto | null>(null);
+  domainStats = signal<AwsDomainStatsDto[]>([]);
+  attemptHistory = signal<AttemptHistoryItemDto[]>([]);
 
   constructor(
     private authFacade: AuthFacade,
-    private statsApi: StatsApiService,
-    private cdr: ChangeDetectorRef
+    private statsApi: StatsApiService
   ) {}
 
   ngOnInit(): void {
@@ -486,8 +518,8 @@ export class StatsComponent implements OnInit {
   loadStats(userId: string): void {
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
-        this.userStats = stats;
-        this.cdr.detectChanges();
+        console.log('User stats loaded:', stats);
+        this.userStats.set(stats);
       },
       error: (error) => {
         console.error('Error loading user stats:', error);
@@ -496,8 +528,12 @@ export class StatsComponent implements OnInit {
 
     this.statsApi.getPerformanceByDomain(userId).subscribe({
       next: (domains) => {
-        this.domainStats = domains.sort((a, b) => b.accuracyRate - a.accuracyRate);
-        this.cdr.detectChanges();
+        console.log('Domain stats loaded:', domains);
+        console.log('Number of domains:', domains.length);
+        domains.forEach(d => {
+          console.log(`Domain: ${d.awsDomain}, Accuracy: ${d.accuracyRate}, Correct: ${d.correctAnswers}, Total: ${d.totalQuestions}`);
+        });
+        this.domainStats.set(domains.sort((a, b) => b.accuracyRate - a.accuracyRate));
       },
       error: (error) => {
         console.error('Error loading domain stats:', error);
@@ -506,10 +542,11 @@ export class StatsComponent implements OnInit {
 
     this.statsApi.getAttemptHistory(userId).subscribe({
       next: (history) => {
-        this.attemptHistory = history.sort((a, b) =>
+        console.log('Attempt history loaded:', history);
+        console.log('Number of attempts:', history.length);
+        this.attemptHistory.set(history.sort((a, b) =>
           new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
-        );
-        this.cdr.detectChanges();
+        ));
       },
       error: (error) => {
         console.error('Error loading attempt history:', error);

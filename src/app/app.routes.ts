@@ -32,6 +32,7 @@ export const routes: Routes = [
       { path: 'exams', component: ExamsListComponent },
       { path: 'exams/:id', component: ExamDetailComponent },
       { path: 'attempt/:id/result', component: ResultComponent },
+      { path: 'attempt/:id/questions', loadComponent: () => import('./features/attempt/attempt-questions-result.component').then(m => m.AttemptQuestionsResultComponent) },
       { path: 'stats', component: StatsComponent },
       { path: 'admin', component: AdminComponent, canActivate: [adminGuard] }
     ]

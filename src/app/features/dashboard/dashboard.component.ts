@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -16,32 +16,32 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
 
       <div class="stats-grid">
         <div class="stat-card">
-          <div class="stat-value">{{ stats?.totalAttempts || 0 }}</div>
+          <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
           <div class="stat-label">Total de Tentativas</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-value">{{ stats?.completedAttempts || 0 }}</div>
+          <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
           <div class="stat-label">Tentativas Completas</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-value">{{ stats?.averageScore?.toFixed(1) || 0 }}%</div>
+          <div class="stat-value">{{ stats()?.averageScore?.toFixed(1) || 0 }}%</div>
           <div class="stat-label">Média de Pontuação</div>
         </div>
 
         <div class="stat-card">
-          <div class="stat-value">{{ stats?.bestScore || 0 }}%</div>
+          <div class="stat-value">{{ stats()?.bestScore || 0 }}%</div>
           <div class="stat-label">Melhor Pontuação</div>
         </div>
       </div>
 
       <div class="section">
         <h2>Tentativas Recentes</h2>
-        @if (recentAttempts.length > 0) {
+        @if (recentAttempts().length > 0) {
           <div class="attempts-list">
-            @for (attempt of recentAttempts; track attempt.id) {
-              <div class="attempt-item">
+            @for (attempt of recentAttempts(); track attempt.id) {
+              <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']">
                 <div class="attempt-info">
                   <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
                   <div class="attempt-status" [class]="attempt.status.toLowerCase()">
@@ -53,7 +53,7 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
                     {{ attempt.score }}%
                   </div>
                 }
-              </div>
+              </a>
             }
           </div>
         } @else {
@@ -188,6 +188,9 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
       background: var(--color-bg-primary);
       border-radius: var(--border-radius-sm);
       transition: var(--transition-fast);
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
     }
 
     .attempt-item:hover {
@@ -328,14 +331,13 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
   `]
 })
 export class DashboardComponent implements OnInit {
-  stats: UserStatsDto | null = null;
-  recentAttempts: AttemptResponse[] = [];
+  stats = signal<UserStatsDto | null>(null);
+  recentAttempts = signal<AttemptResponse[]>([]);
 
   constructor(
     private authFacade: AuthFacade,
     private attemptsApi: AttemptsApiService,
-    private statsApi: StatsApiService,
-    private cdr: ChangeDetectorRef
+    private statsApi: StatsApiService
   ) {}
 
   ngOnInit(): void {
@@ -349,8 +351,7 @@ export class DashboardComponent implements OnInit {
   loadStats(userId: string): void {
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
-        this.stats = stats;
-        this.cdr.detectChanges();
+        this.stats.set(stats);
       },
       error: (error) => {
         console.error('Error loading stats:', error);
@@ -361,10 +362,10 @@ export class DashboardComponent implements OnInit {
   loadRecentAttempts(userId: string): void {
     this.attemptsApi.getAttemptsByUser(userId).subscribe({
       next: (attempts) => {
-        this.recentAttempts = attempts
+        const sorted = attempts
           .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
           .slice(0, 5);
-        this.cdr.detectChanges();
+        this.recentAttempts.set(sorted);
       },
       error: (error) => {
         console.error('Error loading attempts:', error);

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AttemptsApiService } from '../../api/attempts.service';
@@ -12,24 +12,24 @@ import { interval, Subscription } from 'rxjs';
   imports: [CommonModule],
   template: `
     <div class="attempt-runner">
-      @if (loading) {
+      @if (loading()) {
         <div class="loading-state">
           <p>Carregando exame...</p>
         </div>
       }
 
-      @if (error) {
+      @if (error()) {
         <div class="error-state">
-          <p>{{ error }}</p>
+          <p>{{ error() }}</p>
           <button class="btn-secondary" (click)="goBack()">Voltar</button>
         </div>
       }
 
-      @if (!loading && !error && exam && questions.length > 0) {
+      @if (!loading() && !error() && exam() && questions().length > 0) {
         <div class="attempt-header">
-          <h2>{{ exam.title }}</h2>
-          <div class="timer" [class.warning]="timeRemaining < 300">
-            ⏱️ {{ formatTime(timeRemaining) }}
+          <h2>{{ exam()!.title }}</h2>
+          <div class="timer" [class.warning]="timeRemaining() < 300">
+            ⏱️ {{ formatTime(timeRemaining()) }}
           </div>
         </div>
 
@@ -38,10 +38,10 @@ import { interval, Subscription } from 'rxjs';
         </div>
 
         <div class="question-navigation">
-          @for (q of questions; track $index) {
+          @for (q of questions(); track $index) {
             <button
               class="question-nav-btn"
-              [class.active]="$index === currentQuestionIndex"
+              [class.active]="$index === currentQuestionIndex()"
               [class.answered]="answeredQuestions.has($index)"
               (click)="goToQuestion($index)">
               {{ $index + 1 }}
@@ -52,7 +52,7 @@ import { interval, Subscription } from 'rxjs';
         @if (currentQuestion) {
           <div class="question-content">
             <div class="question-header">
-              <span class="question-number">Questão {{ currentQuestionIndex + 1 }} de {{ questions.length }}</span>
+              <span class="question-number">Questão {{ currentQuestionIndex() + 1 }} de {{ questions().length }}</span>
               <span class="question-meta">{{ currentQuestion.domain }} | {{ currentQuestion.difficulty }}</span>
             </div>
 
@@ -62,7 +62,7 @@ import { interval, Subscription } from 'rxjs';
               @for (option of currentQuestion.options; track option.key) {
                 <div
                   class="option"
-                  [class.selected]="selectedAnswers[currentQuestionIndex] === option.key"
+                  [class.selected]="selectedAnswers[currentQuestionIndex()] === option.key"
                   (click)="selectAnswer(option.key)">
                   <div class="option-key">{{ option.key }}</div>
                   <div class="option-text">{{ option.text }}</div>
@@ -74,18 +74,18 @@ import { interval, Subscription } from 'rxjs';
               <button
                 class="btn-secondary"
                 (click)="previousQuestion()"
-                [disabled]="currentQuestionIndex === 0">
+                [disabled]="currentQuestionIndex() === 0">
                 ← Anterior
               </button>
 
               <button
                 class="btn-secondary"
                 (click)="nextQuestion()"
-                [disabled]="currentQuestionIndex === questions.length - 1">
+                [disabled]="currentQuestionIndex() === questions().length - 1">
                 Próxima →
               </button>
 
-              @if (currentQuestionIndex === questions.length - 1) {
+              @if (currentQuestionIndex() === questions().length - 1) {
                 <button
                   class="btn-finish"
                   (click)="confirmFinish()">
@@ -97,14 +97,14 @@ import { interval, Subscription } from 'rxjs';
         }
       }
 
-      @if (showFinishModal) {
-        <div class="finish-modal" (click)="showFinishModal = false">
+      @if (showFinishModal()) {
+        <div class="finish-modal" (click)="showFinishModal.set(false)">
           <div class="modal-content" (click)="$event.stopPropagation()">
             <h3>Finalizar Exame?</h3>
-            <p>Você respondeu {{ answeredQuestions.size }} de {{ questions.length }} questões.</p>
+            <p>Você respondeu {{ answeredQuestions.size }} de {{ questions().length }} questões.</p>
             <p><strong>Tem certeza que deseja finalizar?</strong></p>
             <div class="modal-actions">
-              <button class="btn-secondary" (click)="showFinishModal = false">Cancelar</button>
+              <button class="btn-secondary" (click)="showFinishModal.set(false)">Cancelar</button>
               <button class="btn-primary" (click)="finishAttempt()">Finalizar</button>
             </div>
           </div>
@@ -588,31 +588,34 @@ import { interval, Subscription } from 'rxjs';
 })
 export class AttemptRunnerComponent implements OnInit, OnDestroy {
   attemptId!: string;
-  exam: ExamResponse | null = null;
-  questions: AttemptQuestionResponse[] = [];
-  currentQuestionIndex = 0;
+  exam = signal<ExamResponse | null>(null);
+  questions = signal<AttemptQuestionResponse[]>([]);
+  currentQuestionIndex = signal(0);
+
   selectedAnswers: { [index: number]: string } = {};
   answeredQuestions = new Set<number>();
-  timeRemaining = 10800;
-  showFinishModal = false;
-  loading = true;
-  error = '';
+
+  timeRemaining = signal(10800);
+  showFinishModal = signal(false);
+  loading = signal(true);
+  error = signal('');
+
   private timerSubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService,
-    private cdr: ChangeDetectorRef
+    private examsApi: ExamsApiService
   ) {}
 
   get currentQuestion(): AttemptQuestionResponse | null {
-    return this.questions[this.currentQuestionIndex] || null;
+    return this.questions()[this.currentQuestionIndex()] || null;
   }
 
   get progress(): number {
-    return (this.answeredQuestions.size / this.questions.length) * 100;
+    const questionsLength = this.questions().length;
+    return questionsLength > 0 ? (this.answeredQuestions.size / questionsLength) * 100 : 0;
   }
 
   ngOnInit(): void {
@@ -635,9 +638,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading attempt:', error);
-        this.error = 'Erro ao carregar tentativa. Por favor, tente novamente.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Erro ao carregar tentativa. Por favor, tente novamente.');
+        this.loading.set(false);
       }
     });
   }
@@ -647,14 +649,13 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
         console.log('Exam loaded:', exam);
-        this.exam = exam;
+        this.exam.set(exam);
         this.checkIfLoaded();
       },
       error: (error) => {
         console.error('Error loading exam:', error);
-        this.error = 'Erro ao carregar exame.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Erro ao carregar exame.');
+        this.loading.set(false);
       }
     });
   }
@@ -664,30 +665,28 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.attemptsApi.getAttemptQuestions(this.attemptId).subscribe({
       next: (questions) => {
         console.log('Questions loaded:', questions.length);
-        this.questions = questions;
+        this.questions.set(questions);
         this.checkIfLoaded();
       },
       error: (error) => {
         console.error('Error loading questions:', error);
-        this.error = 'Erro ao carregar questões.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Erro ao carregar questões.');
+        this.loading.set(false);
       }
     });
   }
 
   checkIfLoaded(): void {
-    if (this.exam && this.questions.length > 0) {
+    if (this.exam() && this.questions().length > 0) {
       console.log('Everything loaded successfully!');
-      this.loading = false;
-      this.cdr.detectChanges();
+      this.loading.set(false);
     }
   }
 
   startTimer(): void {
     this.timerSubscription = interval(1000).subscribe(() => {
-      if (this.timeRemaining > 0) {
-        this.timeRemaining--;
+      if (this.timeRemaining() > 0) {
+        this.timeRemaining.update(t => t - 1);
       } else {
         this.finishAttempt();
       }
@@ -695,8 +694,9 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   selectAnswer(optionKey: string): void {
-    this.selectedAnswers[this.currentQuestionIndex] = optionKey;
-    this.answeredQuestions.add(this.currentQuestionIndex);
+    const currentIdx = this.currentQuestionIndex();
+    this.selectedAnswers[currentIdx] = optionKey;
+    this.answeredQuestions.add(currentIdx);
 
     if (this.currentQuestion) {
       this.attemptsApi.submitAnswer(
@@ -712,23 +712,23 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   goToQuestion(index: number): void {
-    this.currentQuestionIndex = index;
+    this.currentQuestionIndex.set(index);
   }
 
   previousQuestion(): void {
-    if (this.currentQuestionIndex > 0) {
-      this.currentQuestionIndex--;
+    if (this.currentQuestionIndex() > 0) {
+      this.currentQuestionIndex.update(i => i - 1);
     }
   }
 
   nextQuestion(): void {
-    if (this.currentQuestionIndex < this.questions.length - 1) {
-      this.currentQuestionIndex++;
+    if (this.currentQuestionIndex() < this.questions().length - 1) {
+      this.currentQuestionIndex.update(i => i + 1);
     }
   }
 
   confirmFinish(): void {
-    this.showFinishModal = true;
+    this.showFinishModal.set(true);
   }
 
   finishAttempt(): void {

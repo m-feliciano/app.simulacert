@@ -15,28 +15,36 @@ import { AuthFacade } from '../../core/auth/auth.facade';
         <div class="form-group">
           <label>Nome</label>
           <input type="text" formControlName="name" class="form-control" />
-          <div class="error" *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid">
-            Nome deve ter entre 3 e 100 caracteres
-          </div>
+          @if (registerForm.get('name')?.touched && registerForm.get('name')?.invalid) {
+            <div class="error">
+              Nome deve ter entre 3 e 100 caracteres
+            </div>
+          }
         </div>
 
         <div class="form-group">
           <label>Email</label>
           <input type="email" formControlName="email" class="form-control" />
-          <div class="error" *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid">
-            Email válido é obrigatório
-          </div>
+          @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+            <div class="error">
+              Email válido é obrigatório
+            </div>
+          }
         </div>
 
         <div class="form-group">
           <label>Senha</label>
           <input type="password" formControlName="password" class="form-control" />
-          <div class="error" *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid">
-            Senha deve ter no mínimo 8 caracteres
-          </div>
+          @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+            <div class="error">
+              Senha deve ter no mínimo 8 caracteres
+            </div>
+          }
         </div>
 
-        <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        @if (errorMessage) {
+          <div class="error">{{ errorMessage }}</div>
+        }
 
         <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || loading">
           {{ loading ? 'Registrando...' : 'Registrar' }}

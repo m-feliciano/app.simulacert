@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import {Component, OnInit, ChangeDetectorRef, signal} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AttemptsApiService } from '../../api/attempts.service';
@@ -11,28 +11,28 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="result-container">
-      @if (loading) {
+      @if (loading()) {
         <div class="loading-state">
           <p>Carregando resultado...</p>
         </div>
       }
 
-      @if (error) {
+      @if (error()) {
         <div class="error-state">
-          <p>{{ error }}</p>
+          <p>{{ error() }}</p>
           <a routerLink="/exams" class="btn-secondary">Voltar aos Exames</a>
         </div>
       }
 
-      @if (!loading && !error && attempt && exam) {
+      @if (!loading() && !error() && attempt() && exam()) {
         <div class="result-header">
           <h1>Resultado do Exame</h1>
-          <p class="exam-title">{{ exam.title }}</p>
+          <p class="exam-title">{{ exam()!.title }}</p>
         </div>
 
         <div class="score-card" [class.passed]="isPassed" [class.failed]="!isPassed">
           <div class="score-label">Sua Pontuação</div>
-          <div class="score-value">{{ attempt.score }}%</div>
+          <div class="score-value">{{ attempt()!.score }}%</div>
           <div class="score-status">{{ isPassed ? '✓ Aprovado' : '✗ Reprovado' }}</div>
           <div class="score-message">
             {{ isPassed ? 'Parabéns! Você foi aprovado.' : 'Pontuação mínima: 72%' }}
@@ -42,12 +42,12 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
         <div class="attempt-details">
           <div class="detail-card">
             <div class="detail-label">Data de Início</div>
-            <div class="detail-value">{{ formatDate(attempt.startedAt) }}</div>
+            <div class="detail-value">{{ formatDate(attempt()!.startedAt) }}</div>
           </div>
 
           <div class="detail-card">
             <div class="detail-label">Data de Conclusão</div>
-            <div class="detail-value">{{ formatDate(attempt.finishedAt!) }}</div>
+            <div class="detail-value">{{ formatDate(attempt()!.finishedAt!) }}</div>
           </div>
 
           <div class="detail-card">
@@ -57,7 +57,7 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
 
           <div class="detail-card">
             <div class="detail-label">Questões</div>
-            <div class="detail-value">{{ attempt.questionIds.length }}</div>
+            <div class="detail-value">{{ attempt()!.questionIds.length }}</div>
           </div>
         </div>
 
@@ -65,6 +65,7 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
           <a routerLink="/exams" class="btn-secondary">Ver Exames</a>
           <a routerLink="/stats" class="btn-primary">Ver Estatísticas</a>
           <a routerLink="/dashboard" class="btn-secondary">Dashboard</a>
+          <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-primary">Ver Questões</a>
         </div>
       }
     </div>
@@ -211,21 +212,21 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
   `]
 })
 export class ResultComponent implements OnInit {
-  attempt: AttemptResponse | null = null;
-  exam: ExamResponse | null = null;
-  loading = true;
-  error = '';
+  attempt = signal<AttemptResponse | null>(null);
+  exam = signal<ExamResponse | null>(null);
+  loading = signal(true);
+  error = signal('');
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService,
-    private cdr: ChangeDetectorRef
+    private examsApi: ExamsApiService
   ) {}
 
   get isPassed(): boolean {
-    return (this.attempt?.score || 0) >= 72;
+    const score = this.attempt()?.score || 0;
+    return score >= 72;
   }
 
   ngOnInit(): void {
@@ -238,14 +239,13 @@ export class ResultComponent implements OnInit {
   loadAttempt(attemptId: string): void {
     this.attemptsApi.getAttempt(attemptId).subscribe({
       next: (attempt) => {
-        this.attempt = attempt;
+        this.attempt.set(attempt);
         this.loadExam(attempt.examId);
       },
       error: (error) => {
         console.error('Error loading attempt:', error);
-        this.error = 'Erro ao carregar resultado. Por favor, tente novamente.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Erro ao carregar resultado. Por favor, tente novamente.');
+        this.loading.set(false);
       }
     });
   }
@@ -253,15 +253,13 @@ export class ResultComponent implements OnInit {
   loadExam(examId: string): void {
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
-        this.exam = exam;
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.exam.set(exam);
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading exam:', error);
-        this.error = 'Erro ao carregar informações do exame.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Erro ao carregar informações do exame.');
+        this.loading.set(false);
       }
     });
   }
@@ -277,12 +275,13 @@ export class ResultComponent implements OnInit {
   }
 
   calculateDuration(): string {
-    if (!this.attempt?.startedAt || !this.attempt?.finishedAt) {
+    const currentAttempt = this.attempt();
+    if (!currentAttempt?.startedAt || !currentAttempt?.finishedAt) {
       return '-';
     }
 
-    const start = new Date(this.attempt.startedAt).getTime();
-    const end = new Date(this.attempt.finishedAt).getTime();
+    const start = new Date(currentAttempt.startedAt).getTime();
+    const end = new Date(currentAttempt.finishedAt).getTime();
     const diffMs = end - start;
     const diffMins = Math.floor(diffMs / 60000);
     const hours = Math.floor(diffMins / 60);
@@ -291,4 +290,3 @@ export class ResultComponent implements OnInit {
     return `${hours}h ${minutes}min`;
   }
 }
-

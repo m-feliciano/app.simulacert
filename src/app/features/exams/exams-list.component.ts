@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
@@ -12,21 +12,21 @@ import {ExamResponse} from '../../api/domain';
     <div class="exams-container">
       <h1>Exames Disponíveis</h1>
 
-      @if (loading) {
+      @if (loading()) {
         <div class="loading-state">
           <p>Carregando exames...</p>
         </div>
       }
 
-      @if (error) {
+      @if (error()) {
         <div class="error-state">
-          <p>{{ error }}</p>
+          <p>{{ error() }}</p>
         </div>
       }
 
-      @if (!loading && !error && exams.length > 0) {
+      @if (!loading() && !error() && exams().length > 0) {
         <div class="exams-grid">
-          @for (exam of exams; track exam.id) {
+          @for (exam of exams(); track exam.id) {
             <div class="exam-card">
               <h3>{{ exam.title }}</h3>
               @if (exam.description) {
@@ -38,7 +38,7 @@ import {ExamResponse} from '../../api/domain';
         </div>
       }
 
-      @if (!loading && !error && exams.length === 0) {
+      @if (!loading() && !error() && exams().length === 0) {
         <div class="empty-state">
           <p>Nenhum exame disponível no momento.</p>
         </div>
@@ -199,36 +199,36 @@ import {ExamResponse} from '../../api/domain';
   `]
 })
 export class ExamsListComponent implements OnInit {
-  exams: ExamResponse[] = [];
-  loading = false;
-  error = '';
+  exams = signal<ExamResponse[]>([]);
+  loading = signal(false);
+  error = signal('');
 
   constructor(
-    private examsApi: ExamsApiService,
-    private cdr: ChangeDetectorRef
+    private examsApi: ExamsApiService
   ) {
+    console.log('ExamsListComponent constructed');
   }
 
   ngOnInit(): void {
+    console.log('ExamsListComponent initialized');
     this.loadExams();
   }
 
   loadExams(): void {
-    this.loading = true;
-    this.error = '';
-    this.cdr.markForCheck();
+    console.log('Loading exams...');
+    this.loading.set(true);
+    this.error.set('');
 
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
-        this.exams = exams;
-        this.loading = false;
-        this.cdr.detectChanges();
+        console.log('Exams loaded successfully:', exams);
+        this.exams.set(exams);
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading exams:', error);
-        this.error = 'Erro ao carregar exames. Por favor, tente novamente.';
-        this.loading = false;
-        this.cdr.detectChanges();
+        this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
+        this.loading.set(false);
       }
     });
   }
