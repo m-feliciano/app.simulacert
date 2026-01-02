@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -13,74 +13,85 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
     <div class="stats-container">
       <h1>Estatísticas</h1>
 
-      <div class="stats-overview" *ngIf="userStats">
-        <div class="stat-card">
-          <div class="stat-value">{{ userStats.totalAttempts }}</div>
-          <div class="stat-label">Total de Tentativas</div>
-        </div>
+      @if (userStats) {
+        <div class="stats-overview">
+          <div class="stat-card">
+            <div class="stat-value">{{ userStats.totalAttempts }}</div>
+            <div class="stat-label">Total de Tentativas</div>
+          </div>
 
-        <div class="stat-card">
-          <div class="stat-value">{{ userStats.completedAttempts }}</div>
-          <div class="stat-label">Tentativas Completas</div>
-        </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ userStats.completedAttempts }}</div>
+            <div class="stat-label">Tentativas Completas</div>
+          </div>
 
-        <div class="stat-card">
-          <div class="stat-value">{{ userStats.averageScore.toFixed(1) }}%</div>
-          <div class="stat-label">Pontuação Média</div>
-        </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ userStats.averageScore.toFixed(1) }}%</div>
+            <div class="stat-label">Pontuação Média</div>
+          </div>
 
-        <div class="stat-card">
-          <div class="stat-value">{{ userStats.bestScore }}%</div>
-          <div class="stat-label">Melhor Pontuação</div>
-        </div>
-      </div>
-
-      <div class="section" *ngIf="domainStats.length > 0">
-        <h2>Performance por Domínio AWS</h2>
-        <div class="domain-stats">
-          <div class="domain-item" *ngFor="let domain of domainStats">
-            <div class="domain-header">
-              <span class="domain-name">{{ domain.awsDomain }}</span>
-              <span class="domain-accuracy">{{ (domain.accuracyRate * 100).toFixed(1) }}%</span>
-            </div>
-            <div class="domain-bar">
-              <div class="domain-fill" [style.width.%]="domain.accuracyRate * 100"></div>
-            </div>
-            <div class="domain-details">
-              {{ domain.correctAnswers }} / {{ domain.totalQuestions }} corretas
-            </div>
+          <div class="stat-card">
+            <div class="stat-value">{{ userStats.bestScore }}%</div>
+            <div class="stat-label">Melhor Pontuação</div>
           </div>
         </div>
-      </div>
+      }
 
-      <div class="section" *ngIf="attemptHistory.length > 0">
-        <h2>Histórico de Tentativas</h2>
-        <div class="history-table">
-          <div class="history-header">
-            <div class="col-date">Data</div>
-            <div class="col-exam">Exame</div>
-            <div class="col-status">Status</div>
-            <div class="col-score">Pontuação</div>
-          </div>
-          <div class="history-row" *ngFor="let attempt of attemptHistory">
-            <div class="col-date">{{ formatDate(attempt.startedAt) }}</div>
-            <div class="col-exam">{{ attempt.examTitle }}</div>
-            <div class="col-status">
-              <span class="status-badge" [class]="attempt.status.toLowerCase()">
-                {{ formatStatus(attempt.status) }}
-              </span>
-            </div>
-            <div class="col-score">
-              <span *ngIf="attempt.score !== null && attempt.score !== undefined"
-                    [class.passed]="attempt.score >= 72"
-                    [class.failed]="attempt.score < 72">
-                {{ attempt.score }}%
-              </span>
-              <span *ngIf="attempt.score === null || attempt.score === undefined">-</span>
-            </div>
+      @if (domainStats.length > 0) {
+        <div class="section">
+          <h2>Performance por Domínio AWS</h2>
+          <div class="domain-stats">
+            @for (domain of domainStats; track domain.awsDomain) {
+              <div class="domain-item">
+                <div class="domain-header">
+                  <span class="domain-name">{{ domain.awsDomain }}</span>
+                  <span class="domain-accuracy">{{ (domain.accuracyRate * 100).toFixed(1) }}%</span>
+                </div>
+                <div class="domain-bar">
+                  <div class="domain-fill" [style.width.%]="domain.accuracyRate * 100"></div>
+                </div>
+                <div class="domain-details">
+                  {{ domain.correctAnswers }} / {{ domain.totalQuestions }} corretas
+                </div>
+              </div>
+            }
           </div>
         </div>
-      </div>
+      }
+
+      @if (attemptHistory.length > 0) {
+        <div class="section">
+          <h2>Histórico de Tentativas</h2>
+          <div class="history-table">
+            <div class="history-header">
+              <div class="col-date">Data</div>
+              <div class="col-exam">Exame</div>
+              <div class="col-status">Status</div>
+              <div class="col-score">Pontuação</div>
+            </div>
+            @for (attempt of attemptHistory; track attempt.attemptId) {
+              <div class="history-row">
+                <div class="col-date">{{ formatDate(attempt.startedAt) }}</div>
+                <div class="col-exam">{{ attempt.examTitle }}</div>
+                <div class="col-status">
+                  <span class="status-badge" [class]="attempt.status.toLowerCase()">
+                    {{ formatStatus(attempt.status) }}
+                  </span>
+                </div>
+                <div class="col-score">
+                  @if (attempt.score !== null && attempt.score !== undefined) {
+                    <span [class.passed]="attempt.score >= 72" [class.failed]="attempt.score < 72">
+                      {{ attempt.score }}%
+                    </span>
+                  } @else {
+                    <span>-</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
 
       <div class="actions">
         <a routerLink="/exams" class="btn-primary">Fazer Novo Exame</a>
@@ -461,7 +472,8 @@ export class StatsComponent implements OnInit {
 
   constructor(
     private authFacade: AuthFacade,
-    private statsApi: StatsApiService
+    private statsApi: StatsApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -475,6 +487,7 @@ export class StatsComponent implements OnInit {
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
         this.userStats = stats;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading user stats:', error);
@@ -484,6 +497,7 @@ export class StatsComponent implements OnInit {
     this.statsApi.getPerformanceByDomain(userId).subscribe({
       next: (domains) => {
         this.domainStats = domains.sort((a, b) => b.accuracyRate - a.accuracyRate);
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading domain stats:', error);
@@ -495,6 +509,7 @@ export class StatsComponent implements OnInit {
         this.attemptHistory = history.sort((a, b) =>
           new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
         );
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading attempt history:', error);

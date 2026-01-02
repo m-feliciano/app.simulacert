@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AttemptsApiService } from '../../api/attempts.service';
@@ -10,48 +10,63 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
-    <div class="result-container" *ngIf="attempt && exam">
-      <div class="result-header">
-        <h1>Resultado do Exame</h1>
-        <p class="exam-title">{{ exam.title }}</p>
-      </div>
-
-      <div class="score-card" [class.passed]="isPassed" [class.failed]="!isPassed">
-        <div class="score-label">Sua Pontuação</div>
-        <div class="score-value">{{ attempt.score }}%</div>
-        <div class="score-status">{{ isPassed ? '✓ Aprovado' : '✗ Reprovado' }}</div>
-        <div class="score-message">
-          {{ isPassed ? 'Parabéns! Você foi aprovado.' : 'Pontuação mínima: 72%' }}
+    <div class="result-container">
+      @if (loading) {
+        <div class="loading-state">
+          <p>Carregando resultado...</p>
         </div>
-      </div>
+      }
 
-      <div class="attempt-details">
-        <div class="detail-card">
-          <div class="detail-label">Data de Início</div>
-          <div class="detail-value">{{ formatDate(attempt.startedAt) }}</div>
+      @if (error) {
+        <div class="error-state">
+          <p>{{ error }}</p>
+          <a routerLink="/exams" class="btn-secondary">Voltar aos Exames</a>
         </div>
+      }
 
-        <div class="detail-card">
-          <div class="detail-label">Data de Conclusão</div>
-          <div class="detail-value">{{ formatDate(attempt.finishedAt!) }}</div>
+      @if (!loading && !error && attempt && exam) {
+        <div class="result-header">
+          <h1>Resultado do Exame</h1>
+          <p class="exam-title">{{ exam.title }}</p>
         </div>
 
-        <div class="detail-card">
-          <div class="detail-label">Tempo Total</div>
-          <div class="detail-value">{{ calculateDuration() }}</div>
+        <div class="score-card" [class.passed]="isPassed" [class.failed]="!isPassed">
+          <div class="score-label">Sua Pontuação</div>
+          <div class="score-value">{{ attempt.score }}%</div>
+          <div class="score-status">{{ isPassed ? '✓ Aprovado' : '✗ Reprovado' }}</div>
+          <div class="score-message">
+            {{ isPassed ? 'Parabéns! Você foi aprovado.' : 'Pontuação mínima: 72%' }}
+          </div>
         </div>
 
-        <div class="detail-card">
-          <div class="detail-label">Questões</div>
-          <div class="detail-value">{{ attempt.questionIds.length }}</div>
-        </div>
-      </div>
+        <div class="attempt-details">
+          <div class="detail-card">
+            <div class="detail-label">Data de Início</div>
+            <div class="detail-value">{{ formatDate(attempt.startedAt) }}</div>
+          </div>
 
-      <div class="actions">
-        <a routerLink="/exams" class="btn-secondary">Ver Exames</a>
-        <a routerLink="/stats" class="btn-primary">Ver Estatísticas</a>
-        <a routerLink="/dashboard" class="btn-secondary">Dashboard</a>
-      </div>
+          <div class="detail-card">
+            <div class="detail-label">Data de Conclusão</div>
+            <div class="detail-value">{{ formatDate(attempt.finishedAt!) }}</div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-label">Tempo Total</div>
+            <div class="detail-value">{{ calculateDuration() }}</div>
+          </div>
+
+          <div class="detail-card">
+            <div class="detail-label">Questões</div>
+            <div class="detail-value">{{ attempt.questionIds.length }}</div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a routerLink="/exams" class="btn-secondary">Ver Exames</a>
+          <a routerLink="/stats" class="btn-primary">Ver Estatísticas</a>
+          <a routerLink="/dashboard" class="btn-secondary">Dashboard</a>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -198,12 +213,15 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
 export class ResultComponent implements OnInit {
   attempt: AttemptResponse | null = null;
   exam: ExamResponse | null = null;
+  loading = true;
+  error = '';
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService
+    private examsApi: ExamsApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get isPassed(): boolean {
@@ -225,6 +243,9 @@ export class ResultComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading attempt:', error);
+        this.error = 'Erro ao carregar resultado. Por favor, tente novamente.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
@@ -233,9 +254,14 @@ export class ResultComponent implements OnInit {
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
         this.exam = exam;
+        this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading exam:', error);
+        this.error = 'Erro ao carregar informações do exame.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

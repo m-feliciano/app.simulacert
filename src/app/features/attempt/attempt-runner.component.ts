@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AttemptsApiService } from '../../api/attempts.service';
@@ -11,83 +11,105 @@ import { interval, Subscription } from 'rxjs';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="attempt-runner" *ngIf="exam && questions.length > 0">
-      <div class="attempt-header">
-        <h2>{{ exam.title }}</h2>
-        <div class="timer" [class.warning]="timeRemaining < 300">
-          ⏱️ {{ formatTime(timeRemaining) }}
+    <div class="attempt-runner">
+      @if (loading) {
+        <div class="loading-state">
+          <p>Carregando exame...</p>
         </div>
-      </div>
+      }
 
-      <div class="progress-bar">
-        <div class="progress-fill" [style.width.%]="progress"></div>
-      </div>
-
-      <div class="question-navigation">
-        <button
-          *ngFor="let q of questions; let i = index"
-          class="question-nav-btn"
-          [class.active]="i === currentQuestionIndex"
-          [class.answered]="answeredQuestions.has(i)"
-          (click)="goToQuestion(i)">
-          {{ i + 1 }}
-        </button>
-      </div>
-
-      <div class="question-content" *ngIf="currentQuestion">
-        <div class="question-header">
-          <span class="question-number">Questão {{ currentQuestionIndex + 1 }} de {{ questions.length }}</span>
-          <span class="question-meta">{{ currentQuestion.domain }} | {{ currentQuestion.difficulty }}</span>
+      @if (error) {
+        <div class="error-state">
+          <p>{{ error }}</p>
+          <button class="btn-secondary" (click)="goBack()">Voltar</button>
         </div>
+      }
 
-        <div class="question-text">{{ currentQuestion.text }}</div>
-
-        <div class="options">
-          <div
-            *ngFor="let option of currentQuestion.options"
-            class="option"
-            [class.selected]="selectedAnswers[currentQuestionIndex] === option.key"
-            (click)="selectAnswer(option.key)">
-            <div class="option-key">{{ option.key }}</div>
-            <div class="option-text">{{ option.text }}</div>
+      @if (!loading && !error && exam && questions.length > 0) {
+        <div class="attempt-header">
+          <h2>{{ exam.title }}</h2>
+          <div class="timer" [class.warning]="timeRemaining < 300">
+            ⏱️ {{ formatTime(timeRemaining) }}
           </div>
         </div>
 
-        <div class="question-actions">
-          <button
-            class="btn-secondary"
-            (click)="previousQuestion()"
-            [disabled]="currentQuestionIndex === 0">
-            ← Anterior
-          </button>
-
-          <button
-            class="btn-secondary"
-            (click)="nextQuestion()"
-            [disabled]="currentQuestionIndex === questions.length - 1">
-            Próxima →
-          </button>
-
-          <button
-            class="btn-finish"
-            (click)="confirmFinish()"
-            *ngIf="currentQuestionIndex === questions.length - 1">
-            Finalizar Exame
-          </button>
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progress"></div>
         </div>
-      </div>
 
-      <div class="finish-modal" *ngIf="showFinishModal" (click)="showFinishModal = false">
-        <div class="modal-content" (click)="$event.stopPropagation()">
-          <h3>Finalizar Exame?</h3>
-          <p>Você respondeu {{ answeredQuestions.size }} de {{ questions.length }} questões.</p>
-          <p><strong>Tem certeza que deseja finalizar?</strong></p>
-          <div class="modal-actions">
-            <button class="btn-secondary" (click)="showFinishModal = false">Cancelar</button>
-            <button class="btn-primary" (click)="finishAttempt()">Finalizar</button>
+        <div class="question-navigation">
+          @for (q of questions; track $index) {
+            <button
+              class="question-nav-btn"
+              [class.active]="$index === currentQuestionIndex"
+              [class.answered]="answeredQuestions.has($index)"
+              (click)="goToQuestion($index)">
+              {{ $index + 1 }}
+            </button>
+          }
+        </div>
+
+        @if (currentQuestion) {
+          <div class="question-content">
+            <div class="question-header">
+              <span class="question-number">Questão {{ currentQuestionIndex + 1 }} de {{ questions.length }}</span>
+              <span class="question-meta">{{ currentQuestion.domain }} | {{ currentQuestion.difficulty }}</span>
+            </div>
+
+            <div class="question-text">{{ currentQuestion.text }}</div>
+
+            <div class="options">
+              @for (option of currentQuestion.options; track option.key) {
+                <div
+                  class="option"
+                  [class.selected]="selectedAnswers[currentQuestionIndex] === option.key"
+                  (click)="selectAnswer(option.key)">
+                  <div class="option-key">{{ option.key }}</div>
+                  <div class="option-text">{{ option.text }}</div>
+                </div>
+              }
+            </div>
+
+            <div class="question-actions">
+              <button
+                class="btn-secondary"
+                (click)="previousQuestion()"
+                [disabled]="currentQuestionIndex === 0">
+                ← Anterior
+              </button>
+
+              <button
+                class="btn-secondary"
+                (click)="nextQuestion()"
+                [disabled]="currentQuestionIndex === questions.length - 1">
+                Próxima →
+              </button>
+
+              @if (currentQuestionIndex === questions.length - 1) {
+                <button
+                  class="btn-finish"
+                  (click)="confirmFinish()">
+                  Finalizar Exame
+                </button>
+              }
+            </div>
+          </div>
+        }
+      }
+
+      @if (showFinishModal) {
+        <div class="finish-modal" (click)="showFinishModal = false">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <h3>Finalizar Exame?</h3>
+            <p>Você respondeu {{ answeredQuestions.size }} de {{ questions.length }} questões.</p>
+            <p><strong>Tem certeza que deseja finalizar?</strong></p>
+            <div class="modal-actions">
+              <button class="btn-secondary" (click)="showFinishModal = false">Cancelar</button>
+              <button class="btn-primary" (click)="finishAttempt()">Finalizar</button>
+            </div>
           </div>
         </div>
-      </div>
+      }
     </div>
   `,
   styles: [`
@@ -535,6 +557,33 @@ import { interval, Subscription } from 'rxjs';
         transform: none;
       }
     }
+
+    .loading-state, .error-state {
+      background: var(--color-bg-secondary);
+      padding: var(--spacing-xxl);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+      margin: var(--spacing-xl) auto;
+      max-width: 500px;
+    }
+
+    .loading-state p {
+      color: var(--color-text-secondary);
+      font-size: 16px;
+      margin: 0;
+    }
+
+    .error-state {
+      background: var(--color-bg-danger);
+    }
+
+    .error-state p {
+      color: #721c24;
+      font-size: 15px;
+      margin: 0 0 var(--spacing-lg);
+      font-weight: 500;
+    }
   `]
 })
 export class AttemptRunnerComponent implements OnInit, OnDestroy {
@@ -546,13 +595,16 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   answeredQuestions = new Set<number>();
   timeRemaining = 10800;
   showFinishModal = false;
+  loading = true;
+  error = '';
   private timerSubscription?: Subscription;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService
+    private examsApi: ExamsApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   get currentQuestion(): AttemptQuestionResponse | null {
@@ -574,37 +626,62 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   loadAttempt(): void {
+    console.log('Loading attempt:', this.attemptId);
     this.attemptsApi.getAttempt(this.attemptId).subscribe({
       next: (attempt) => {
+        console.log('Attempt loaded:', attempt);
         this.loadExam(attempt.examId);
         this.loadQuestions();
       },
       error: (error) => {
         console.error('Error loading attempt:', error);
+        this.error = 'Erro ao carregar tentativa. Por favor, tente novamente.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadExam(examId: string): void {
+    console.log('Loading exam:', examId);
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
+        console.log('Exam loaded:', exam);
         this.exam = exam;
+        this.checkIfLoaded();
       },
       error: (error) => {
         console.error('Error loading exam:', error);
+        this.error = 'Erro ao carregar exame.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   loadQuestions(): void {
+    console.log('Loading questions for attempt:', this.attemptId);
     this.attemptsApi.getAttemptQuestions(this.attemptId).subscribe({
       next: (questions) => {
+        console.log('Questions loaded:', questions.length);
         this.questions = questions;
+        this.checkIfLoaded();
       },
       error: (error) => {
         console.error('Error loading questions:', error);
+        this.error = 'Erro ao carregar questões.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  checkIfLoaded(): void {
+    if (this.exam && this.questions.length > 0) {
+      console.log('Everything loaded successfully!');
+      this.loading = false;
+      this.cdr.detectChanges();
+    }
   }
 
   startTimer(): void {
@@ -671,6 +748,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  goBack(): void {
+    this.router.navigate(['/exams']);
   }
 }
 

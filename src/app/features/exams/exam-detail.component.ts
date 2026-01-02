@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ExamsApiService } from '../../api/exams.service';
@@ -11,45 +11,72 @@ import { ExamResponse } from '../../api/domain';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="exam-detail" *ngIf="exam">
+    <div class="exam-detail">
       <div class="breadcrumb">
         <a (click)="goBack()" class="back-link">← Voltar</a>
       </div>
 
-      <div class="exam-header">
-        <h1>{{ exam.title }}</h1>
-        <p class="exam-description" *ngIf="exam.description">{{ exam.description }}</p>
-      </div>
+      @if (loadingExam) {
+        <div class="loading-state">
+          <p>Carregando detalhes do exame...</p>
+        </div>
+      }
 
-      <div class="exam-info">
-        <div class="info-card">
-          <h3>Informações do Exame</h3>
-          <ul>
-            <li><strong>Tipo:</strong> Simulado AWS</li>
-            <li><strong>Duração:</strong> 180 minutos</li>
-            <li><strong>Questões:</strong> 65</li>
-            <li><strong>Pontuação mínima:</strong> 72%</li>
-          </ul>
+      @if (!loadingExam && exam) {
+        <div class="exam-header">
+          <h1>{{ exam.title }}</h1>
+          @if (exam.description) {
+            <p class="exam-description">{{ exam.description }}</p>
+          }
         </div>
 
-        <div class="info-card">
-          <h3>Regras</h3>
-          <ul>
-            <li>Você terá 180 minutos para completar o exame</li>
-            <li>São 65 questões de múltipla escolha</li>
-            <li>Não é possível pausar o exame</li>
-            <li>Você pode revisar suas respostas antes de finalizar</li>
-          </ul>
+        <div class="exam-info">
+          <div class="info-card">
+            <h3>Informações do Exame</h3>
+            <ul>
+              <li><strong>Tipo:</strong> Simulado AWS</li>
+              <li><strong>Duração:</strong> {{ calculateDuration() }} minutos</li>
+              <li><strong>Questões:</strong> {{ questionCount }}</li>
+              <li><strong>Pontuação mínima:</strong> 72%</li>
+            </ul>
+          </div>
+
+          <div class="info-card">
+            <h3>Regras</h3>
+            <ul>
+              <li>Você terá {{ calculateDuration() }} minutos para completar o exame</li>
+              <li>São {{ questionCount }} questões de múltipla escolha</li>
+              <li>Não é possível pausar o exame</li>
+              <li>Você pode revisar suas respostas antes de finalizar</li>
+            </ul>
+          </div>
         </div>
-      </div>
 
-      <div class="actions">
-        <button class="btn-primary" (click)="startExam()" [disabled]="loading">
-          {{ loading ? 'Iniciando...' : 'Iniciar Exame' }}
-        </button>
-      </div>
+        <div class="question-selector">
+          <h3>Quantidade de Questões</h3>
+          <div class="question-options">
+            @for (count of questionCountOptions; track count) {
+              <button
+                class="question-option"
+                [class.selected]="questionCount === count"
+                (click)="selectQuestionCount(count)"
+                type="button">
+                {{ count }} questões
+              </button>
+            }
+          </div>
+        </div>
 
-      <div class="error" *ngIf="errorMessage">{{ errorMessage }}</div>
+        <div class="actions">
+          <button class="btn-primary" (click)="startExam()" [disabled]="loading">
+            {{ loading ? 'Iniciando...' : 'Iniciar Exame com ' + questionCount + ' questões' }}
+          </button>
+        </div>
+      }
+
+      @if (errorMessage) {
+        <div class="error">{{ errorMessage }}</div>
+      }
     </div>
   `,
   styles: [`
@@ -178,6 +205,64 @@ import { ExamResponse } from '../../api/domain';
       margin-bottom: var(--spacing-lg);
     }
 
+    .question-selector {
+      background: var(--color-bg-secondary);
+      padding: var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-bottom: var(--spacing-xl);
+    }
+
+    @media (min-width: 768px) {
+      .question-selector {
+        padding: var(--spacing-xl);
+      }
+    }
+
+    .question-selector h3 {
+      margin: 0 0 var(--spacing-lg);
+      text-align: center;
+    }
+
+    .question-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+      justify-content: center;
+    }
+
+    .question-option {
+      padding: 12px 24px;
+      background: var(--color-bg-primary);
+      color: var(--color-text-primary);
+      border: 2px solid var(--color-border);
+      border-radius: var(--border-radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: inherit;
+      min-width: 120px;
+    }
+
+    .question-option:hover {
+      border-color: var(--color-primary);
+      background: var(--color-bg-secondary);
+      transform: translateY(-2px);
+    }
+
+    .question-option.selected {
+      background: var(--color-primary);
+      color: white;
+      border-color: var(--color-primary);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .question-option:hover {
+        transform: none;
+      }
+    }
+
     .btn-primary {
       padding: 15px 40px;
       background: var(--color-primary);
@@ -226,19 +311,37 @@ import { ExamResponse } from '../../api/domain';
       text-align: center;
       font-size: 14px;
     }
+
+    .loading-state {
+      background: var(--color-bg-secondary);
+      padding: var(--spacing-xxl);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .loading-state p {
+      color: var(--color-text-secondary);
+      font-size: 15px;
+      margin: 0;
+    }
   `]
 })
 export class ExamDetailComponent implements OnInit {
   exam: ExamResponse | null = null;
   loading = false;
+  loadingExam = false;
   errorMessage = '';
+  questionCount = 50;
+  questionCountOptions = [10, 20, 30, 40, 50];
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private examsApi: ExamsApiService,
     private attemptsApi: AttemptsApiService,
-    private authFacade: AuthFacade
+    private authFacade: AuthFacade,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -249,15 +352,32 @@ export class ExamDetailComponent implements OnInit {
   }
 
   loadExam(examId: string): void {
+    this.loadingExam = true;
+    this.errorMessage = '';
+    this.cdr.markForCheck();
+
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
         this.exam = exam;
+        this.loadingExam = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading exam:', error);
         this.errorMessage = 'Erro ao carregar exame';
+        this.loadingExam = false;
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  selectQuestionCount(count: number): void {
+    this.questionCount = count;
+    this.cdr.detectChanges();
+  }
+
+  calculateDuration(): number {
+    return Math.round(this.questionCount * 2);
   }
 
   startExam(): void {
@@ -267,11 +387,12 @@ export class ExamDetailComponent implements OnInit {
 
     this.loading = true;
     this.errorMessage = '';
+    this.cdr.markForCheck();
 
     this.attemptsApi.startAttempt({
       examId: this.exam.id,
       userId: this.authFacade.currentUser.id,
-      questionCount: 65
+      questionCount: this.questionCount
     }).subscribe({
       next: (attempt) => {
         this.router.navigate(['/attempt', attempt.id, 'run']);
@@ -279,6 +400,7 @@ export class ExamDetailComponent implements OnInit {
       error: (error) => {
         this.loading = false;
         this.errorMessage = error.error?.message || 'Erro ao iniciar exame';
+        this.cdr.detectChanges();
       }
     });
   }

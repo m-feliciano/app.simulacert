@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { ExamsApiService } from '../../api/exams.service';
-import { ExamResponse } from '../../api/domain';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink} from '@angular/router';
+import {ExamsApiService} from '../../api/exams.service';
+import {ExamResponse} from '../../api/domain';
 
 @Component({
   selector: 'app-exams-list',
@@ -12,19 +12,37 @@ import { ExamResponse } from '../../api/domain';
     <div class="exams-container">
       <h1>Exames Disponíveis</h1>
 
-      <div class="exams-grid" *ngIf="exams.length > 0; else noExams">
-        <div class="exam-card" *ngFor="let exam of exams">
-          <h3>{{ exam.title }}</h3>
-          <p class="exam-description" *ngIf="exam.description">{{ exam.description }}</p>
-          <a [routerLink]="['/exams', exam.id]" class="btn-primary">Ver Detalhes</a>
+      @if (loading) {
+        <div class="loading-state">
+          <p>Carregando exames...</p>
         </div>
-      </div>
+      }
 
-      <ng-template #noExams>
+      @if (error) {
+        <div class="error-state">
+          <p>{{ error }}</p>
+        </div>
+      }
+
+      @if (!loading && !error && exams.length > 0) {
+        <div class="exams-grid">
+          @for (exam of exams; track exam.id) {
+            <div class="exam-card">
+              <h3>{{ exam.title }}</h3>
+              @if (exam.description) {
+                <p class="exam-description">{{ exam.description }}</p>
+              }
+              <a [routerLink]="['/exams', exam.id]" class="btn-primary">Ver Detalhes</a>
+            </div>
+          }
+        </div>
+      }
+
+      @if (!loading && !error && exams.length === 0) {
         <div class="empty-state">
           <p>Nenhum exame disponível no momento.</p>
         </div>
-      </ng-template>
+      }
     </div>
   `,
   styles: [`
@@ -153,24 +171,64 @@ import { ExamResponse } from '../../api/domain';
         font-size: 16px;
       }
     }
+
+    .loading-state, .error-state {
+      background: var(--color-bg-secondary);
+      padding: var(--spacing-xxl);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .loading-state p {
+      color: var(--color-text-secondary);
+      font-size: 15px;
+      margin: 0;
+    }
+
+    .error-state {
+      background: var(--color-bg-danger);
+    }
+
+    .error-state p {
+      color: #721c24;
+      font-size: 15px;
+      margin: 0;
+      font-weight: 500;
+    }
   `]
 })
 export class ExamsListComponent implements OnInit {
   exams: ExamResponse[] = [];
+  loading = false;
+  error = '';
 
-  constructor(private examsApi: ExamsApiService) {}
+  constructor(
+    private examsApi: ExamsApiService,
+    private cdr: ChangeDetectorRef
+  ) {
+  }
 
   ngOnInit(): void {
     this.loadExams();
   }
 
   loadExams(): void {
+    this.loading = true;
+    this.error = '';
+    this.cdr.markForCheck();
+
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams = exams;
+        this.loading = false;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading exams:', error);
+        this.error = 'Erro ao carregar exames. Por favor, tente novamente.';
+        this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }

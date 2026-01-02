@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -38,22 +38,27 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
 
       <div class="section">
         <h2>Tentativas Recentes</h2>
-        <div class="attempts-list" *ngIf="recentAttempts.length > 0; else noAttempts">
-          <div class="attempt-item" *ngFor="let attempt of recentAttempts">
-            <div class="attempt-info">
-              <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
-              <div class="attempt-status" [class]="attempt.status.toLowerCase()">
-                {{ formatStatus(attempt.status) }}
+        @if (recentAttempts.length > 0) {
+          <div class="attempts-list">
+            @for (attempt of recentAttempts; track attempt.id) {
+              <div class="attempt-item">
+                <div class="attempt-info">
+                  <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
+                  <div class="attempt-status" [class]="attempt.status.toLowerCase()">
+                    {{ formatStatus(attempt.status) }}
+                  </div>
+                </div>
+                @if (attempt.score !== null && attempt.score !== undefined) {
+                  <div class="attempt-score">
+                    {{ attempt.score }}%
+                  </div>
+                }
               </div>
-            </div>
-            <div class="attempt-score" *ngIf="attempt.score !== null && attempt.score !== undefined">
-              {{ attempt.score }}%
-            </div>
+            }
           </div>
-        </div>
-        <ng-template #noAttempts>
+        } @else {
           <p class="empty-message">Nenhuma tentativa ainda</p>
-        </ng-template>
+        }
       </div>
 
       <div class="actions">
@@ -329,7 +334,8 @@ export class DashboardComponent implements OnInit {
   constructor(
     private authFacade: AuthFacade,
     private attemptsApi: AttemptsApiService,
-    private statsApi: StatsApiService
+    private statsApi: StatsApiService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -344,6 +350,7 @@ export class DashboardComponent implements OnInit {
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
         this.stats = stats;
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading stats:', error);
@@ -357,6 +364,7 @@ export class DashboardComponent implements OnInit {
         this.recentAttempts = attempts
           .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
           .slice(0, 5);
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Error loading attempts:', error);
