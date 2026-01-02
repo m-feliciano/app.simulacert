@@ -70,7 +70,7 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
       @if (attemptHistory().length > 0) {
         <div class="section">
           <h2>Histórico de Tentativas</h2>
-          <div class="history-table">
+          <div class="history-table" style="overflow: hidden">
             <div class="history-header">
               <div class="col-date">Data</div>
               <div class="col-exam">Exame</div>
