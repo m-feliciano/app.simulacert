@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -7,14 +7,18 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgOptimizedImage],
   template: `
     <div class="auth-card">
+      <div class="logo-container">
+        <img ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="auth-logo" height="96" width="360">
+      </div>
+
       <h2>Registrar</h2>
       <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Nome</label>
-          <input type="text" formControlName="name" class="form-control" />
+          <input type="text" formControlName="name" class="form-control"/>
           @if (registerForm.get('name')?.touched && registerForm.get('name')?.invalid) {
             <div class="error">
               Nome deve ter entre 3 e 100 caracteres
@@ -24,7 +28,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 
         <div class="form-group">
           <label>Email</label>
-          <input type="email" formControlName="email" class="form-control" />
+          <input type="email" formControlName="email" class="form-control"/>
           @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
             <div class="error">
               Email válido é obrigatório
@@ -34,7 +38,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 
         <div class="form-group">
           <label>Senha</label>
-          <input type="password" formControlName="password" class="form-control" />
+          <input type="password" formControlName="password" class="form-control"/>
           @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
             <div class="error">
               Senha deve ter no mínimo 8 caracteres
@@ -58,16 +62,27 @@ import { AuthFacade } from '../../core/auth/auth.facade';
   `,
   styles: [`
     .auth-card {
-      background: white;
+      background: #37475a;
       padding: 40px;
       border-radius: 8px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
 
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .auth-logo {
+      height: 60px;
+      width: auto;
+    }
+
     h2 {
       margin: 0 0 30px;
       text-align: center;
-      color: #232f3e;
+      color: #fff;
     }
 
     .form-group {
@@ -78,7 +93,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
       display: block;
       margin-bottom: 5px;
       font-weight: 500;
-      color: #333;
+      color: #fff;
     }
 
     .form-control {
@@ -126,6 +141,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
     .auth-footer {
       margin-top: 20px;
       text-align: center;
+      color: #ccc;
     }
 
     .auth-footer a {

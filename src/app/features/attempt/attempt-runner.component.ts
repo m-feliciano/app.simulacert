@@ -10,6 +10,7 @@ import { interval, Subscription } from 'rxjs';
   selector: 'app-attempt-runner',
   standalone: true,
   imports: [CommonModule],
+  styleUrls: ['./attempt-runner.component.css'],
   template: `
     <div class="attempt-runner">
       @if (loading()) {
@@ -110,481 +111,31 @@ import { interval, Subscription } from 'rxjs';
           </div>
         </div>
       }
+
+      @if (finishingAttempt()) {
+        <div class="finish-modal">
+          <div class="modal-content">
+            <div class="loading-spinner"></div>
+            <h3>Finalizando exame...</h3>
+            <p>Por favor, aguarde enquanto processamos suas respostas.</p>
+          </div>
+        </div>
+      }
+
+      @if (finishError()) {
+        <div class="finish-modal" (click)="finishError.set('')">
+          <div class="modal-content error-modal" (click)="$event.stopPropagation()">
+            <h3>⚠️ Erro ao Finalizar</h3>
+            <p>{{ finishError() }}</p>
+            <div class="modal-actions">
+              <button class="btn-secondary" (click)="finishError.set('')">Fechar</button>
+              <button class="btn-primary" (click)="retryFinish()">Tentar Novamente</button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
-  `,
-  styles: [`
-    .attempt-runner {
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .attempt-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: var(--spacing-md);
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    @media (min-width: 768px) {
-      .attempt-header {
-        padding: var(--spacing-lg) var(--spacing-xl);
-      }
-    }
-
-    h2 {
-      margin: 0;
-      color: var(--color-dark);
-      font-size: 20px;
-    }
-
-    @media (min-width: 768px) {
-      h2 {
-        font-size: 24px;
-      }
-    }
-
-    .timer {
-      font-size: 18px;
-      font-weight: bold;
-      padding: 10px 20px;
-      background: var(--color-secondary);
-      color: white;
-      border-radius: var(--border-radius-sm);
-      transition: var(--transition-fast);
-      white-space: nowrap;
-    }
-
-    @media (min-width: 768px) {
-      .timer {
-        font-size: 20px;
-      }
-    }
-
-    .timer.warning {
-      background: var(--color-danger);
-      animation: pulse 1s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-      50% {
-        opacity: 0.8;
-        transform: scale(1.05);
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .timer.warning {
-        animation: none;
-      }
-    }
-
-    .progress-bar {
-      height: 8px;
-      background: var(--color-border-light);
-      border-radius: var(--border-radius-sm);
-      overflow: hidden;
-      margin-bottom: var(--spacing-lg);
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
-      transition: var(--transition-normal);
-    }
-
-    .question-navigation {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-md);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      margin-bottom: var(--spacing-lg);
-    }
-
-    @media (min-width: 768px) {
-      .question-navigation {
-        padding: var(--spacing-lg);
-      }
-    }
-
-    .question-nav-btn {
-      width: 36px;
-      height: 36px;
-      border: 2px solid var(--color-border);
-      background: var(--color-bg-secondary);
-      border-radius: var(--border-radius-sm);
-      cursor: pointer;
-      font-weight: 500;
-      transition: var(--transition-fast);
-      font-size: 13px;
-    }
-
-    @media (min-width: 768px) {
-      .question-nav-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 14px;
-      }
-    }
-
-    .question-nav-btn:hover {
-      border-color: var(--color-primary);
-      transform: scale(1.05);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .question-nav-btn:hover {
-        transform: none;
-      }
-    }
-
-    .question-nav-btn.active {
-      background: var(--color-primary);
-      color: white;
-      border-color: var(--color-primary);
-    }
-
-    .question-nav-btn.answered {
-      background: var(--color-bg-success);
-      border-color: var(--color-success);
-    }
-
-    .question-nav-btn.answered.active {
-      background: var(--color-success);
-      color: white;
-    }
-
-    .question-content {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-    }
-
-    @media (min-width: 768px) {
-      .question-content {
-        padding: var(--spacing-xl);
-      }
-    }
-
-    .question-header {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
-      padding-bottom: var(--spacing-md);
-      border-bottom: 2px solid var(--color-bg-primary);
-    }
-
-    .question-number {
-      font-weight: bold;
-      color: var(--color-dark);
-      font-size: 14px;
-    }
-
-    @media (min-width: 768px) {
-      .question-number {
-        font-size: 16px;
-      }
-    }
-
-    .question-meta {
-      color: var(--color-text-secondary);
-      font-size: 13px;
-    }
-
-    @media (min-width: 768px) {
-      .question-meta {
-        font-size: 14px;
-      }
-    }
-
-    .question-text {
-      font-size: 15px;
-      line-height: 1.6;
-      margin-bottom: var(--spacing-xl);
-      color: var(--color-text-primary);
-    }
-
-    @media (min-width: 768px) {
-      .question-text {
-        font-size: 16px;
-      }
-    }
-
-    .options {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-xl);
-    }
-
-    .option {
-      display: flex;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md);
-      border: 2px solid var(--color-border);
-      border-radius: var(--border-radius-md);
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-
-    .option:hover {
-      border-color: var(--color-primary);
-      background: #fff8f0;
-      transform: translateX(4px);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .option:hover {
-        transform: none;
-      }
-    }
-
-    .option.selected {
-      border-color: var(--color-primary);
-      background: #fff8f0;
-      box-shadow: var(--shadow-sm);
-    }
-
-    .option-key {
-      min-width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--color-bg-primary);
-      border-radius: var(--border-radius-sm);
-      font-weight: bold;
-      color: var(--color-dark);
-      transition: var(--transition-fast);
-    }
-
-    @media (min-width: 768px) {
-      .option-key {
-        min-width: 40px;
-        height: 40px;
-      }
-    }
-
-    .option.selected .option-key {
-      background: var(--color-primary);
-      color: white;
-    }
-
-    .option-text {
-      flex: 1;
-      line-height: 1.6;
-      color: var(--color-text-primary);
-      font-size: 14px;
-    }
-
-    @media (min-width: 768px) {
-      .option-text {
-        font-size: 15px;
-      }
-    }
-
-    .question-actions {
-      display: flex;
-      gap: var(--spacing-md);
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    .btn-secondary, .btn-finish {
-      padding: 12px 24px;
-      border: none;
-      border-radius: var(--border-radius-sm);
-      font-weight: 500;
-      cursor: pointer;
-      font-size: 14px;
-      transition: var(--transition-fast);
-      font-family: inherit;
-    }
-
-    .btn-secondary {
-      background: var(--color-secondary);
-      color: white;
-    }
-
-    .btn-secondary:hover:not(:disabled) {
-      background: var(--color-dark);
-      transform: translateY(-2px);
-    }
-
-    .btn-secondary:active:not(:disabled) {
-      transform: translateY(0);
-    }
-
-    .btn-secondary:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .btn-secondary:hover:not(:disabled) {
-        transform: none;
-      }
-    }
-
-    .btn-finish {
-      background: var(--color-success);
-      color: white;
-    }
-
-    .btn-finish:hover {
-      background: #218838;
-      transform: translateY(-2px);
-    }
-
-    .btn-finish:active {
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .btn-finish:hover {
-        transform: none;
-      }
-    }
-
-    .finish-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      padding: var(--spacing-lg);
-      animation: fadeIn 0.2s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-
-    .modal-content {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-xl);
-      border-radius: var(--border-radius-md);
-      max-width: 500px;
-      width: 100%;
-      box-shadow: var(--shadow-lg);
-      animation: slideUp 0.3s ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(20px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .finish-modal, .modal-content {
-        animation: none;
-      }
-    }
-
-    .modal-content h3 {
-      margin: 0 0 var(--spacing-md);
-      color: var(--color-dark);
-      font-size: 20px;
-    }
-
-    .modal-content p {
-      margin: 0 0 var(--spacing-sm);
-      color: var(--color-text-secondary);
-      font-size: 15px;
-    }
-
-    .modal-actions {
-      display: flex;
-      gap: var(--spacing-md);
-      margin-top: var(--spacing-xl);
-      justify-content: flex-end;
-    }
-
-    .btn-primary {
-      padding: 12px 24px;
-      background: var(--color-primary);
-      color: white;
-      border: none;
-      border-radius: var(--border-radius-sm);
-      font-weight: 500;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      font-family: inherit;
-    }
-
-    .btn-primary:hover {
-      background: var(--color-primary-dark);
-      transform: translateY(-2px);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .btn-primary:hover {
-        transform: none;
-      }
-    }
-
-    .loading-state, .error-state {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-xxl);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-      margin: var(--spacing-xl) auto;
-      max-width: 500px;
-    }
-
-    .loading-state p {
-      color: var(--color-text-secondary);
-      font-size: 16px;
-      margin: 0;
-    }
-
-    .error-state {
-      background: var(--color-bg-danger);
-    }
-
-    .error-state p {
-      color: #721c24;
-      font-size: 15px;
-      margin: 0 0 var(--spacing-lg);
-      font-weight: 500;
-    }
-  `]
+  `
 })
 export class AttemptRunnerComponent implements OnInit, OnDestroy {
   attemptId!: string;
@@ -592,15 +143,18 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   questions = signal<AttemptQuestionResponse[]>([]);
   currentQuestionIndex = signal(0);
 
-  selectedAnswers: { [index: number]: string } = {};
+  selectedAnswers: { [index: number]: string} = {};
   answeredQuestions = new Set<number>();
 
   timeRemaining = signal(10800);
   showFinishModal = signal(false);
   loading = signal(true);
   error = signal('');
+  finishingAttempt = signal(false);
+  finishError = signal('');
 
   private timerSubscription?: Subscription;
+  private readonly STORAGE_KEY_PREFIX = 'attempt_progress_';
 
   constructor(
     private route: ActivatedRoute,
@@ -622,10 +176,54 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.attemptId = this.route.snapshot.paramMap.get('id')!;
     this.loadAttempt();
     this.startTimer();
+    this.loadLocalProgress();
   }
 
   ngOnDestroy(): void {
     this.timerSubscription?.unsubscribe();
+  }
+
+  private getStorageKey(): string {
+    return `${this.STORAGE_KEY_PREFIX}${this.attemptId}`;
+  }
+
+  private saveLocalProgress(): void {
+    try {
+      const progress = {
+        selectedAnswers: this.selectedAnswers,
+        answeredQuestions: Array.from(this.answeredQuestions),
+        currentQuestionIndex: this.currentQuestionIndex(),
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(progress));
+    } catch (error) {
+      console.error('Error saving progress to localStorage:', error);
+    }
+  }
+
+  private loadLocalProgress(): void {
+    try {
+      const saved = localStorage.getItem(this.getStorageKey());
+      if (saved) {
+        const progress = JSON.parse(saved);
+        this.selectedAnswers = progress.selectedAnswers || {};
+        this.answeredQuestions = new Set(progress.answeredQuestions || []);
+        if (progress.currentQuestionIndex !== undefined) {
+          this.currentQuestionIndex.set(progress.currentQuestionIndex);
+        }
+        console.log('Progress loaded from localStorage:', progress);
+      }
+    } catch (error) {
+      console.error('Error loading progress from localStorage:', error);
+    }
+  }
+
+  private clearLocalProgress(): void {
+    try {
+      localStorage.removeItem(this.getStorageKey());
+    } catch (error) {
+      console.error('Error clearing progress from localStorage:', error);
+    }
   }
 
   loadAttempt(): void {
@@ -661,7 +259,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   loadQuestions(): void {
-    console.log('Loading questions for attempt:', this.attemptId);
     this.attemptsApi.getAttemptQuestions(this.attemptId).subscribe({
       next: (questions) => {
         console.log('Questions loaded:', questions.length);
@@ -678,7 +275,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
   checkIfLoaded(): void {
     if (this.exam() && this.questions().length > 0) {
-      console.log('Everything loaded successfully!');
       this.loading.set(false);
     }
   }
@@ -698,14 +294,21 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.selectedAnswers[currentIdx] = optionKey;
     this.answeredQuestions.add(currentIdx);
 
+    // Salva progresso localmente imediatamente
+    this.saveLocalProgress();
+
     if (this.currentQuestion) {
       this.attemptsApi.submitAnswer(
         this.attemptId,
         this.currentQuestion.questionId,
         { selectedOption: optionKey }
       ).subscribe({
+        next: () => {
+          console.log('Answer submitted successfully');
+        },
         error: (error) => {
           console.error('Error submitting answer:', error);
+          // Mesmo com erro no servidor, mantemos localmente
         }
       });
     }
@@ -732,15 +335,29 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   finishAttempt(): void {
+    this.finishingAttempt.set(true);
+    this.finishError.set('');
+    this.showFinishModal.set(false);
     this.timerSubscription?.unsubscribe();
+
     this.attemptsApi.finishAttempt(this.attemptId).subscribe({
       next: () => {
+        console.log('Attempt finished successfully');
+        // Limpa o progresso local apenas após sucesso
+        this.clearLocalProgress();
         this.router.navigate(['/attempt', this.attemptId, 'result']);
       },
       error: (error) => {
         console.error('Error finishing attempt:', error);
+        this.finishingAttempt.set(false);
+        this.finishError.set('Erro ao finalizar o exame. Suas respostas estão salvas. Por favor, tente novamente.');
+        // Mantém o progresso local para retry
       }
     });
+  }
+
+  retryFinish(): void {
+    this.finishAttempt();
   }
 
   formatTime(seconds: number): string {

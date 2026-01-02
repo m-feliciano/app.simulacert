@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthFacade } from '../../core/auth/auth.facade';
@@ -7,14 +7,17 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, NgOptimizedImage],
   template: `
     <div class="auth-card">
+      <div class="logo-container">
+        <img ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="auth-logo" height="96" width="360">
+      </div>
       <h2>Login</h2>
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Email</label>
-          <input type="email" formControlName="email" class="form-control" />
+          <input type="email" formControlName="email" class="form-control"/>
 
           @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
             <div class="error">
@@ -25,7 +28,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 
         <div class="form-group">
           <label>Senha</label>
-          <input type="password" formControlName="password" class="form-control" />
+          <input type="password" formControlName="password" class="form-control"/>
 
           @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
             <div class="error">
@@ -38,28 +41,41 @@ import { AuthFacade } from '../../core/auth/auth.facade';
           <div class="error">{{ errorMessage }}</div>
         }
 
-        <button type="submit" class="btn-primary" [disabled]="loginForm.invalid || loading">
+        <button type="submit"
+                class="btn-primary"
+                [disabled]="loginForm.invalid || loading">
           {{ loading ? 'Entrando...' : 'Entrar' }}
         </button>
       </form>
 
       <div class="auth-footer">
-        <p>Não tem uma conta? <a routerLink="/register">Registre-se</a></p>
+        <p style="color: #ccc">Não tem uma conta? <a routerLink="/register">Registre-se</a></p>
       </div>
     </div>
   `,
   styles: [`
     .auth-card {
-      background: var(--color-bg-secondary);
+      background: #37475a;
       padding: var(--spacing-xl);
       border-radius: var(--border-radius-md);
       box-shadow: var(--shadow-lg);
     }
 
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .auth-logo {
+      height: 60px;
+      width: auto;
+    }
+
     h2 {
       margin: 0 0 var(--spacing-xl);
       text-align: center;
-      color: var(--color-dark);
+      color: #fff;
       font-size: 24px;
     }
 
@@ -71,7 +87,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
       display: block;
       margin-bottom: var(--spacing-xs);
       font-weight: 500;
-      color: var(--color-text-primary);
+      color: #fff;
       font-size: 14px;
     }
 
@@ -150,6 +166,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
       margin-top: var(--spacing-lg);
       text-align: center;
       font-size: 14px;
+      color: #ccc;
     }
 
     .auth-footer p {
