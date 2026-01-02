@@ -1,0 +1,143 @@
+import { Component, Input } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { CommonModule } from '@angular/common';
+
+@Component({
+  selector: 'app-attempt-layout',
+  standalone: true,
+  imports: [RouterOutlet, CommonModule],
+  template: `
+    <div class="attempt-layout">
+      <header class="attempt-topbar">
+        <div class="attempt-topbar-left">
+          <h1 class="logo">SimulaAWS</h1>
+          <span class="exam-title">{{ examTitle }}</span>
+        </div>
+        <div class="attempt-topbar-right">
+          <div class="timer" [class.warning]="timeRemaining < 300">
+            ⏱️ {{ formatTime(timeRemaining) }}
+          </div>
+        </div>
+      </header>
+
+      <main class="attempt-content">
+        <router-outlet />
+      </main>
+    </div>
+  `,
+  styles: [`
+    .attempt-layout {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .attempt-topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 60px;
+      background: var(--color-dark);
+      color: white;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      box-shadow: var(--shadow-sm);
+      flex-wrap: wrap;
+      gap: var(--spacing-md);
+    }
+
+    .attempt-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      flex-wrap: wrap;
+    }
+
+    .logo {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0;
+    }
+
+    @media (min-width: 768px) {
+      .logo {
+        font-size: 20px;
+      }
+    }
+
+    .exam-title {
+      font-size: 14px;
+      color: #ccc;
+    }
+
+    @media (min-width: 768px) {
+      .exam-title {
+        font-size: 16px;
+      }
+    }
+
+    .timer {
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      background: var(--color-secondary);
+      border-radius: var(--border-radius-sm);
+      transition: var(--transition-fast);
+      white-space: nowrap;
+    }
+
+    @media (min-width: 768px) {
+      .timer {
+        font-size: 18px;
+      }
+    }
+
+    .timer.warning {
+      background: var(--color-danger);
+      animation: pulse 1s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .timer.warning {
+        animation: none;
+      }
+    }
+
+    .attempt-content {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      background: var(--color-bg-primary);
+      padding: var(--spacing-md);
+    }
+
+    @media (min-width: 768px) {
+      .attempt-content {
+        padding: var(--spacing-lg);
+      }
+    }
+  `]
+})
+export class AttemptLayoutComponent {
+  @Input() examTitle = '';
+  @Input() timeRemaining = 0;
+
+  formatTime(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+}
+
