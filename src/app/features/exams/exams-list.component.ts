@@ -206,22 +206,18 @@ export class ExamsListComponent implements OnInit {
   constructor(
     private examsApi: ExamsApiService
   ) {
-    console.log('ExamsListComponent constructed');
   }
 
-  ngOnInit(): void {
-    console.log('ExamsListComponent initialized');
+  ngOnInit(): void {;
     this.loadExams();
   }
 
   loadExams(): void {
-    console.log('Loading exams...');
     this.loading.set(true);
     this.error.set('');
 
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
-        console.log('Exams loaded successfully:', exams);
         this.exams.set(exams);
         this.loading.set(false);
       },

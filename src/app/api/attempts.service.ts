@@ -37,6 +37,10 @@ export class AttemptsApiService {
     return this.http.post<void>(`${this.baseUrl}/${attemptId}/answers/${questionId}`, request);
   }
 
+  deleteAnswer(attemptId: string, questionId: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${attemptId}/answers/${questionId}`);
+  }
+
   finishAttempt(attemptId: string): Observable<AttemptResponse> {
     return this.http.post<AttemptResponse>(`${this.baseUrl}/${attemptId}/finish`, {});
   }

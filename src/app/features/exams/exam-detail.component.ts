@@ -358,7 +358,6 @@ export class ExamDetailComponent implements OnInit {
 
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
-        console.log('Exam loaded:', exam);
         this.exam.set(exam);
         this.loadingExam.set(false);
       },

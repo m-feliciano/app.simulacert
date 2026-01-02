@@ -1,12 +1,7 @@
 export interface QuestionOption {
   key: string;
   text: string;
-}
-
-export interface QuestionOptionDto {
   isCorrect: boolean;
-  key: string;
-  text: string;
 }
 
 export interface QuestionOptionResponse {
@@ -28,7 +23,7 @@ export interface CreateQuestionRequest {
   difficulty: string;
   domain: string;
   examId: string;
-  options: QuestionOptionDto[];
+  options: QuestionOption[];
   text: string;
 }
 

@@ -29,13 +29,13 @@ import { AttemptQuestionResponse } from '../../api/domain/attempt-question.model
               <div class="question-text">{{ q.text }}</div>
               <ul class="options-list">
                 @for (opt of q.options; track opt.key) {
-                  <li [class.correct-option]="opt.isCorrect" [class.selected-option]="q.selectedOption === opt.key">
+                  <li [class.correct-option]="opt.isCorrect" [class.selected-option]="isSelectedOption(q, opt.key)">
                     <span class="option-key">{{ opt.key }})</span>
                     <span class="option-text">{{ opt.text }}</span>
                     @if (opt.isCorrect) {
                       <span class="correct-label">Correta</span>
                     }
-                    @if (q.selectedOption === opt.key) {
+                    @if (isSelectedOption(q, opt.key)) {
                       <span class="selected-label">Sua resposta</span>
                     }
                   </li>
@@ -77,7 +77,22 @@ export class AttemptQuestionsResultComponent implements OnInit {
   }
 
   isCorrect(q: AttemptQuestionResponse): boolean {
-    const correct = q.options.find(opt => opt.isCorrect)?.key;
-    return q.selectedOption === correct;
+    const correctOptions = q.options
+      .filter(opt => opt.isCorrect)
+      .map(opt => opt.key)
+      .sort()
+      .join(',');
+
+    const selectedOptions = q.selectedOption
+      ? q.selectedOption.split(',').map(s => s.trim()).sort().join(',')
+      : '';
+
+    return selectedOptions === correctOptions;
+  }
+
+  isSelectedOption(q: AttemptQuestionResponse, optionKey: string): boolean {
+    if (!q.selectedOption) return false;
+    const selected = q.selectedOption.split(',').map(s => s.trim());
+    return selected.includes(optionKey);
   }
 }

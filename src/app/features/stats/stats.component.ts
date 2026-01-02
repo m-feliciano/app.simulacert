@@ -518,7 +518,6 @@ export class StatsComponent implements OnInit {
   loadStats(userId: string): void {
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
-        console.log('User stats loaded:', stats);
         this.userStats.set(stats);
       },
       error: (error) => {
@@ -528,11 +527,6 @@ export class StatsComponent implements OnInit {
 
     this.statsApi.getPerformanceByDomain(userId).subscribe({
       next: (domains) => {
-        console.log('Domain stats loaded:', domains);
-        console.log('Number of domains:', domains.length);
-        domains.forEach(d => {
-          console.log(`Domain: ${d.awsDomain}, Accuracy: ${d.accuracyRate}, Correct: ${d.correctAnswers}, Total: ${d.totalQuestions}`);
-        });
         this.domainStats.set(domains.sort((a, b) => b.accuracyRate - a.accuracyRate));
       },
       error: (error) => {
@@ -542,8 +536,6 @@ export class StatsComponent implements OnInit {
 
     this.statsApi.getAttemptHistory(userId).subscribe({
       next: (history) => {
-        console.log('Attempt history loaded:', history);
-        console.log('Number of attempts:', history.length);
         this.attemptHistory.set(history.sort((a, b) =>
           new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
         ));

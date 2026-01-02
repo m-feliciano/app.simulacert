@@ -1,10 +1,10 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AttemptsApiService } from '../../api/attempts.service';
-import { ExamsApiService } from '../../api/exams.service';
-import { AttemptQuestionResponse, ExamResponse } from '../../api/domain';
-import { interval, Subscription } from 'rxjs';
+import {Component, computed, OnDestroy, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AttemptsApiService} from '../../api/attempts.service';
+import {ExamsApiService} from '../../api/exams.service';
+import {AttemptQuestionResponse, ExamResponse} from '../../api/domain';
+import {interval, Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-attempt-runner',
@@ -28,9 +28,16 @@ import { interval, Subscription } from 'rxjs';
 
       @if (!loading() && !error() && exam() && questions().length > 0) {
         <div class="attempt-header">
-          <h2>{{ exam()!.title }}</h2>
-          <div class="timer" [class.warning]="timeRemaining() < 300">
-            ⏱️ {{ formatTime(timeRemaining()) }}
+          <div class="header-left">
+            <h2>{{ exam()!.title }}</h2>
+          </div>
+          <div class="header-right">
+            <div class="timer" [class.warning]="timeRemaining() < 300">
+              ⏱️ {{ formatTime(timeRemaining()) }}
+            </div>
+            <button class="btn-exit" (click)="confirmExit()" title="Sair do Exame">
+              ✕ Sair
+            </button>
           </div>
         </div>
 
@@ -59,12 +66,31 @@ import { interval, Subscription } from 'rxjs';
 
             <div class="question-text">{{ currentQuestion.text }}</div>
 
+            @if (isMultipleChoice(currentQuestion)) {
+              <div class="multiple-choice-hint">
+                <span class="hint-icon">ℹ️</span>
+                <span>Esta questão permite múltiplas respostas. Selecione {{ getExpectedAnswerCount(currentQuestion) }}
+                  opção(ões) correta(s).</span>
+                @if (selectedAnswers[currentQuestionIndex()]) {
+                  <span class="selection-count">({{ selectedAnswers[currentQuestionIndex()].length }}
+                    /{{ getExpectedAnswerCount(currentQuestion) }} selecionadas)</span>
+                }
+              </div>
+            }
+
             <div class="options">
               @for (option of currentQuestion.options; track option.key) {
                 <div
                   class="option"
-                  [class.selected]="selectedAnswers[currentQuestionIndex()] === option.key"
-                  (click)="selectAnswer(option.key)">
+                  [class.selected]="isOptionSelected(option.key)"
+                  (click)="toggleAnswer(option.key)">
+                  @if (isMultipleChoice(currentQuestion)) {
+                    <div class="option-checkbox" [class.checked]="isOptionSelected(option.key)">
+                      @if (isOptionSelected(option.key)) {
+                        <span>✓</span>
+                      }
+                    </div>
+                  }
                   <div class="option-key">{{ option.key }}</div>
                   <div class="option-text">{{ option.text }}</div>
                 </div>
@@ -87,15 +113,27 @@ import { interval, Subscription } from 'rxjs';
               </button>
 
               @if (currentQuestionIndex() === questions().length - 1) {
-                <button
-                  class="btn-finish"
-                  (click)="confirmFinish()">
+                <button class="btn-finish" (click)="submitCurrentAnswer(); confirmFinish()">
                   Finalizar Exame
                 </button>
               }
             </div>
           </div>
         }
+      }
+
+      @if (showExitModal()) {
+        <div class="finish-modal" (click)="showExitModal.set(false)">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <h3>⚠️ Sair do Exame?</h3>
+            <p>Seu progresso foi salvo, mas o cronômetro continuará rodando.</p>
+            <p><strong>Tem certeza que deseja sair?</strong></p>
+            <div class="modal-actions">
+              <button class="btn-secondary" (click)="showExitModal.set(false)">Cancelar</button>
+              <button class="btn-primary" (click)="exitAttempt()">Sair</button>
+            </div>
+          </div>
+        </div>
       }
 
       @if (showFinishModal()) {
@@ -143,11 +181,15 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   questions = signal<AttemptQuestionResponse[]>([]);
   currentQuestionIndex = signal(0);
 
-  selectedAnswers: { [index: number]: string} = {};
+  selectedAnswers: { [index: number]: string[] } = {};
   answeredQuestions = new Set<number>();
 
-  timeRemaining = signal(10800);
+  duration = computed(() => Math.round(this.questions().length * 2 * 60)); // in seconds
+
+  timeRemaining = signal(0);
+
   showFinishModal = signal(false);
+  showExitModal = signal(false);
   loading = signal(true);
   error = signal('');
   finishingAttempt = signal(false);
@@ -175,7 +217,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.attemptId = this.route.snapshot.paramMap.get('id')!;
     this.loadAttempt();
-    this.startTimer();
     this.loadLocalProgress();
   }
 
@@ -193,9 +234,12 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         selectedAnswers: this.selectedAnswers,
         answeredQuestions: Array.from(this.answeredQuestions),
         currentQuestionIndex: this.currentQuestionIndex(),
+        timeRemaining: this.timeRemaining(),
         timestamp: new Date().toISOString()
       };
+
       localStorage.setItem(this.getStorageKey(), JSON.stringify(progress));
+
     } catch (error) {
       console.error('Error saving progress to localStorage:', error);
     }
@@ -208,11 +252,16 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         const progress = JSON.parse(saved);
         this.selectedAnswers = progress.selectedAnswers || {};
         this.answeredQuestions = new Set(progress.answeredQuestions || []);
+
         if (progress.currentQuestionIndex !== undefined) {
           this.currentQuestionIndex.set(progress.currentQuestionIndex);
         }
-        console.log('Progress loaded from localStorage:', progress);
+
+        if (progress.timeRemaining !== undefined) {
+          this.timeRemaining.set(progress.timeRemaining);
+        }
       }
+
     } catch (error) {
       console.error('Error loading progress from localStorage:', error);
     }
@@ -227,10 +276,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   loadAttempt(): void {
-    console.log('Loading attempt:', this.attemptId);
     this.attemptsApi.getAttempt(this.attemptId).subscribe({
       next: (attempt) => {
-        console.log('Attempt loaded:', attempt);
         this.loadExam(attempt.examId);
         this.loadQuestions();
       },
@@ -243,10 +290,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   loadExam(examId: string): void {
-    console.log('Loading exam:', examId);
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
-        console.log('Exam loaded:', exam);
         this.exam.set(exam);
         this.checkIfLoaded();
       },
@@ -261,7 +306,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   loadQuestions(): void {
     this.attemptsApi.getAttemptQuestions(this.attemptId).subscribe({
       next: (questions) => {
-        console.log('Questions loaded:', questions.length);
         this.questions.set(questions);
         this.checkIfLoaded();
       },
@@ -276,6 +320,14 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   checkIfLoaded(): void {
     if (this.exam() && this.questions().length > 0) {
       this.loading.set(false);
+
+      if (this.timeRemaining() === 0) {
+        this.timeRemaining.set(this.duration());
+      }
+
+      if (!this.timerSubscription || this.timerSubscription.closed) {
+        this.startTimer();
+      }
     }
   }
 
@@ -283,51 +335,136 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.timerSubscription = interval(1000).subscribe(() => {
       if (this.timeRemaining() > 0) {
         this.timeRemaining.update(t => t - 1);
+        this.saveLocalProgress();
       } else {
         this.finishAttempt();
       }
     });
   }
 
-  selectAnswer(optionKey: string): void {
+  toggleAnswer(optionKey: string): void {
     const currentIdx = this.currentQuestionIndex();
-    this.selectedAnswers[currentIdx] = optionKey;
-    this.answeredQuestions.add(currentIdx);
 
-    // Salva progresso localmente imediatamente
-    this.saveLocalProgress();
-
-    if (this.currentQuestion) {
-      this.attemptsApi.submitAnswer(
-        this.attemptId,
-        this.currentQuestion.questionId,
-        { selectedOption: optionKey }
-      ).subscribe({
-        next: () => {
-          console.log('Answer submitted successfully');
-        },
-        error: (error) => {
-          console.error('Error submitting answer:', error);
-          // Mesmo com erro no servidor, mantemos localmente
-        }
-      });
+    if (!this.selectedAnswers[currentIdx]) {
+      this.selectedAnswers[currentIdx] = [];
     }
+
+    const currentAnswers = [...this.selectedAnswers[currentIdx]];
+    const expectedCount = this.getExpectedAnswerCount(this.currentQuestion!);
+
+    if (expectedCount === 1) {
+      if (currentAnswers.length === 1 && currentAnswers[0] === optionKey) {
+        this.selectedAnswers[currentIdx] = [];
+      } else {
+        this.selectedAnswers[currentIdx] = [optionKey];
+      }
+    } else {
+      const optionIndex = currentAnswers.indexOf(optionKey);
+      if (optionIndex > -1) {
+        currentAnswers.splice(optionIndex, 1);
+        this.selectedAnswers[currentIdx] = currentAnswers;
+      } else {
+        if (currentAnswers.length < expectedCount) {
+          this.selectedAnswers[currentIdx] = [...currentAnswers, optionKey].sort();
+        }
+      }
+    }
+
+    this.saveLocalProgress();
+  }
+
+  isOptionSelected(optionKey: string): boolean {
+    const currentIdx = this.currentQuestionIndex();
+    const answers = this.selectedAnswers[currentIdx];
+    return answers ? answers.includes(optionKey) : false;
+  }
+
+  protected submitCurrentAnswer(): void {
+    if (!this.currentQuestion || !this.selectedAnswers) return;
+
+    const currentIdx = this.currentQuestionIndex();
+    const currentAnswers = this.selectedAnswers[currentIdx];
+    const expectedCount = this.getExpectedAnswerCount(this.currentQuestion);
+    const currentCount = currentAnswers?.length || 0;
+    const questionId = this.currentQuestion.questionId;
+
+    if (currentCount !== expectedCount) return;
+
+    const selectedOption = currentAnswers.join(',');
+
+    this.attemptsApi.submitAnswer(this.attemptId, questionId, {selectedOption})
+      .subscribe({
+        next: () => {
+          this.answeredQuestions.add(currentIdx);
+        },
+        error: (error) => console.error('Error submitting:', error)
+      });
+  }
+
+  isMultipleChoice(question: AttemptQuestionResponse): boolean {
+    const text = question?.text?.toLowerCase();
+    return text?.includes('escolha dois') ||
+      text?.includes('escolha duas') ||
+      text?.includes('escolha três') ||
+      text?.includes('escolha tres') ||
+      text?.includes('selecione dois') ||
+      text?.includes('selecione duas') ||
+      text?.includes('selecione três') ||
+      text?.includes('selecione tres') ||
+      text?.includes('(escolha') ||
+      text?.includes('(selecione');
+  }
+
+  getExpectedAnswerCount(question: AttemptQuestionResponse): number {
+    const text = question.text.toLowerCase();
+
+    if (text.includes('escolha dois') || text.includes('selecione dois') ||
+      text.includes('escolha duas') || text.includes('selecione duas')) {
+      return 2;
+    }
+    if (text.includes('escolha três') || text.includes('selecione três') ||
+      text.includes('escolha tres') || text.includes('selecione tres')) {
+      return 3;
+    }
+    if (text.includes('escolha quatro') || text.includes('selecione quatro')) {
+      return 4;
+    }
+
+    if (this.isMultipleChoice(question)) {
+      const correctCount = question.options.filter(opt => opt.isCorrect).length;
+      return correctCount > 1 ? correctCount : 1;
+    }
+
+    return 1;
   }
 
   goToQuestion(index: number): void {
+    this.submitCurrentAnswer();
     this.currentQuestionIndex.set(index);
   }
 
   previousQuestion(): void {
     if (this.currentQuestionIndex() > 0) {
+      this.submitCurrentAnswer();
       this.currentQuestionIndex.update(i => i - 1);
     }
   }
 
   nextQuestion(): void {
     if (this.currentQuestionIndex() < this.questions().length - 1) {
+      this.submitCurrentAnswer();
       this.currentQuestionIndex.update(i => i + 1);
     }
+  }
+
+  confirmExit(): void {
+    this.showExitModal.set(true);
+  }
+
+  exitAttempt(): void {
+    this.saveLocalProgress();
+    this.timerSubscription?.unsubscribe();
+    this.router.navigate(['/dashboard']);
   }
 
   confirmFinish(): void {
@@ -335,6 +472,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   finishAttempt(): void {
+    this.submitCurrentAnswer();
+
     this.finishingAttempt.set(true);
     this.finishError.set('');
     this.showFinishModal.set(false);
@@ -342,8 +481,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
     this.attemptsApi.finishAttempt(this.attemptId).subscribe({
       next: () => {
-        console.log('Attempt finished successfully');
-        // Limpa o progresso local apenas após sucesso
         this.clearLocalProgress();
         this.router.navigate(['/attempt', this.attemptId, 'result']);
       },
@@ -351,7 +488,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         console.error('Error finishing attempt:', error);
         this.finishingAttempt.set(false);
         this.finishError.set('Erro ao finalizar o exame. Suas respostas estão salvas. Por favor, tente novamente.');
-        // Mantém o progresso local para retry
       }
     });
   }

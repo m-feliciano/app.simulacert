@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
       <header class="topbar">
         <div class="topbar-left">
           <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
-          <img ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="logo" height="96" width="360">
+          <img priority ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="logo" height="96" width="360">
         </div>
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser?.name }}</span>
