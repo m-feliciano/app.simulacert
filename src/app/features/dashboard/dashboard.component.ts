@@ -341,7 +341,7 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const userId = this.authFacade.currentUser?.id;
+    const userId = this.authFacade.currentUser()?.id;
     if (userId) {
       this.loadStats(userId);
       this.loadRecentAttempts(userId);

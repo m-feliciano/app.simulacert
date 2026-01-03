@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -38,14 +38,14 @@ import { AuthFacade } from '../../core/auth/auth.facade';
           }
         </div>
 
-        @if (errorMessage) {
-          <div class="error">{{ errorMessage }}</div>
+        @if (errorMessage()) {
+          <div class="error">{{ errorMessage() }}</div>
         }
 
         <button type="submit"
                 class="btn-primary"
-                [disabled]="loginForm.invalid || loading">
-          {{ loading ? 'Entrando...' : 'Entrar' }}
+                [disabled]="loginForm.invalid || loading()">
+          {{ loading() ? 'Entrando...' : 'Entrar' }}
         </button>
       </form>
 
@@ -57,8 +57,8 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 })
 export class LoginComponent {
   loginForm: FormGroup;
-  loading = false;
-  errorMessage = '';
+  loading = signal(false);
+  errorMessage = signal('');
 
   constructor(
     private fb: FormBuilder,
@@ -73,16 +73,17 @@ export class LoginComponent {
 
   onSubmit(): void {
     if (this.loginForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
+      this.loading.set(true);
+      this.errorMessage.set('');
 
       this.authFacade.login(this.loginForm.value).subscribe({
         next: () => {
+          this.loading.set(false);
           this.router.navigate(['/dashboard']);
         },
         error: (error) => {
-          this.loading = false;
-          this.errorMessage = error.error?.message || 'Erro ao fazer login';
+          this.loading.set(false);
+          this.errorMessage.set(error.error?.message || 'Erro ao fazer login');
         }
       });
     }

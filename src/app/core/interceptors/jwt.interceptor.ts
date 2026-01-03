@@ -16,7 +16,7 @@ export class JwtInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
-    const token = this.authFacade.token;
+    const token = this.authFacade.token();
     if (token) {
       req = req.clone({
         setHeaders: {

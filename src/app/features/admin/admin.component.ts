@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ExamsApiService } from '../../api/exams.service';
@@ -16,107 +16,119 @@ import { ExamResponse } from '../../api/domain';
       <div class="admin-tabs">
         <button
           class="tab-btn"
-          [class.active]="activeTab === 'exams'"
-          (click)="activeTab = 'exams'">
+          [class.active]="activeTab() === 'exams'"
+          (click)="activeTab.set('exams')">
           Exames
         </button>
         <button
           class="tab-btn"
-          [class.active]="activeTab === 'questions'"
-          (click)="activeTab = 'questions'">
+          [class.active]="activeTab() === 'questions'"
+          (click)="activeTab.set('questions')">
           Questões
         </button>
       </div>
 
-      <div class="tab-content" *ngIf="activeTab === 'exams'">
-        <div class="section">
-          <h2>Criar Novo Exame</h2>
-          <form [formGroup]="examForm" (ngSubmit)="createExam()">
-            <div class="form-group">
-              <label>Título</label>
-              <input type="text" formControlName="title" class="form-control" />
-            </div>
-
-            <div class="form-group">
-              <label>Descrição</label>
-              <textarea formControlName="description" class="form-control" rows="3"></textarea>
-            </div>
-
-            <button type="submit" class="btn-primary" [disabled]="examForm.invalid || loadingExam">
-              {{ loadingExam ? 'Criando...' : 'Criar Exame' }}
-            </button>
-          </form>
-        </div>
-
-        <div class="section">
-          <h2>Exames Existentes</h2>
-          <div class="exams-list">
-            <div class="exam-item" *ngFor="let exam of exams">
-              <div class="exam-info">
-                <h3>{{ exam.title }}</h3>
-                <p *ngIf="exam.description">{{ exam.description }}</p>
+      @if (activeTab() === 'exams') {
+        <div class="tab-content">
+          <div class="section">
+            <h2>Criar Novo Exame</h2>
+            <form [formGroup]="examForm" (ngSubmit)="createExam()">
+              <div class="form-group">
+                <label>Título</label>
+                <input type="text" formControlName="title" class="form-control" />
               </div>
-              <div class="exam-actions">
-                <button class="btn-danger" (click)="deleteExam(exam.id)">Excluir</button>
+
+              <div class="form-group">
+                <label>Descrição</label>
+                <textarea formControlName="description" class="form-control" rows="3"></textarea>
               </div>
+
+              <button type="submit" class="btn-primary" [disabled]="examForm.invalid || loadingExam()">
+                {{ loadingExam() ? 'Criando...' : 'Criar Exame' }}
+              </button>
+            </form>
+          </div>
+
+          <div class="section">
+            <h2>Exames Existentes</h2>
+            <div class="exams-list">
+              @for (exam of exams(); track exam.id) {
+                <div class="exam-item">
+                  <div class="exam-info">
+                    <h3>{{ exam.title }}</h3>
+                    @if (exam.description) {
+                      <p>{{ exam.description }}</p>
+                    }
+                  </div>
+                  <div class="exam-actions">
+                    <button class="btn-danger" (click)="deleteExam(exam.id)">Excluir</button>
+                  </div>
+                </div>
+              }
             </div>
           </div>
         </div>
-      </div>
+      }
 
-      <div class="tab-content" *ngIf="activeTab === 'questions'">
-        <div class="section">
-          <h2>Criar Nova Questão</h2>
-          <form [formGroup]="questionForm" (ngSubmit)="createQuestion()">
-            <div class="form-group">
-              <label>Exame</label>
-              <select formControlName="examId" class="form-control">
-                <option value="">Selecione um exame</option>
-                <option *ngFor="let exam of exams" [value]="exam.id">{{ exam.title }}</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label>Texto da Questão</label>
-              <textarea formControlName="text" class="form-control" rows="4"></textarea>
-            </div>
-
-            <div class="form-row">
+      @if (activeTab() === 'questions') {
+        <div class="tab-content">
+          <div class="section">
+            <h2>Criar Nova Questão</h2>
+            <form [formGroup]="questionForm" (ngSubmit)="createQuestion()">
               <div class="form-group">
-                <label>Domínio AWS</label>
-                <input type="text" formControlName="domain" class="form-control" />
-              </div>
-
-              <div class="form-group">
-                <label>Dificuldade</label>
-                <select formControlName="difficulty" class="form-control">
-                  <option value="EASY">Fácil</option>
-                  <option value="MEDIUM">Média</option>
-                  <option value="HARD">Difícil</option>
+                <label>Exame</label>
+                <select formControlName="examId" class="form-control">
+                  <option value="">Selecione um exame</option>
+                  @for (exam of exams(); track exam.id) {
+                    <option [value]="exam.id">{{ exam.title }}</option>
+                  }
                 </select>
               </div>
-            </div>
 
-            <div class="options-group">
-              <h3>Opções de Resposta</h3>
-              <div class="option-item" *ngFor="let option of questionOptions; let i = index">
-                <input type="text" [(ngModel)]="option.key" [ngModelOptions]="{standalone: true}" placeholder="Chave (A, B, C, D)" class="option-key" />
-                <input type="text" [(ngModel)]="option.text" [ngModelOptions]="{standalone: true}" placeholder="Texto da opção" class="option-text" />
-                <label class="option-correct">
-                  <input type="checkbox" [(ngModel)]="option.isCorrect" [ngModelOptions]="{standalone: true}" />
-                  Correta
-                </label>
-                <button type="button" class="btn-remove" (click)="removeOption(i)">×</button>
+              <div class="form-group">
+                <label>Texto da Questão</label>
+                <textarea formControlName="text" class="form-control" rows="4"></textarea>
               </div>
-              <button type="button" class="btn-secondary" (click)="addOption()">+ Adicionar Opção</button>
-            </div>
 
-            <button type="submit" class="btn-primary" [disabled]="questionForm.invalid || loadingQuestion">
-              {{ loadingQuestion ? 'Criando...' : 'Criar Questão' }}
-            </button>
-          </form>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Domínio AWS</label>
+                  <input type="text" formControlName="domain" class="form-control" />
+                </div>
+
+                <div class="form-group">
+                  <label>Dificuldade</label>
+                  <select formControlName="difficulty" class="form-control">
+                    <option value="EASY">Fácil</option>
+                    <option value="MEDIUM">Média</option>
+                    <option value="HARD">Difícil</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="options-group">
+                <h3>Opções de Resposta</h3>
+                @for (option of questionOptions(); track $index) {
+                  <div class="option-item">
+                    <input type="text" [(ngModel)]="option.key" [ngModelOptions]="{standalone: true}" placeholder="Chave (A, B, C, D)" class="option-key" />
+                    <input type="text" [(ngModel)]="option.text" [ngModelOptions]="{standalone: true}" placeholder="Texto da opção" class="option-text" />
+                    <label class="option-correct">
+                      <input type="checkbox" [(ngModel)]="option.isCorrect" [ngModelOptions]="{standalone: true}" />
+                      Correta
+                    </label>
+                    <button type="button" class="btn-remove" (click)="removeOption($index)">×</button>
+                  </div>
+                }
+                <button type="button" class="btn-secondary" (click)="addOption()">+ Adicionar Opção</button>
+              </div>
+
+              <button type="submit" class="btn-primary" [disabled]="questionForm.invalid || loadingQuestion()">
+                {{ loadingQuestion() ? 'Criando...' : 'Criar Questão' }}
+              </button>
+            </form>
+          </div>
         </div>
-      </div>
+      }
     </div>
   `,
   styles: [`
@@ -327,13 +339,13 @@ import { ExamResponse } from '../../api/domain';
   `]
 })
 export class AdminComponent implements OnInit {
-  activeTab = 'exams';
-  exams: ExamResponse[] = [];
+  activeTab = signal<'exams' | 'questions'>('exams');
+  exams = signal<ExamResponse[]>([]);
   examForm: FormGroup;
   questionForm: FormGroup;
-  questionOptions: Array<{ key: string; text: string; isCorrect: boolean }> = [];
-  loadingExam = false;
-  loadingQuestion = false;
+  questionOptions = signal<Array<{ key: string; text: string; isCorrect: boolean }>>([]);
+  loadingExam = signal(false);
+  loadingQuestion = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -352,10 +364,13 @@ export class AdminComponent implements OnInit {
       difficulty: ['MEDIUM', Validators.required]
     });
 
-    this.addOption();
-    this.addOption();
-    this.addOption();
-    this.addOption();
+    // Inicializar com 4 opções vazias
+    this.questionOptions.set([
+      { key: '', text: '', isCorrect: false },
+      { key: '', text: '', isCorrect: false },
+      { key: '', text: '', isCorrect: false },
+      { key: '', text: '', isCorrect: false }
+    ]);
   }
 
   ngOnInit(): void {
@@ -365,7 +380,7 @@ export class AdminComponent implements OnInit {
   loadExams(): void {
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
-        this.exams = exams;
+        this.exams.set(exams);
       },
       error: (error) => {
         console.error('Error loading exams:', error);
@@ -375,16 +390,16 @@ export class AdminComponent implements OnInit {
 
   createExam(): void {
     if (this.examForm.valid) {
-      this.loadingExam = true;
+      this.loadingExam.set(true);
       this.examsApi.createExam(this.examForm.value).subscribe({
         next: () => {
           this.examForm.reset();
           this.loadExams();
-          this.loadingExam = false;
+          this.loadingExam.set(false);
         },
         error: (error) => {
           console.error('Error creating exam:', error);
-          this.loadingExam = false;
+          this.loadingExam.set(false);
         }
       });
     }
@@ -404,38 +419,39 @@ export class AdminComponent implements OnInit {
   }
 
   createQuestion(): void {
-    if (this.questionForm.valid && this.questionOptions.length > 0) {
-      this.loadingQuestion = true;
+    if (this.questionForm.valid && this.questionOptions().length > 0) {
+      this.loadingQuestion.set(true);
       const request = {
         ...this.questionForm.value,
-        options: this.questionOptions.filter(opt => opt.key && opt.text)
+        options: this.questionOptions().filter(opt => opt.key && opt.text)
       };
 
       this.questionsApi.createQuestion(request).subscribe({
         next: () => {
           this.questionForm.reset();
           this.questionForm.patchValue({ difficulty: 'MEDIUM' });
-          this.questionOptions = [];
-          this.addOption();
-          this.addOption();
-          this.addOption();
-          this.addOption();
-          this.loadingQuestion = false;
+          this.questionOptions.set([
+            { key: '', text: '', isCorrect: false },
+            { key: '', text: '', isCorrect: false },
+            { key: '', text: '', isCorrect: false },
+            { key: '', text: '', isCorrect: false }
+          ]);
+          this.loadingQuestion.set(false);
         },
         error: (error) => {
           console.error('Error creating question:', error);
-          this.loadingQuestion = false;
+          this.loadingQuestion.set(false);
         }
       });
     }
   }
 
   addOption(): void {
-    this.questionOptions.push({ key: '', text: '', isCorrect: false });
+    this.questionOptions.update(options => [...options, { key: '', text: '', isCorrect: false }]);
   }
 
   removeOption(index: number): void {
-    this.questionOptions.splice(index, 1);
+    this.questionOptions.update(options => options.filter((_, i) => i !== index));
   }
 }
 
