@@ -88,7 +88,9 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
                 </div>
                 <div class="col-score">
                   @if (attempt.score !== null && attempt.score !== undefined) {
-                    <span [class.passed]="attempt.score >= 72" [class.failed]="attempt.score < 72">
+                    <span [class.passed]="attempt.score >= 72"
+                          [class.warning]="attempt.score >= 50 && attempt.score < 72"
+                          [class.failed]="attempt.score < 49">
                       {{ attempt.score }}%
                     </span>
                   } @else {
@@ -416,6 +418,10 @@ import { UserStatsDto, AttemptHistoryItemDto, AwsDomainStatsDto } from '../../ap
 
     .col-score .passed {
       color: var(--color-success);
+    }
+
+    .col-score .warning {
+      color: #ffc107;
     }
 
     .col-score .failed {

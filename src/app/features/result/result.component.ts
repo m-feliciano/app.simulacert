@@ -1,9 +1,9 @@
-import {Component, OnInit, ChangeDetectorRef, signal} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { AttemptsApiService } from '../../api/attempts.service';
-import { ExamsApiService } from '../../api/exams.service';
-import { AttemptResponse, ExamResponse } from '../../api/domain';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {AttemptsApiService} from '../../api/attempts.service';
+import {ExamsApiService} from '../../api/exams.service';
+import {AttemptResponse, ExamResponse} from '../../api/domain';
 
 @Component({
   selector: 'app-result',
@@ -30,9 +30,9 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
           <p class="exam-title">{{ exam()!.title }}</p>
         </div>
 
-        <div class="score-card" [class.passed]="isPassed" [class.failed]="!isPassed">
+        <div class="score-card" [class]="getColorClass()">
           <div class="score-label">Sua Pontuação</div>
-          <div class="score-value">{{ attempt()!.score }}%</div>
+          <div class="score-value">{{ attempt()!.score ?? 0 }}%</div>
           <div class="score-status">{{ isPassed ? '✓ Aprovado' : '✗ Reprovado' }}</div>
           <div class="score-message">
             {{ isPassed ? 'Parabéns! Você foi aprovado.' : 'Pontuação mínima: 72%' }}
@@ -127,6 +127,10 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
       color: #28a745;
     }
 
+    .score-card.warning .score-value {
+      color: #ff9900;
+    }
+
     .score-card.failed .score-value {
       color: #d13212;
     }
@@ -143,6 +147,10 @@ import { AttemptResponse, ExamResponse } from '../../api/domain';
 
     .score-card.failed .score-status {
       color: #d13212;
+    }
+
+    .score-card.warning .score-status {
+      color: #ff9900;
     }
 
     .score-message {
@@ -227,6 +235,17 @@ export class ResultComponent implements OnInit {
   get isPassed(): boolean {
     const score = this.attempt()?.score || 0;
     return score >= 72;
+  }
+
+  getColorClass(): string {
+    const score = this.attempt()?.score || 0;
+    if (this.isPassed) {
+      return 'passed';
+    } else if (score >= 40) {
+      return 'warning';
+    } else {
+      return 'failed';
+    }
   }
 
   ngOnInit(): void {

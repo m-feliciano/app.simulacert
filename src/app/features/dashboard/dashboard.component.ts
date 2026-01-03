@@ -48,8 +48,12 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
                     {{ formatStatus(attempt.status) }}
                   </div>
                 </div>
-                @if (attempt.score !== null && attempt.score !== undefined) {
-                  <div class="attempt-score">
+                @if (attempt.score) {
+                  <div class="attempt-score"
+                       [ngClass]="{'green': attempt.score >= 75,
+                                    'red': attempt.score < 40,
+                                    'yellow': attempt.score >= 40 && attempt.score <= 74}
+                                ">
                     {{ attempt.score }}%
                   </div>
                 }
@@ -261,7 +265,18 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
     .attempt-score {
       font-size: 16px;
       font-weight: bold;
-      color: var(--color-primary);
+    }
+
+    .attempt-score.yellow {
+      color: #ffc107;
+    }
+
+    .attempt-score.green {
+      color: #28a745;
+    }
+
+    .attempt-score.red {
+      color: #d13212;
     }
 
     @media (min-width: 768px) {
