@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, throwError } from 'rxjs';
-import { tap, catchError, shareReplay } from 'rxjs/operators';
-import { AuthApiService } from '../../api/auth.service';
-import { LoginRequest, RegisterRequest, UserResponse, AuthResponse } from '../../api/domain';
+import {computed, Injectable, signal} from '@angular/core';
+import {Observable, throwError} from 'rxjs';
+import {catchError, tap} from 'rxjs/operators';
+import {AuthApiService} from '../../api/auth.service';
+import {AuthResponse, LoginRequest, RegisterRequest, UserResponse} from '../../api/domain';
+import {HttpResponse} from '@angular/common/http';
 
 interface AuthState {
   user: UserResponse | null;
@@ -14,36 +15,22 @@ interface AuthState {
   providedIn: 'root'
 })
 export class AuthFacade {
-  private readonly TOKEN_KEY = 'simulaaws_token';
-  private readonly USER_KEY = 'simulaaws_user';
+  private readonly TOKEN_KEY = 'simulacert_token';
+  private readonly USER_KEY = 'simulacert_user';
 
-  private state$ = new BehaviorSubject<AuthState>({
+  private state = signal<AuthState>({
     user: this.loadUserFromStorage(),
     token: this.loadTokenFromStorage(),
     isAuthenticated: !!this.loadTokenFromStorage()
   });
 
-  readonly user$ = this.state$.pipe(
-    shareReplay(1)
-  );
+  readonly currentUser = computed(() => this.state().user);
+  readonly isAuthenticated = computed(() => this.state().isAuthenticated);
+  readonly token = computed(() => this.state().token);
+  readonly isAdmin = computed(() => this.state().user?.role === 'ADMIN');
 
   constructor(private authApi: AuthApiService) {}
 
-  get currentUser(): UserResponse | null {
-    return this.state$.value.user;
-  }
-
-  get isAuthenticated(): boolean {
-    return this.state$.value.isAuthenticated;
-  }
-
-  get token(): string | null {
-    return this.state$.value.token;
-  }
-
-  get isAdmin(): boolean {
-    return this.state$.value.user?.role === 'ADMIN';
-  }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.authApi.login(request).pipe(
@@ -55,11 +42,9 @@ export class AuthFacade {
     );
   }
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
+  register(request: RegisterRequest): Observable<HttpResponse<void>> {
     return this.authApi.register(request).pipe(
-      tap(response => this.handleAuthSuccess(response)),
       catchError(error => {
-        this.clearAuth();
         return throwError(() => error);
       })
     );
@@ -72,7 +57,8 @@ export class AuthFacade {
   private handleAuthSuccess(response: AuthResponse): void {
     localStorage.setItem(this.TOKEN_KEY, response.token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
-    this.state$.next({
+
+    this.state.set({
       user: response.user,
       token: response.token,
       isAuthenticated: true
@@ -82,7 +68,8 @@ export class AuthFacade {
   private clearAuth(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
-    this.state$.next({
+
+    this.state.set({
       user: null,
       token: null,
       isAuthenticated: false

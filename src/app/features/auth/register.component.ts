@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthFacade } from '../../core/auth/auth.facade';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
+import {AuthFacade} from '../../core/auth/auth.facade';
 
 @Component({
   selector: 'app-register',
@@ -12,7 +12,7 @@ import { AuthFacade } from '../../core/auth/auth.facade';
   template: `
     <div class="auth-card">
       <div class="logo-container">
-        <img ngSrc="/simulaaws-logo.svg" priority alt="SimulaAWS" class="auth-logo" height="96" width="360">
+        <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360">
       </div>
 
       <h2>Registrar</h2>
@@ -47,12 +47,12 @@ import { AuthFacade } from '../../core/auth/auth.facade';
           }
         </div>
 
-        @if (errorMessage) {
-          <div class="error">{{ errorMessage }}</div>
+        @if (errorMessage()) {
+          <div class="error">{{ errorMessage() }}</div>
         }
 
-        <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || loading">
-          {{ loading ? 'Registrando...' : 'Registrar' }}
+        <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || loading()">
+          {{ loading() ? 'Registrando...' : 'Registrar' }}
         </button>
       </form>
 
@@ -64,8 +64,8 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 })
 export class RegisterComponent {
   registerForm: FormGroup;
-  loading = false;
-  errorMessage = '';
+  loading = signal(false);
+  errorMessage = signal('');
 
   constructor(
     private fb: FormBuilder,
@@ -81,18 +81,20 @@ export class RegisterComponent {
 
   onSubmit(): void {
     if (this.registerForm.valid) {
-      this.loading = true;
-      this.errorMessage = '';
+      this.loading.set(true);
+      this.errorMessage.set('');
 
-      this.authFacade.register(this.registerForm.value).subscribe({
-        next: () => {
-          this.router.navigate(['/dashboard']);
-        },
-        error: (error) => {
-          this.loading = false;
-          this.errorMessage = error.error?.message || 'Erro ao registrar';
-        }
-      });
+      this.authFacade.register(this.registerForm.value)
+        .subscribe({
+          next: (response) => {
+            this.loading.set(false);
+            this.router.navigate(['/dashboard']);
+          },
+          error: (error) => {
+            this.loading.set(false);
+            this.errorMessage.set(error.error?.message || 'Erro ao registrar');
+          }
+        });
     }
   }
 }

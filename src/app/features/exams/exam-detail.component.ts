@@ -375,7 +375,7 @@ export class ExamDetailComponent implements OnInit {
 
   startExam(): void {
     const currentExam = this.exam();
-    if (!currentExam || !this.authFacade.currentUser) {
+    if (!currentExam || !this.authFacade.currentUser()) {
       return;
     }
 
@@ -384,7 +384,7 @@ export class ExamDetailComponent implements OnInit {
 
     this.attemptsApi.startAttempt({
       examId: currentExam.id,
-      userId: this.authFacade.currentUser.id,
+      userId: this.authFacade.currentUser()!.id,
       questionCount: this.questionCount()
     }).subscribe({
       next: (attempt) => {

@@ -13,10 +13,10 @@ import { Router } from '@angular/router';
       <header class="topbar">
         <div class="topbar-left">
           <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
-          <img priority ngSrc="/simulaaws-logo.svg" alt="SimulaAWS" class="logo" height="96" width="360">
+          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="96" width="360">
         </div>
         <div class="topbar-right">
-          <span class="user-name">{{ authFacade.currentUser?.name }}</span>
+          <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
           <button class="logout-btn" (click)="logout()">Sair</button>
         </div>
       </header>
@@ -36,10 +36,12 @@ import { Router } from '@angular/router';
               <span class="nav-icon">📈</span>
               <span class="nav-label">Estatísticas</span>
             </a>
-            <a *ngIf="authFacade.isAdmin" routerLink="/admin" routerLinkActive="active" class="nav-item">
-              <span class="nav-icon">⚙️</span>
-              <span class="nav-label">Admin</span>
-            </a>
+            @if (authFacade.isAdmin()) {
+              <a routerLink="/admin" routerLinkActive="active" class="nav-item">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-label">Admin</span>
+              </a>
+            }
           </nav>
         </aside>
 

@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, UserResponse, ChangePasswordRequest } from './domain';
 import { API_CONFIG, ApiConfig } from './config/api.config';
@@ -21,9 +21,14 @@ export class AuthApiService {
     return this.http.post<AuthResponse>(`${this.baseUrl}/login`, request);
   }
 
-  register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.baseUrl}/register`, request);
+  register(request: RegisterRequest): Observable<HttpResponse<void>> {
+    return this.http.post<void>(
+      `${this.baseUrl}/register`,
+      request,
+      { observe: 'response' }
+    );
   }
+
 
   getUserById(userId: string): Observable<UserResponse> {
     return this.http.get<UserResponse>(`${this.baseUrl}/users/${userId}`);

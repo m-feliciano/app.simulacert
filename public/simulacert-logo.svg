@@ -37,12 +37,10 @@
     font-size="32"
     font-weight="600"
     fill="#E5E7EB"
-  >
-    Simula
-    <tspan
+  >Simula<tspan
       dx="6"
       fill="#FF9900"
       font-weight="700"
-    >AWS</tspan>
+    >Cert</tspan>
   </text>
 </svg>
