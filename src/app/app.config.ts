@@ -4,10 +4,23 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { ErrorInterceptor } from './core/interceptors/error.interceptor';
-import { API_CONFIG } from './api/config/api.config';
+import { API_CONFIG, ApiConfig } from './api/config/api.config';
 import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
+
+declare global {
+  interface Window {
+    __env?: {
+      API_BASE_URL?: string;
+    };
+  }
+}
+
+function getApiConfig(): ApiConfig {
+  const baseUrl = window.__env?.API_BASE_URL || environment.apiConfig.baseUrl;
+  return { baseUrl };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -16,6 +29,6 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptorsFromDi()),
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
-    { provide: API_CONFIG, useValue: environment.apiConfig }
+    { provide: API_CONFIG, useFactory: getApiConfig }
   ]
 };
