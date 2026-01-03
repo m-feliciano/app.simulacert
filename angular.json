@@ -7,7 +7,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "simulaaws": {
+    "simulacert": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -72,10 +72,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "simulaaws:build:production"
+              "buildTarget": "simulacert:build:production"
             },
             "development": {
-              "buildTarget": "simulaaws:build:development"
+              "buildTarget": "simulacert:build:development"
             }
           },
           "defaultConfiguration": "development"

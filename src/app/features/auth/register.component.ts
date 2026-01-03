@@ -12,7 +12,7 @@ import {AuthFacade} from '../../core/auth/auth.facade';
   template: `
     <div class="auth-card">
       <div class="logo-container">
-        <img ngSrc="/simulaaws-logo.svg" priority alt="SimulaAWS" class="auth-logo" height="96" width="360">
+        <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360">
       </div>
 
       <h2>Registrar</h2>

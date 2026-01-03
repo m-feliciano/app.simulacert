@@ -11,7 +11,7 @@ import { CommonModule } from '@angular/common';
     <div class="attempt-layout">
       <header class="attempt-topbar">
         <div class="attempt-topbar-left">
-          <h1 class="logo">SimulaAWS</h1>
+          <h1 class="logo">simulacert</h1>
           <span class="exam-title">{{ examTitle }}</span>
         </div>
         <div class="attempt-topbar-right">
