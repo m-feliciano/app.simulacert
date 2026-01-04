@@ -43,7 +43,11 @@
                   "maximumError": "8kB"
                 }
               ],
+              "optimization": true,
               "outputHashing": "all",
+              "sourceMap": false,
+              "extractLicenses": true,
+              "namedChunks": false,
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
