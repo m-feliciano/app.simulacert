@@ -40,5 +40,9 @@ export class ExamsApiService {
   examExists(examId: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.baseUrl}/${examId}/exists`);
   }
+
+  importFromDirectory(): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/import/directory`, {});
+  }
 }
 

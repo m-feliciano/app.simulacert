@@ -31,7 +31,14 @@ import { ExamResponse } from '../../api/domain';
       @if (activeTab() === 'exams') {
         <div class="tab-content">
           <div class="section">
-            <h2>Criar Novo Exame</h2>
+            <div class="section-header">
+              <h2>Criar Novo Exame</h2>
+              <button type="button" class="btn-import"
+                      (click)="importExamsFromDirectory()"
+                      [disabled]="loadingImport()">
+                {{ loadingImport() ? 'Importando...' : '📁 Importar em Lote' }}
+              </button>
+            </div>
             <form [formGroup]="examForm" (ngSubmit)="createExam()">
               <div class="form-group">
                 <label>Título</label>
@@ -190,6 +197,17 @@ import { ExamResponse } from '../../api/domain';
       margin-bottom: 30px;
     }
 
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+    }
+
     .form-group {
       margin-bottom: 20px;
     }
@@ -271,7 +289,7 @@ import { ExamResponse } from '../../api/domain';
       line-height: 1;
     }
 
-    .btn-primary, .btn-secondary, .btn-danger {
+    .btn-primary, .btn-secondary, .btn-danger, .btn-import {
       padding: 12px 24px;
       border: none;
       border-radius: 4px;
@@ -312,6 +330,20 @@ import { ExamResponse } from '../../api/domain';
       background: #a82a0f;
     }
 
+    .btn-import {
+      background: #232f3e;
+      color: white;
+    }
+
+    .btn-import:hover:not(:disabled) {
+      background: #37475a;
+    }
+
+    .btn-import:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .exams-list {
       display: flex;
       flex-direction: column;
@@ -346,6 +378,7 @@ export class AdminComponent implements OnInit {
   questionOptions = signal<Array<{ key: string; text: string; isCorrect: boolean }>>([]);
   loadingExam = signal(false);
   loadingQuestion = signal(false);
+  loadingImport = signal(false);
 
   constructor(
     private fb: FormBuilder,
@@ -452,6 +485,29 @@ export class AdminComponent implements OnInit {
 
   removeOption(index: number): void {
     this.questionOptions.update(options => options.filter((_, i) => i !== index));
+  }
+
+  importExamsFromDirectory(): void {
+    this.loadingImport.set(true);
+    this.showToast('Importação iniciada! Processando arquivos do diretório...', 'info');
+
+    this.examsApi.importFromDirectory().subscribe({
+      next: () => {
+        this.loadingImport.set(false);
+        this.showToast('Importação concluída com sucesso!', 'success');
+        this.loadExams();
+      },
+      error: (error) => {
+        console.error('Error importing exams:', error);
+        this.loadingImport.set(false);
+        this.showToast('Erro ao importar exames. Verifique o console para mais detalhes.', 'error');
+      }
+    });
+  }
+
+  private showToast(message: string, type: 'success' | 'error' | 'info'): void {
+    console.log(`[${type.toUpperCase()}] ${message}`);
+    alert(message);
   }
 }
 
