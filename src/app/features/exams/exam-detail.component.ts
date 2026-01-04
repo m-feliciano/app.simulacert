@@ -332,8 +332,8 @@ export class ExamDetailComponent implements OnInit {
   loading = signal(false);
   loadingExam = signal(false);
   errorMessage = signal('');
-  questionCount = signal(50);
-  questionCountOptions = [10, 20, 30, 40, 50];
+  questionCount = signal(20);
+  questionCountOptions = [10, 20, 30, 40, 50, 100];
 
   duration = computed(() => Math.round(this.questionCount() * 2));
 
