@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ExamsApiService } from '../../api/exams.service';
 import { QuestionsApiService } from '../../api/questions.service';
-import { ExamResponse } from '../../api/domain';
+import { AuthApiService } from '../../api/auth.service';
+import { ExamResponse, UserResponse } from '../../api/domain';
 
 @Component({
   selector: 'app-admin',
@@ -25,6 +26,12 @@ import { ExamResponse } from '../../api/domain';
           [class.active]="activeTab() === 'questions'"
           (click)="activeTab.set('questions')">
           Questões
+        </button>
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === 'users'"
+          (click)="activeTab.set('users')">
+          Usuários
         </button>
       </div>
 
@@ -133,6 +140,55 @@ import { ExamResponse } from '../../api/domain';
                 {{ loadingQuestion() ? 'Criando...' : 'Criar Questão' }}
               </button>
             </form>
+          </div>
+        </div>
+      }
+
+      @if (activeTab() === 'users') {
+        <div class="tab-content">
+          <div class="section">
+            <h2>Gerenciar Usuários</h2>
+
+            <div class="search-user">
+              <input
+                type="email"
+                [value]="searchEmail()"
+                (input)="searchEmail.set($any($event.target).value)"
+                placeholder="Digite o email do usuário"
+                class="form-control" />
+              <button
+                type="button"
+                class="btn-primary"
+                (click)="searchUserByEmail()"
+                [disabled]="loadingUser() || !searchEmail()">
+                {{ loadingUser() ? 'Buscando...' : '🔍 Buscar' }}
+              </button>
+            </div>
+
+            @if (foundUser()) {
+              <div class="user-card">
+                <div class="user-info">
+                  <h3>{{ foundUser()!.name }}</h3>
+                  <p><strong>Email:</strong> {{ foundUser()!.email }}</p>
+                  <p><strong>Função:</strong> {{ foundUser()!.role }}</p>
+                  <p><strong>Cadastro:</strong> {{ foundUser()!.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                  <div class="user-status">
+                    <span [class.status-active]="foundUser()!.active" [class.status-inactive]="!foundUser()!.active">
+                      {{ foundUser()!.active ? '✓ Ativo' : '✗ Inativo' }}
+                    </span>
+                  </div>
+                </div>
+                <div class="user-actions">
+                  <button
+                    [class.btn-danger]="foundUser()!.active"
+                    [class.btn-success]="!foundUser()!.active"
+                    (click)="toggleUserStatus(foundUser()!)"
+                    [disabled]="loadingUser()">
+                    {{ foundUser()!.active ? 'Desativar' : 'Ativar' }}
+                  </button>
+                </div>
+              </div>
+            }
           </div>
         </div>
       }
@@ -368,10 +424,75 @@ import { ExamResponse } from '../../api/domain';
       color: #666;
       font-size: 14px;
     }
+
+    .search-user {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+
+    .search-user .form-control {
+      flex: 1;
+    }
+
+    .user-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 25px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+
+    .user-info h3 {
+      margin: 0 0 10px;
+      color: #232f3e;
+    }
+
+    .user-info p {
+      margin: 5px 0;
+      color: #666;
+    }
+
+    .user-status {
+      margin-top: 10px;
+    }
+
+    .status-active, .status-inactive {
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-inactive {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #218838;
+    }
+
+    .btn-success:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
   `]
 })
 export class AdminComponent implements OnInit {
-  activeTab = signal<'exams' | 'questions'>('exams');
+  activeTab = signal<'exams' | 'questions' | 'users'>('exams');
   exams = signal<ExamResponse[]>([]);
   examForm: FormGroup;
   questionForm: FormGroup;
@@ -379,11 +500,15 @@ export class AdminComponent implements OnInit {
   loadingExam = signal(false);
   loadingQuestion = signal(false);
   loadingImport = signal(false);
+  searchEmail = signal('');
+  foundUser = signal<UserResponse | null>(null);
+  loadingUser = signal(false);
 
   constructor(
     private fb: FormBuilder,
     private examsApi: ExamsApiService,
-    private questionsApi: QuestionsApiService
+    private questionsApi: QuestionsApiService,
+    private authApi: AuthApiService
   ) {
     this.examForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
@@ -501,6 +626,52 @@ export class AdminComponent implements OnInit {
         console.error('Error importing exams:', error);
         this.loadingImport.set(false);
         this.showToast('Erro ao importar exames. Verifique o console para mais detalhes.', 'error');
+      }
+    });
+  }
+
+  searchUserByEmail(): void {
+    const email = this.searchEmail().trim();
+    if (!email) {
+      this.showToast('Digite um email válido', 'error');
+      return;
+    }
+
+    this.loadingUser.set(true);
+    this.authApi.getUserByEmail(email).subscribe({
+      next: (user) => {
+        this.foundUser.set(user);
+        this.loadingUser.set(false);
+      },
+      error: (error) => {
+        console.error('Error searching user:', error);
+        this.foundUser.set(null);
+        this.loadingUser.set(false);
+        this.showToast('Usuário não encontrado', 'error');
+      }
+    });
+  }
+
+  toggleUserStatus(user: UserResponse): void {
+    const action = user.active ? 'desativar' : 'ativar';
+    if (!confirm(`Tem certeza que deseja ${action} este usuário?`)) {
+      return;
+    }
+
+    this.loadingUser.set(true);
+    const request = user.active
+      ? this.authApi.deactivateUser(user.id)
+      : this.authApi.activateUser(user.id);
+
+    request.subscribe({
+      next: () => {
+        this.searchUserByEmail();
+        this.showToast(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+      },
+      error: (error) => {
+        console.error(`Error ${action}ing user:`, error);
+        this.loadingUser.set(false);
+        this.showToast(`Erro ao ${action} usuário`, 'error');
       }
     });
   }
