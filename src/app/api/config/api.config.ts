@@ -5,8 +5,3 @@ export interface ApiConfig {
 }
 
 export const API_CONFIG = new InjectionToken<ApiConfig>('api.config');
-
-export const DEFAULT_API_CONFIG: ApiConfig = {
-  baseUrl: ''
-};
-
