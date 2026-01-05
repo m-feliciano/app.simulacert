@@ -1,13 +1,18 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { AttemptQuestionsApiService } from '../../api/attempt-questions.service';
+import { AttemptsApiService } from '../../api/attempts.service';
+import { ExamsApiService } from '../../api/exams.service';
 import { AttemptQuestionResponse } from '../../api/domain/attempt-question.model';
+import { AttemptResponse, ExamResponse } from '../../api/domain';
+import { QuestionExplanationComponent } from '../../shared/components/question-explanation.component';
 
 @Component({
   selector: 'app-attempt-questions-result',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, QuestionExplanationComponent],
   styleUrls: ['./attempt-questions-result.component.css'],
   template: `
     <div class="attempt-questions-result">
@@ -41,6 +46,14 @@ import { AttemptQuestionResponse } from '../../api/domain/attempt-question.model
                   </li>
                 }
               </ul>
+
+              @if (attempt() && exam()) {
+                <app-question-explanation
+                  [questionId]="q.questionId"
+                  [attemptId]="attempt()!.id"
+                  [certification]="exam()!.title">
+                </app-question-explanation>
+              }
             </div>
           }
         } @else {
@@ -52,20 +65,37 @@ import { AttemptQuestionResponse } from '../../api/domain/attempt-question.model
 })
 export class AttemptQuestionsResultComponent implements OnInit {
   questions = signal<AttemptQuestionResponse[]>([]);
+  attempt = signal<AttemptResponse | null>(null);
+  exam = signal<ExamResponse | null>(null);
   loading = signal(true);
 
   constructor(
     protected route: ActivatedRoute,
-    private api: AttemptQuestionsApiService
+    private api: AttemptQuestionsApiService,
+    private attemptsApi: AttemptsApiService,
+    private examsApi: ExamsApiService
   ) {}
 
   ngOnInit(): void {
     const attemptId = this.route.snapshot.paramMap.get('id');
     if (attemptId) {
-      this.api.getAttemptQuestions(attemptId).subscribe({
-        next: (questions) => {
+      forkJoin({
+        questions: this.api.getAttemptQuestions(attemptId),
+        attempt: this.attemptsApi.getAttempt(attemptId)
+      }).subscribe({
+        next: ({ questions, attempt }) => {
           this.questions.set(questions);
-          this.loading.set(false);
+          this.attempt.set(attempt);
+
+          this.examsApi.getExam(attempt.examId).subscribe({
+            next: (exam) => {
+              this.exam.set(exam);
+              this.loading.set(false);
+            },
+            error: () => {
+              this.loading.set(false);
+            }
+          });
         },
         error: () => {
           this.loading.set(false);
