@@ -44,5 +44,9 @@ export class AttemptsApiService {
   finishAttempt(attemptId: string): Observable<AttemptResponse> {
     return this.http.post<AttemptResponse>(`${this.baseUrl}/${attemptId}/finish`, {});
   }
+
+  cancelAttempt(attemptId: string): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${attemptId}/cancel`, {});
+  }
 }
 

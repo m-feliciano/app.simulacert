@@ -126,7 +126,7 @@ import {interval, Subscription} from 'rxjs';
         <div class="finish-modal" (click)="showExitModal.set(false)">
           <div class="modal-content" (click)="$event.stopPropagation()">
             <h3>⚠️ Sair do Exame?</h3>
-            <p>Seu progresso foi salvo, mas o cronômetro continuará rodando.</p>
+            <p>Seu progresso será perdido se você sair agora.</p>
             <p><strong>Tem certeza que deseja sair?</strong></p>
             <div class="modal-actions">
               <button class="btn-secondary" (click)="showExitModal.set(false)">Cancelar</button>
@@ -462,7 +462,14 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   exitAttempt(): void {
-    this.saveLocalProgress();
+    this.clearLocalProgress();
+
+    this.attemptsApi.cancelAttempt(this.attemptId).subscribe({
+      error: (error) => {
+        console.error('Error cancelling attempt:', error);
+      }
+    });
+
     this.timerSubscription?.unsubscribe();
     this.router.navigate(['/dashboard']);
   }
