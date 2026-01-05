@@ -3,12 +3,13 @@ import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
-import {AttemptResponse, ExamResponse} from '../../api/domain';
+import {AttemptResponse, ExamResponse, AttemptStatus} from '../../api/domain';
+import {ReviewCardComponent} from '../../shared/components/review-card.component';
 
 @Component({
   selector: 'app-result',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ReviewCardComponent],
   template: `
     <div class="result-container">
       @if (loading()) {
@@ -29,6 +30,11 @@ import {AttemptResponse, ExamResponse} from '../../api/domain';
           <h1>Resultado do Exame</h1>
           <p class="exam-title">{{ exam()!.title }}</p>
         </div>
+
+        <app-review-card
+          [attemptId]="attempt()!.id"
+          [finalized]="isAttemptFinalized()">
+        </app-review-card>
 
         <div class="score-card" [class]="getColorClass()">
           <div class="score-label">Sua Pontuação</div>
@@ -235,6 +241,10 @@ export class ResultComponent implements OnInit {
   get isPassed(): boolean {
     const score = this.attempt()?.score || 0;
     return score >= 72;
+  }
+
+  isAttemptFinalized(): boolean {
+    return this.attempt()?.status === AttemptStatus.COMPLETED;
   }
 
   getColorClass(): string {
