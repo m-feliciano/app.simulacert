@@ -15,7 +15,7 @@ import { ExplanationResponse } from '../../api/domain';
           class="btn-explain"
           (click)="requestExplanation()"
           [disabled]="loading()">
-          {{ loading() ? 'Gerando explicação...' : '💡 Explique essa questão' }}
+          {{ loading() ? 'Gerando explicação...' : '💡 Explicar questão' }}
         </button>
       }
 
@@ -28,7 +28,7 @@ import { ExplanationResponse } from '../../api/domain';
       @if (showExplanation() && explanation()) {
         <div class="explanation-card">
           <div class="explanation-header">
-            <h4>Explicação da IA</h4>
+            <h4>Explicação da questão</h4>
             <button class="btn-close" (click)="closeExplanation()">✕</button>
           </div>
 
