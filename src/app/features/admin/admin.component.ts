@@ -49,7 +49,7 @@ import { ExamResponse, UserResponse } from '../../api/domain';
             <form [formGroup]="examForm" (ngSubmit)="createExam()">
               <div class="form-group">
                 <label>Título</label>
-                <input type="text" formControlName="title" class="form-control" />
+                <input type="text" formControlName="title" class="form-control"/>
               </div>
 
               <div class="form-group">
@@ -107,7 +107,7 @@ import { ExamResponse, UserResponse } from '../../api/domain';
               <div class="form-row">
                 <div class="form-group">
                   <label>Domínio AWS</label>
-                  <input type="text" formControlName="domain" class="form-control" />
+                  <input type="text" formControlName="domain" class="form-control"/>
                 </div>
 
                 <div class="form-group">
@@ -124,10 +124,12 @@ import { ExamResponse, UserResponse } from '../../api/domain';
                 <h3>Opções de Resposta</h3>
                 @for (option of questionOptions(); track $index) {
                   <div class="option-item">
-                    <input type="text" [(ngModel)]="option.key" [ngModelOptions]="{standalone: true}" placeholder="Chave (A, B, C, D)" class="option-key" />
-                    <input type="text" [(ngModel)]="option.text" [ngModelOptions]="{standalone: true}" placeholder="Texto da opção" class="option-text" />
+                    <input type="text" [(ngModel)]="option.key" [ngModelOptions]="{standalone: true}"
+                           placeholder="Chave (A, B, C, D)" class="option-key"/>
+                    <input type="text" [(ngModel)]="option.text" [ngModelOptions]="{standalone: true}"
+                           placeholder="Texto da opção" class="option-text"/>
                     <label class="option-correct">
-                      <input type="checkbox" [(ngModel)]="option.isCorrect" [ngModelOptions]="{standalone: true}" />
+                      <input type="checkbox" [(ngModel)]="option.isCorrect" [ngModelOptions]="{standalone: true}"/>
                       Correta
                     </label>
                     <button type="button" class="btn-remove" (click)="removeOption($index)">×</button>
@@ -155,7 +157,7 @@ import { ExamResponse, UserResponse } from '../../api/domain';
                 [value]="searchEmail()"
                 (input)="searchEmail.set($any($event.target).value)"
                 placeholder="Digite o email do usuário"
-                class="form-control" />
+                class="form-control"/>
               <button
                 type="button"
                 class="btn-primary"
@@ -187,6 +189,35 @@ import { ExamResponse, UserResponse } from '../../api/domain';
                     {{ foundUser()!.active ? 'Desativar' : 'Ativar' }}
                   </button>
                 </div>
+              </div>
+            } @else {
+              <div class="users-list">
+                @for (user of users(); track user.id) {
+                  <div class="user-card">
+                    <div class="user-info">
+                      <h3>{{ user.name }}</h3>
+                      <p><strong>Email:</strong> {{ user.email }}</p>
+                      <p><strong>Função:</strong> {{ user.role }}</p>
+                      <p><strong>Cadastro:</strong> {{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+
+                      <div class="user-status">
+                        <span [class.status-active]="user.active" [class.status-inactive]="!user.active">
+                          {{ user.active ? '✓ Ativo' : '✗ Inativo' }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div class="user-actions">
+                      <button
+                        [class.btn-danger]="user.active"
+                        [class.btn-success]="!user.active"
+                        (click)="toggleUserStatus(user)"
+                        [disabled]="loadingUser()">
+                        {{ user.active ? 'Desativar' : 'Ativar' }}
+                      </button>
+                    </div>
+                  </div>
+                }
               </div>
             }
           </div>
@@ -494,15 +525,19 @@ import { ExamResponse, UserResponse } from '../../api/domain';
 export class AdminComponent implements OnInit {
   activeTab = signal<'exams' | 'questions' | 'users'>('exams');
   exams = signal<ExamResponse[]>([]);
+
   examForm: FormGroup;
   questionForm: FormGroup;
+
   questionOptions = signal<Array<{ key: string; text: string; isCorrect: boolean }>>([]);
   loadingExam = signal(false);
   loadingQuestion = signal(false);
   loadingImport = signal(false);
   searchEmail = signal('');
-  foundUser = signal<UserResponse | null>(null);
   loadingUser = signal(false);
+
+  foundUser = signal<UserResponse | null>(null);
+  users = signal<UserResponse[]>([]);
 
   constructor(
     private fb: FormBuilder,
@@ -522,7 +557,6 @@ export class AdminComponent implements OnInit {
       difficulty: ['MEDIUM', Validators.required]
     });
 
-    // Inicializar com 4 opções vazias
     this.questionOptions.set([
       { key: '', text: '', isCorrect: false },
       { key: '', text: '', isCorrect: false },
@@ -533,6 +567,7 @@ export class AdminComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadExams();
+    this.loadUsers();
   }
 
   loadExams(): void {
@@ -630,6 +665,21 @@ export class AdminComponent implements OnInit {
     });
   }
 
+  loadUsers(email?: string): void {
+    this.loadingUser.set(true);
+    this.authApi.getUsers(email).subscribe({
+      next: (users) => {
+        this.users.set(users);
+        this.loadingUser.set(false);
+      },
+      error: (error) => {
+        console.error('Erro ao buscar usuários:', error);
+        this.users.set([]);
+        this.loadingUser.set(false);
+      }
+    });
+  }
+
   searchUserByEmail(): void {
     const email = this.searchEmail().trim();
     if (!email) {
@@ -638,6 +688,7 @@ export class AdminComponent implements OnInit {
     }
 
     this.loadingUser.set(true);
+
     this.authApi.getUserByEmail(email).subscribe({
       next: (user) => {
         this.foundUser.set(user);

@@ -56,5 +56,12 @@ export class AuthApiService {
   getCurrentUser() {
     return this.http.get<UserResponse>(`${this.baseUrl}/me`);
   }
-}
 
+  getUsers(email?: string): Observable<UserResponse[]> {
+    let url = `${this.baseUrl}/users`;
+    if (email) {
+      url += `?email=${encodeURIComponent(email)}`;
+    }
+    return this.http.get<UserResponse[]>(url);
+  }
+}
