@@ -1,8 +1,9 @@
-import {Component, signal} from '@angular/core';
+import {Component, Inject, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthFacade } from '../../core/auth/auth.facade';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {Router, RouterLink} from '@angular/router';
+import {AuthFacade} from '../../core/auth/auth.facade';
+import {API_CONFIG, ApiConfig} from '../../api/config/api.config';
 
 @Component({
   selector: 'app-login',
@@ -14,7 +15,40 @@ import { AuthFacade } from '../../core/auth/auth.facade';
       <div class="logo-container">
         <img ngSrc="/simulacert-logo.svg" alt="simulacert" class="auth-logo" height="96" width="360">
       </div>
-      <h2>Login</h2>
+
+      <p class="tagline">Prepare-se para certificações AWS, Azure e GCP</p>
+
+      <div class="value-props">
+        <div class="prop">✓ Simulados atualizados</div>
+        <div class="prop">✓ Análise de desempenho</div>
+        <div class="prop">✓ Acesso ilimitado</div>
+      </div>
+
+      <h2>Faça login</h2>
+
+      <button type="button"
+              class="btn-google"
+              (click)="loginWithGoogle()"
+              [disabled]="loadingGoogle()">
+
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4"
+                d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
+          <path fill="#34A853"
+                d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
+          <path fill="#FBBC05"
+                d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.348 2.825.957 4.039l3.007-2.332z"/>
+          <path fill="#EA4335"
+                d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
+        </svg>
+
+        {{ loadingGoogle() ? 'Conectando...' : 'Continuar com Google' }}
+      </button>
+
+      <div class="divider">
+        <span>ou</span>
+      </div>
+
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
         <div class="form-group">
           <label>Email</label>
@@ -36,6 +70,10 @@ import { AuthFacade } from '../../core/auth/auth.facade';
               Senha é obrigatória
             </div>
           }
+
+          <div class="forgot-password-link">
+            <a routerLink="/forgot-password">Esqueci minha senha</a>
+          </div>
         </div>
 
         @if (errorMessage()) {
@@ -50,7 +88,8 @@ import { AuthFacade } from '../../core/auth/auth.facade';
       </form>
 
       <div class="auth-footer">
-        <p>Não tem uma conta? <a routerLink="/register">Registre-se</a></p>
+        <p class="cta-secondary">Novo aqui? <a routerLink="/register">Crie sua conta grátis</a></p>
+        <p class="link-secondary"><a routerLink="/how-it-works">Como funciona?</a></p>
       </div>
     </div>
   `
@@ -58,17 +97,29 @@ import { AuthFacade } from '../../core/auth/auth.facade';
 export class LoginComponent {
   loginForm: FormGroup;
   loading = signal(false);
+  loadingGoogle = signal(false);
   errorMessage = signal('');
+
+  private readonly baseUrl: string;
 
   constructor(
     private fb: FormBuilder,
     private authFacade: AuthFacade,
-    private router: Router
+    private router: Router,
+    @Inject(API_CONFIG) private config: ApiConfig
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+    this.baseUrl = this.config.baseUrl;
+  }
+
+  loginWithGoogle(): void {
+    this.loadingGoogle.set(true);
+    this.errorMessage.set('');
+
+    window.location.href = this.baseUrl + '/api/v1/auth/oauth/google';
   }
 
   onSubmit(): void {

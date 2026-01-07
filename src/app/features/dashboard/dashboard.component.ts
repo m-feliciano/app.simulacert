@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
-import { AuthFacade } from '../../core/auth/auth.facade';
-import { AttemptsApiService } from '../../api/attempts.service';
-import { StatsApiService } from '../../api/stats.service';
-import { AttemptResponse, UserStatsDto } from '../../api/domain';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {RouterLink} from '@angular/router';
+import {AuthFacade} from '../../core/auth/auth.facade';
+import {AttemptsApiService} from '../../api/attempts.service';
+import {StatsApiService} from '../../api/stats.service';
+import {AttemptResponse, UserStatsDto} from '../../api/domain';
 
 @Component({
   selector: 'app-dashboard',
@@ -12,63 +12,94 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="dashboard">
-      <h1>Dashboard</h1>
+      @if (isFirstAccess()) {
+        <!-- Empty State para primeiro acesso -->
+        <div class="welcome-state">
+          <div class="welcome-icon">🎯</div>
+          <h1>Bem-vindo ao simulacert!</h1>
+          <p class="welcome-intro">Escolha uma certificação e comece seu primeiro simulado agora</p>
 
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
-          <div class="stat-label">Total de Tentativas</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
-          <div class="stat-label">Tentativas Completas</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-value">{{ stats()?.averageScore?.toFixed(1) || 0 }}%</div>
-          <div class="stat-label">Média de Pontuação</div>
-        </div>
-
-        <div class="stat-card">
-          <div class="stat-value">{{ stats()?.bestScore || 0 }}%</div>
-          <div class="stat-label">Melhor Pontuação</div>
-        </div>
-      </div>
-
-      <div class="section">
-        <h2>Tentativas Recentes</h2>
-        @if (recentAttempts().length > 0) {
-          <div class="attempts-list">
-            @for (attempt of recentAttempts(); track attempt.id) {
-              <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']">
-                <div class="attempt-info">
-                  <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
-                  <div class="attempt-status" [class]="attempt.status.toLowerCase()">
-                    {{ formatStatus(attempt.status) }}
-                  </div>
-                </div>
-                @if (attempt.score) {
-                  <div class="attempt-score"
-                       [ngClass]="{'green': attempt.score >= 75,
-                                    'red': attempt.score < 40,
-                                    'yellow': attempt.score >= 40 && attempt.score <= 74}
-                                ">
-                    {{ attempt.score }}%
-                  </div>
-                }
-              </a>
-            }
+          <div class="quick-actions">
+            <a routerLink="/exams" class="btn-primary-large">
+              Iniciar Primeiro Simulado
+            </a>
+            <p class="helper-text">Escolha entre AWS, Azure, GCP e outras certificações</p>
           </div>
-        } @else {
-          <p class="empty-message">Nenhuma tentativa ainda</p>
-        }
-      </div>
+        </div>
+      } @else {
+        <!-- Dashboard normal com estatísticas -->
+        <h1>Bem-vindo de volta!</h1>
 
-      <div class="actions">
-        <a routerLink="/exams" class="btn-primary">Ver Exames</a>
-        <a routerLink="/stats" class="btn-secondary">Ver Estatísticas Completas</a>
-      </div>
+        <!-- Recomendações Inteligentes -->
+        @if (showRecommendations()) {
+          <div class="recommendations-section">
+            <div class="recommendation-card">
+              <div class="recommendation-icon">💡</div>
+              <div class="recommendation-content">
+                <h3>Recomendação para você</h3>
+                <p>{{ recommendation() }}</p>
+                <a [routerLink]="recommendationLink()" class="btn-recommendation">
+                  {{ recommendationCTA() }}
+                </a>
+              </div>
+            </div>
+          </div>
+        }
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
+            <div class="stat-label">Total de Tentativas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
+            <div class="stat-label">Tentativas Completas</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-value">{{ stats()?.averageScore?.toFixed(1) || 0 }}%</div>
+            <div class="stat-label">Média de Pontuação</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-value">{{ stats()?.bestScore || 0 }}%</div>
+            <div class="stat-label">Melhor Pontuação</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h2>Tentativas Recentes</h2>
+          @if (recentAttempts().length > 0) {
+            <div class="attempts-list">
+              @for (attempt of recentAttempts(); track attempt.id) {
+                <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']">
+                  <div class="attempt-info">
+                    <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
+                    <div class="attempt-status" [class]="attempt.status.toLowerCase()">
+                      {{ formatStatus(attempt.status) }}
+                    </div>
+                  </div>
+                  @if (attempt.score) {
+                    <div class="attempt-score"
+                         [ngClass]="{'green': attempt.score >= 75,
+                                      'red': attempt.score < 40,
+                                      'yellow': attempt.score >= 40 && attempt.score <= 74}
+                                  ">
+                      {{ attempt.score }}%
+                    </div>
+                  }
+                </a>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="actions">
+          <a routerLink="/exams" class="btn-primary">Fazer Novo Simulado</a>
+          <a routerLink="/stats" class="btn-secondary">Ver Estatísticas Completas</a>
+        </div>
+      }
     </div>
   `,
   styles: [`
@@ -77,6 +108,102 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
       margin: 0 auto;
     }
 
+    /* Welcome State (Empty State) */
+    .welcome-state {
+      text-align: center;
+      padding: var(--spacing-xxl) var(--spacing-lg);
+      background: var(--color-bg-secondary);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-sm);
+      max-width: 600px;
+      margin: var(--spacing-xxl) auto;
+    }
+
+    .welcome-icon {
+      font-size: 64px;
+      margin-bottom: var(--spacing-lg);
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .welcome-icon {
+        animation: none;
+      }
+    }
+
+    .welcome-state h1 {
+      margin: 0 0 var(--spacing-md);
+      color: var(--color-dark);
+      font-size: 28px;
+    }
+
+    @media (min-width: 768px) {
+      .welcome-state h1 {
+        font-size: 32px;
+      }
+    }
+
+    .welcome-intro {
+      color: var(--color-text-secondary);
+      font-size: 16px;
+      line-height: 1.6;
+      margin: 0 0 var(--spacing-xl);
+    }
+
+    @media (min-width: 768px) {
+      .welcome-intro {
+        font-size: 18px;
+      }
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-md);
+      align-items: center;
+    }
+
+    .btn-primary-large {
+      display: inline-block;
+      padding: 16px 32px;
+      background: var(--color-primary);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--border-radius-sm);
+      font-size: 18px;
+      font-weight: 600;
+      transition: var(--transition-fast);
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-primary-large:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-primary-large:hover {
+        transform: none;
+      }
+    }
+
+    .helper-text {
+      color: var(--color-text-light);
+      font-size: 14px;
+      margin: 0;
+    }
+
+    /* Normal Dashboard Styles */
     h1 {
       margin: 0 0 var(--spacing-xl);
       color: var(--color-dark);
@@ -86,6 +213,74 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
     @media (min-width: 768px) {
       h1 {
         font-size: 32px;
+      }
+    }
+
+    /* Recommendations Section */
+    .recommendations-section {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .recommendation-card {
+      background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+      padding: var(--spacing-xl);
+      border-radius: var(--border-radius-md);
+      box-shadow: var(--shadow-md);
+      display: flex;
+      gap: var(--spacing-lg);
+      align-items: center;
+      color: white;
+    }
+
+    .recommendation-icon {
+      font-size: 48px;
+      flex-shrink: 0;
+    }
+
+    .recommendation-content {
+      flex: 1;
+    }
+
+    .recommendation-content h3 {
+      margin: 0 0 var(--spacing-sm);
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .recommendation-content p {
+      margin: 0 0 var(--spacing-md);
+      font-size: 15px;
+      line-height: 1.5;
+      opacity: 0.95;
+    }
+
+    .btn-recommendation {
+      display: inline-block;
+      padding: 10px 20px;
+      background: white;
+      color: #357abd;
+      text-decoration: none;
+      border-radius: var(--border-radius-sm);
+      font-weight: 600;
+      font-size: 14px;
+      transition: var(--transition-fast);
+    }
+
+    .btn-recommendation:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .btn-recommendation:hover {
+        transform: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .recommendation-card {
+        flex-direction: column;
+        text-align: center;
       }
     }
 
@@ -348,6 +543,11 @@ import { AttemptResponse, UserStatsDto } from '../../api/domain';
 export class DashboardComponent implements OnInit {
   stats = signal<UserStatsDto | null>(null);
   recentAttempts = signal<AttemptResponse[]>([]);
+  isFirstAccess = signal<boolean>(true);
+  showRecommendations = signal<boolean>(false);
+  recommendation = signal<string>('');
+  recommendationCTA = signal<string>('');
+  recommendationLink = signal<string>('/exams');
 
   constructor(
     private authFacade: AuthFacade,
@@ -367,6 +567,12 @@ export class DashboardComponent implements OnInit {
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
         this.stats.set(stats);
+
+        this.isFirstAccess.set(!stats.totalAttempts || stats.totalAttempts === 0);
+
+        if (!this.isFirstAccess()) {
+          this.generateRecommendations(stats);
+        }
       },
       error: (error) => {
         console.error('Error loading stats:', error);
@@ -374,11 +580,60 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  generateRecommendations(stats: UserStatsDto): void {
+    const avgScore = stats.averageScore || 0;
+    const totalAttempts = stats.totalAttempts || 0;
+    const completedAttempts = stats.completedAttempts || 0;
+
+    // Recomendação baseada na média de pontuação
+    if (avgScore < 50) {
+      this.showRecommendations.set(true);
+      this.recommendation.set('Sua média está abaixo de 50%. Que tal revisar os conceitos básicos antes de fazer mais simulados?');
+      this.recommendationCTA.set('Ver Estatísticas Detalhadas');
+      this.recommendationLink.set('/stats');
+
+    } else if (avgScore >= 50 && avgScore < 70) {
+      this.showRecommendations.set(true);
+      this.recommendation.set('Você está progredindo bem! Continue praticando para alcançar a nota de aprovação (70%).');
+      this.recommendationCTA.set('Fazer Novo Simulado');
+      this.recommendationLink.set('/exams');
+
+    } else if (avgScore >= 70 && avgScore < 85) {
+      this.showRecommendations.set(true);
+      this.recommendation.set('Excelente! Você está acima da nota de aprovação. Continue praticando para consolidar seu conhecimento.');
+      this.recommendationCTA.set('Fazer Novo Simulado');
+      this.recommendationLink.set('/exams');
+
+    } else if (avgScore >= 85) {
+      this.showRecommendations.set(true);
+      this.recommendation.set('Parabéns! Sua média é excelente. Você está pronto para o exame real!');
+      this.recommendationCTA.set('Ver Conquistas');
+      this.recommendationLink.set('/achievements');
+    }
+
+    // Recomendação baseada em quantidade de simulados
+    if (totalAttempts < 5) {
+      this.showRecommendations.set(true);
+      this.recommendation.set('Complete mais simulados para ter uma visão melhor do seu desempenho e identificar pontos de melhoria.');
+      this.recommendationCTA.set('Fazer Novo Simulado');
+      this.recommendationLink.set('/exams');
+    }
+
+    // Recomendação para simulados incompletos
+    if (completedAttempts < totalAttempts && (totalAttempts - completedAttempts) >= 3) {
+      this.showRecommendations.set(true);
+      this.recommendation.set(`Você tem ${totalAttempts - completedAttempts} simulados incompletos. Termine-os para ter estatísticas mais precisas.`);
+      this.recommendationCTA.set('Ver Tentativas');
+      this.recommendationLink.set('/stats');
+    }
+  }
+
   loadRecentAttempts(userId: string): void {
     this.attemptsApi.getAttemptsByUser(userId).subscribe({
       next: (attempts) => {
         const sorted = attempts
-          .sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
+          .sort((a, b) =>
+            new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
           .slice(0, 5);
         this.recentAttempts.set(sorted);
       },
@@ -402,7 +657,7 @@ export class DashboardComponent implements OnInit {
     const statusMap: { [key: string]: string } = {
       'IN_PROGRESS': 'Em Andamento',
       'COMPLETED': 'Concluído',
-      'ABANDONED': 'Abandonado'
+      'ABANDONED': 'Cancelado'
     };
     return statusMap[status] || status;
   }
