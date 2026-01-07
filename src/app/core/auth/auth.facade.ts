@@ -55,10 +55,12 @@ export class AuthFacade {
     localStorage.setItem(this.TOKEN_KEY, token);
 
     this.state.set({
-      user: null, // Será carregado depois
+      user: null,
       token: token,
       isAuthenticated: true
     });
+
+    this.loadCurrentUser();
   }
 
   logout(): void {
@@ -104,6 +106,21 @@ export class AuthFacade {
   private loadUserFromStorage(): UserResponse | null {
     const userJson = localStorage.getItem(this.USER_KEY);
     return userJson ? JSON.parse(userJson) : null;
+  }
+
+  private loadCurrentUser() {
+    this.authApi.getCurrentUser().subscribe({
+      next: user => {
+        this.state.update(s => ({
+          ...s,
+          user: user
+        }));
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      },
+      error: () => {
+        this.clearAuth();
+      }
+    });
   }
 }
 

@@ -52,5 +52,9 @@ export class AuthApiService {
   exchangeGoogleCode(code: string, state: string) {
     return this.http.post<AuthResponse>(`${this.baseUrl}/oauth/google/exchange`, {code, state});
   }
+
+  getCurrentUser() {
+    return this.http.get<UserResponse>(`${this.baseUrl}/me`);
+  }
 }
 
