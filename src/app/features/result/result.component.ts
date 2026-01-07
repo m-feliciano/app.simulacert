@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
-import {AttemptResponse, ExamResponse, AttemptStatus} from '../../api/domain';
+import {AttemptResponse, AttemptStatus, ExamResponse} from '../../api/domain';
 import {ReviewCardComponent} from '../../shared/components/review-card.component';
 
 @Component({
@@ -71,7 +71,11 @@ import {ReviewCardComponent} from '../../shared/components/review-card.component
           <a routerLink="/exams" class="btn-secondary">Ver Exames</a>
           <a routerLink="/stats" class="btn-primary">Ver Estatísticas</a>
           <a routerLink="/dashboard" class="btn-secondary">Dashboard</a>
-          <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-primary">Ver Questões</a>
+
+          @if (attempt()?.status == AttemptStatus.COMPLETED) {
+            <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-primary">Ver Questões</a>
+          }
+
         </div>
       }
     </div>
@@ -318,4 +322,6 @@ export class ResultComponent implements OnInit {
 
     return `${hours}h ${minutes}min`;
   }
+
+  protected readonly AttemptStatus = AttemptStatus;
 }

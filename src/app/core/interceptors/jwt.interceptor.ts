@@ -1,11 +1,17 @@
-import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthFacade } from '../auth/auth.facade';
+import {Injectable} from '@angular/core';
+import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {AuthFacade} from '../auth/auth.facade';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
-  private readonly publicUrls = ['/api/v1/auth/login', '/api/v1/auth/register'];
+
+  private readonly publicUrls = [
+    '/api/v1/auth/login',
+    '/api/v1/auth/register',
+    '/auth/oauth/google',
+    '/auth/oauth/google/callback'
+  ];
 
   constructor(private authFacade: AuthFacade) {}
 

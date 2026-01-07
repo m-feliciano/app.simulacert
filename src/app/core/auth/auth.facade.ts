@@ -50,8 +50,31 @@ export class AuthFacade {
     );
   }
 
+  handleOAuthCallback(token: string): void {
+    // O backend já retorna o token JWT pronto para uso
+    localStorage.setItem(this.TOKEN_KEY, token);
+
+    this.state.set({
+      user: null,
+      token: token,
+      isAuthenticated: true
+    });
+
+    this.loadCurrentUser();
+  }
+
   logout(): void {
     this.clearAuth();
+  }
+
+  exchangeGoogleCode(code: string, state: string): Observable<AuthResponse> {
+    return this.authApi.exchangeGoogleCode(code, state).pipe(
+      tap(response => this.handleAuthSuccess(response)),
+      catchError(error => {
+        this.clearAuth();
+        return throwError(() => error);
+      })
+    );
   }
 
   private handleAuthSuccess(response: AuthResponse): void {
@@ -83,6 +106,21 @@ export class AuthFacade {
   private loadUserFromStorage(): UserResponse | null {
     const userJson = localStorage.getItem(this.USER_KEY);
     return userJson ? JSON.parse(userJson) : null;
+  }
+
+  private loadCurrentUser() {
+    this.authApi.getCurrentUser().subscribe({
+      next: user => {
+        this.state.update(s => ({
+          ...s,
+          user: user
+        }));
+        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+      },
+      error: () => {
+        this.clearAuth();
+      }
+    });
   }
 }
 

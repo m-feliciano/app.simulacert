@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
@@ -28,11 +28,35 @@ import {ExamResponse} from '../../api/domain';
         <div class="exams-grid">
           @for (exam of exams(); track exam.id) {
             <div class="exam-card">
-              <h3>{{ exam.title }}</h3>
+              <div class="exam-header">
+                <h3>{{ exam.title }}</h3>
+                @if (exam.difficulty) {
+                  <span class="difficulty-badge" [class]="'difficulty-' + exam.difficulty.toLowerCase()">
+                    {{ getDifficultyLabel(exam.difficulty) }}
+                  </span>
+                }
+              </div>
+
               @if (exam.description) {
                 <p class="exam-description">{{ exam.description }}</p>
               }
-              <a [routerLink]="['/exams', exam.id]" class="btn-primary">Ver Detalhes</a>
+
+              <div class="exam-meta">
+                @if (exam.totalQuestions) {
+                  <div class="meta-item">
+                    <span class="meta-icon">📝</span>
+                    <span class="meta-text">{{ exam.totalQuestions }} questões</span>
+                  </div>
+                }
+                @if (exam.durationMinutes) {
+                  <div class="meta-item">
+                    <span class="meta-icon">⏱️</span>
+                    <span class="meta-text">{{ exam.durationMinutes }} min</span>
+                  </div>
+                }
+              </div>
+
+              <a [routerLink]="['/exams', exam.id]" class="btn-primary">Iniciar Simulado</a>
             </div>
           }
         </div>
@@ -82,6 +106,7 @@ import {ExamResponse} from '../../api/domain';
       box-shadow: var(--shadow-sm);
       display: flex;
       flex-direction: column;
+      gap: var(--spacing-md);
       transition: var(--transition-fast);
     }
 
@@ -96,10 +121,18 @@ import {ExamResponse} from '../../api/domain';
       }
     }
 
+    .exam-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--spacing-sm);
+    }
+
     h3 {
-      margin: 0 0 var(--spacing-md);
+      margin: 0;
       color: var(--color-dark);
       font-size: 18px;
+      flex: 1;
     }
 
     @media (min-width: 768px) {
@@ -108,12 +141,60 @@ import {ExamResponse} from '../../api/domain';
       }
     }
 
+    .difficulty-badge {
+      padding: 4px 12px;
+      border-radius: var(--border-radius-lg);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .difficulty-easy {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .difficulty-medium {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .difficulty-hard {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
     .exam-description {
       flex: 1;
-      margin: 0 0 var(--spacing-lg);
+      margin: 0;
       color: var(--color-text-secondary);
       line-height: 1.6;
       font-size: 14px;
+    }
+
+    .exam-meta {
+      display: flex;
+      gap: var(--spacing-md);
+      padding: var(--spacing-sm) 0;
+      border-top: 1px solid #e0e0e0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+
+    .meta-icon {
+      font-size: 16px;
+    }
+
+    .meta-text {
+      color: var(--color-text-secondary);
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .btn-primary {
@@ -227,6 +308,15 @@ export class ExamsListComponent implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  getDifficultyLabel(difficulty: string): string {
+    const labels: { [key: string]: string } = {
+      'EASY': 'Fácil',
+      'MEDIUM': 'Médio',
+      'HARD': 'Difícil'
+    };
+    return labels[difficulty] || difficulty;
   }
 }
 

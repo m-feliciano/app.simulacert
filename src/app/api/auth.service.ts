@@ -1,8 +1,8 @@
-import { Injectable, Inject } from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { AuthResponse, LoginRequest, RegisterRequest, UserResponse, ChangePasswordRequest } from './domain';
-import { API_CONFIG, ApiConfig } from './config/api.config';
+import {Observable} from 'rxjs';
+import {AuthResponse, ChangePasswordRequest, LoginRequest, RegisterRequest, UserResponse} from './domain';
+import {API_CONFIG, ApiConfig} from './config/api.config';
 
 @Injectable({
   providedIn: 'root'
@@ -29,7 +29,6 @@ export class AuthApiService {
     );
   }
 
-
   getUserById(userId: string): Observable<UserResponse> {
     return this.http.get<UserResponse>(`${this.baseUrl}/users/${userId}`);
   }
@@ -48,6 +47,14 @@ export class AuthApiService {
 
   deactivateUser(userId: string): Observable<void> {
     return this.http.put<void>(`${this.baseUrl}/users/${userId}/deactivate`, {});
+  }
+
+  exchangeGoogleCode(code: string, state: string) {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/oauth/google/exchange`, {code, state});
+  }
+
+  getCurrentUser() {
+    return this.http.get<UserResponse>(`${this.baseUrl}/me`);
   }
 }
 

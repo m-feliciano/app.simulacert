@@ -1,13 +1,13 @@
-import { Component } from '@angular/core';
-import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
+import {Component} from '@angular/core';
+import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
-import { AuthFacade } from '../auth/auth.facade';
-import { Router } from '@angular/router';
+import {AuthFacade} from '../auth/auth.facade';
+import {FooterComponent} from '../../shared/components/footer.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent],
   template: `
     <div class="app-layout">
       <header class="topbar">
@@ -22,22 +22,25 @@ import { Router } from '@angular/router';
       </header>
 
       <div class="app-content">
+        @if (!sidebarCollapsed) {
+          <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+        }
         <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
           <nav class="sidebar-nav">
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
               <span class="nav-icon">📊</span>
               <span class="nav-label">Dashboard</span>
             </a>
-            <a routerLink="/exams" routerLinkActive="active" class="nav-item">
+            <a routerLink="/exams" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
               <span class="nav-icon">📝</span>
               <span class="nav-label">Exames</span>
             </a>
-            <a routerLink="/stats" routerLinkActive="active" class="nav-item">
+            <a routerLink="/stats" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
               <span class="nav-icon">📈</span>
               <span class="nav-label">Estatísticas</span>
             </a>
             @if (authFacade.isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="active" class="nav-item">
+              <a routerLink="/admin" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
                 <span class="nav-icon">⚙️</span>
                 <span class="nav-label">Admin</span>
               </a>
@@ -46,7 +49,10 @@ import { Router } from '@angular/router';
         </aside>
 
         <main class="main-content">
-          <router-outlet/>
+          <div class="content-wrapper">
+            <router-outlet/>
+            <app-footer/>
+          </div>
         </main>
       </div>
     </div>
@@ -147,23 +153,58 @@ import { Router } from '@angular/router';
       width: 250px;
       background: var(--color-secondary);
       color: white;
-      transition: var(--transition-normal);
+      transition: transform 0.3s ease, width 0.3s ease;
       overflow-x: hidden;
       overflow-y: auto;
       box-shadow: var(--shadow-sm);
+      z-index: 1000;
     }
 
-    .sidebar.collapsed {
-      width: 60px;
+    .sidebar-overlay {
+      display: none;
     }
 
     @media (max-width: 768px) {
-      .sidebar:not(.collapsed) {
+      .sidebar {
         position: fixed;
         top: 60px;
         left: 0;
         bottom: 0;
+        transform: translateX(0);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .sidebar.collapsed {
+        transform: translateX(-100%);
+        width: 250px;
+      }
+
+      .sidebar-overlay {
+        display: block;
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(2px);
         z-index: 999;
+        animation: fadeIn 0.2s ease;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    }
+
+    @media (min-width: 769px) {
+      .sidebar.collapsed {
+        width: 60px;
       }
     }
 
@@ -221,26 +262,67 @@ import { Router } from '@angular/router';
       overflow-y: auto;
       overflow-x: hidden;
       background: var(--color-bg-primary);
-      padding: var(--spacing-lg);
+    }
+
+    .content-wrapper {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: var(--spacing-lg) var(--spacing-lg) 0;
+    }
+
+    .content-wrapper > app-footer {
+      margin-top: auto;
+      padding-top: var(--spacing-xxl);
     }
 
     @media (min-width: 768px) {
-      .main-content {
-        padding: var(--spacing-xl);
+      .content-wrapper {
+        padding: var(--spacing-xl) var(--spacing-xl) 0;
       }
     }
   `]
 })
 export class AppLayoutComponent {
   sidebarCollapsed = false;
+  private isMobile = false;
 
   constructor(
     public authFacade: AuthFacade,
     private router: Router
-  ) {}
+  ) {
+    this.checkIfMobile();
+    this.sidebarCollapsed = this.isMobile;
+  }
+
+  closeSidebar(): void {
+    if (this.isMobile) {
+      this.sidebarCollapsed = true;
+    }
+  }
 
   toggleSidebar(): void {
     this.sidebarCollapsed = !this.sidebarCollapsed;
+  }
+
+  onNavItemClick(): void {
+    // Fecha a sidebar no mobile ao clicar em um item
+    if (this.isMobile) {
+      this.sidebarCollapsed = true;
+    }
+  }
+
+  private checkIfMobile(): void {
+    this.isMobile = window.innerWidth <= 768;
+    window.addEventListener('resize', () => {
+      const wasMobile = this.isMobile;
+      this.isMobile = window.innerWidth <= 768;
+
+      // Se mudou de mobile para desktop ou vice-versa, ajusta o estado da sidebar
+      if (wasMobile !== this.isMobile) {
+        this.sidebarCollapsed = this.isMobile;
+      }
+    });
   }
 
   logout(): void {

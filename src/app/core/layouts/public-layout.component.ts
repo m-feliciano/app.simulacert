@@ -1,25 +1,25 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import {Component} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
+import {FooterComponent} from '../../shared/components/footer.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, FooterComponent],
   template: `
     <div class="public-layout">
       <div class="public-layout-content">
         <router-outlet />
       </div>
+      <app-footer/>
     </div>
   `,
   styles: [`
     .public-layout {
       display: flex;
-      align-items: center;
-      justify-content: center;
+      flex-direction: column;
       min-height: 100vh;
       background: linear-gradient(135deg, #232F3E 0%, #37475A 70%, #FF9900 100%);
-      padding: var(--spacing-lg);
       position: relative;
       overflow: hidden;
     }
@@ -44,8 +44,14 @@ import { RouterOutlet } from '@angular/router';
     }
 
     .public-layout-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: var(--spacing-lg);
       width: 100%;
-      max-width: 450px;
+      max-width: 1000px;
+      margin: 0 auto;
       animation: fadeIn 0.4s ease-out;
       position: relative;
       z-index: 1;
