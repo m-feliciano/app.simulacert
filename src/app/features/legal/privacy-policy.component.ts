@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
-import {RouterLink} from '@angular/router';
+import {Router} from '@angular/router';
 
 @Component({
   selector: 'app-privacy-policy',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <div class="legal-page">
       <div class="legal-container">
@@ -65,7 +65,7 @@ import {RouterLink} from '@angular/router';
         </section>
 
         <div class="back-link">
-          <a routerLink="/">← Voltar</a>
+          <a (click)="goBack()">← Voltar</a>
         </div>
       </div>
     </div>
@@ -146,5 +146,11 @@ import {RouterLink} from '@angular/router';
   `]
 })
 export class PrivacyPolicyComponent {
+
+  constructor(private router: Router) {}
+
+  goBack(): void {
+    window.history.back();
+  }
 }
 

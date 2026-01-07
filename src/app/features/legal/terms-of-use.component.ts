@@ -47,7 +47,7 @@ import {RouterLink} from '@angular/router';
         </section>
 
         <div class="back-link">
-          <a routerLink="/">← Voltar</a>
+          <a (click)="goBack()">← Voltar</a>
         </div>
       </div>
     </div>
@@ -117,5 +117,9 @@ import {RouterLink} from '@angular/router';
   `]
 })
 export class TermsOfUseComponent {
+
+  goBack(): void {
+    window.history.back();
+  }
 }
 
