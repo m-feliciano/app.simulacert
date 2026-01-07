@@ -50,7 +50,7 @@ export class AuthApiService {
   }
 
   exchangeGoogleCode(code: string, state: string) {
-    return this.http.post<AuthResponse>('/api/v1/auth/oauth/google/exchange', {code, state});
+    return this.http.post<AuthResponse>(`${this.baseUrl}/oauth/google/exchange`, {code, state});
   }
 }
 
