@@ -15,8 +15,8 @@ interface AuthState {
   providedIn: 'root'
 })
 export class AuthFacade {
-  private readonly USER_KEY = 'user';
-  private readonly TOKEN_KEY = 'token';
+  private readonly USER_KEY = 'simulacert_user';
+  private readonly TOKEN_KEY = 'simulacert_token';
   private readonly REFRESH_KEY = 'refresh_token';
 
   private state = signal<AuthState>({
