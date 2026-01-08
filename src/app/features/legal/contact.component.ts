@@ -21,19 +21,19 @@ import {Component} from '@angular/core';
               <a href="mailto:marcelofeliciano@tutamail.com">marcelofeliciano&#64;tutamail.com</a>
             </li>
 
-            <li>
-              <strong>LinkedIn:</strong>
-              <a href="https://www.linkedin.com/in/feliciano-marcelo" target="_blank" rel="noopener">
-                linkedin.com/in/feliciano-marcelo
-              </a>
-            </li>
+<!--            <li>-->
+<!--              <strong>LinkedIn:</strong>-->
+<!--              <a href="https://www.linkedin.com/in/feliciano-marcelo" target="_blank" rel="noopener">-->
+<!--                linkedin.com/in/feliciano-marcelo-->
+<!--              </a>-->
+<!--            </li>-->
 
-            <li>
-              <strong>GitHub:</strong>
-              <a href="https://github.com/m-feliciano" target="_blank" rel="noopener">
-                github.com/m-feliciano
-              </a>
-            </li>
+<!--            <li>-->
+<!--              <strong>GitHub:</strong>-->
+<!--              <a href="https://github.com/m-feliciano" target="_blank" rel="noopener">-->
+<!--                github.com/m-feliciano-->
+<!--              </a>-->
+<!--            </li>-->
           </ul>
         </section>
 
