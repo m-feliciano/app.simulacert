@@ -20,7 +20,7 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
           </p>
           <div class="quick-actions">
             <a routerLink="/exams" class="btn-primary-large">
-              Iniciar Simulado
+              Iniciar
             </a>
             <p class="helper-text">
               AWS, Azure, GCP e outras certificações
