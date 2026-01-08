@@ -66,5 +66,5 @@ export const routes: Routes = [
     component: AttemptRunnerComponent,
     canActivate: [authGuard]
   },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'dashboard' },
 ];
