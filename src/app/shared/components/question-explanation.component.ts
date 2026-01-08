@@ -338,7 +338,7 @@ export class QuestionExplanationComponent {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Erro ao gerar explicação. Tente novamente.');
+        this.error.set('Você atingiu o limite de explicações gratuitas por hoje. Tente novamente mais tarde.');
         this.loading.set(false);
         console.error('Error generating explanation:', err);
       }
