@@ -1,23 +1,39 @@
-import {Component} from '@angular/core';
+import {Component, computed, signal} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
+import { SupportModalComponent } from '../../shared/components/support-modal.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent],
   template: `
     <div class="app-layout">
       <header class="topbar">
         <div class="topbar-left">
-          <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
+          @if (isMobile()) {
+            <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
+          }
           <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="96" width="360">
         </div>
+
+        @if (!isMobile()) {
+          <nav class="topbar-nav">
+            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
+            <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
+            <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
+            @if (authFacade.isAdmin()) {
+              <a routerLink="/admin" routerLinkActive="active" class="nav-item">Admin</a>
+            }
+            <button class="nav-item support-btn" (click)="showSupportModal = true">
+              <span class="nav-icon">☕</span> Apoie
+            </button>
+          </nav>
+        }
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
-
           @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
             <button class="logout-btn" (click)="logout()">Sair</button>
           } @else {
@@ -25,33 +41,37 @@ import {FooterComponent} from '../../shared/components/footer.component';
           }
         </div>
       </header>
-
       <div class="app-content">
-        @if (!sidebarCollapsed) {
+        @if (isMobile() && !sidebarCollapsed()) {
           <div class="sidebar-overlay" (click)="closeSidebar()"></div>
-        }
-        <aside class="sidebar" [class.collapsed]="sidebarCollapsed">
-          <nav class="sidebar-nav">
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-              <span class="nav-icon">📊</span>
-              <span class="nav-label">Dashboard</span>
-            </a>
-            <a routerLink="/exams" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-              <span class="nav-icon">📝</span>
-              <span class="nav-label">Exames</span>
-            </a>
-            <a routerLink="/stats" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-              <span class="nav-icon">📈</span>
-              <span class="nav-label">Estatísticas</span>
-            </a>
-            @if (authFacade.isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-                <span class="nav-icon">⚙️</span>
-                <span class="nav-label">Admin</span>
+
+          <aside class="sidebar" [ngClass]="{'collapsed': sidebarCollapsed()}">
+            <nav class="sidebar-nav">
+              <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+                <span class="nav-icon">📊</span>
+                <span class="nav-label">Dashboard</span>
               </a>
-            }
-          </nav>
-        </aside>
+              <a routerLink="/exams" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+                <span class="nav-icon">📝</span>
+                <span class="nav-label">Exames</span>
+              </a>
+              <a routerLink="/stats" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+                <span class="nav-icon">📈</span>
+                <span class="nav-label">Estatísticas</span>
+              </a>
+              @if (authFacade.isAdmin()) {
+                <a routerLink="/admin" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+                  <span class="nav-icon">⚙️</span>
+                  <span class="nav-label">Admin</span>
+                </a>
+              }
+              <button class="nav-item support-btn" (click)="showSupportModal = true">
+                <span class="nav-icon">☕</span>
+                <span class="nav-label">Apoie</span>
+              </button>
+            </nav>
+          </aside>
+        }
 
         <main class="main-content">
           <div class="content-wrapper">
@@ -60,6 +80,11 @@ import {FooterComponent} from '../../shared/components/footer.component';
           </div>
         </main>
       </div>
+
+      @if (showSupportModal) {
+        <app-support-modal (close)="showSupportModal = false"/>
+      }
+
     </div>
   `,
   styles: [`
@@ -179,11 +204,19 @@ import {FooterComponent} from '../../shared/components/footer.component';
       width: 250px;
       background: var(--color-secondary);
       color: white;
-      transition: transform 0.3s ease, width 0.3s ease;
+      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.33s, width 0.45s cubic-bezier(0.4,0,0.2,1);
+      opacity: 1;
       overflow-x: hidden;
       overflow-y: auto;
       box-shadow: var(--shadow-sm);
       z-index: 1000;
+    }
+
+    .sidebar.collapsed {
+      transform: translateX(-100%);
+      width: 250px;
+      opacity: 0;
+      pointer-events: none;
     }
 
     .sidebar-overlay {
@@ -229,9 +262,7 @@ import {FooterComponent} from '../../shared/components/footer.component';
     }
 
     @media (min-width: 769px) {
-      .sidebar.collapsed {
-        width: 60px;
-      }
+      .sidebar, .sidebar-overlay { display: none !important; }
     }
 
     .sidebar-nav {
@@ -307,46 +338,97 @@ import {FooterComponent} from '../../shared/components/footer.component';
         padding: var(--spacing-xl) var(--spacing-xl) 0;
       }
     }
+
+    .support-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      cursor: pointer;
+      padding: var(--spacing-md) var(--spacing-lg);
+      transition: background 0.2s;
+      width: 100%;
+      text-align: left;
+    }
+    .support-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--color-primary);
+    }
+
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-lg);
+      margin-left: var(--spacing-xl);
+    }
+    .topbar-nav .nav-item {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1rem;
+      padding: 8px 16px;
+      border-radius: var(--border-radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .topbar-nav .nav-item.active,
+    .topbar-nav .nav-item:focus-visible {
+      background: var(--color-primary);
+      color: #fff;
+    }
+    .topbar-nav .nav-item:hover {
+      background: rgba(255,255,255,0.08);
+      color: var(--color-primary);
+    }
+    @media (max-width: 768px) {
+      .topbar-nav { display: none; }
+    }
   `]
 })
 export class AppLayoutComponent {
-  sidebarCollapsed = false;
-  private isMobile = false;
+  sidebarCollapsed = signal(true);
+  isMobile = signal(false);
+  showSupportModal = false;
 
   constructor(
     public authFacade: AuthFacade,
     private router: Router
   ) {
     this.checkIfMobile();
-    this.sidebarCollapsed = this.isMobile;
   }
 
   closeSidebar(): void {
-    if (this.isMobile) {
-      this.sidebarCollapsed = true;
+    if (this.isMobile()) {
+      this.sidebarCollapsed.set(true);
     }
   }
 
   toggleSidebar(): void {
-    this.sidebarCollapsed = !this.sidebarCollapsed;
+    this.sidebarCollapsed.set(!this.sidebarCollapsed());
   }
 
   onNavItemClick(): void {
-    // Fecha a sidebar no mobile ao clicar em um item
-    if (this.isMobile) {
-      this.sidebarCollapsed = true;
+    if (this.isMobile()) {
+      this.sidebarCollapsed.set(true);
     }
   }
 
   private checkIfMobile(): void {
-    this.isMobile = window.innerWidth <= 768;
-    window.addEventListener('resize', () => {
-      const wasMobile = this.isMobile;
-      this.isMobile = window.innerWidth <= 768;
+    this.isMobile.set(window.innerWidth <= 768);
 
-      // Se mudou de mobile para desktop ou vice-versa, ajusta o estado da sidebar
-      if (wasMobile !== this.isMobile) {
-        this.sidebarCollapsed = this.isMobile;
+    window.addEventListener('resize', () => {
+      const wasMobile = this.isMobile();
+      this.isMobile.set(window.innerWidth <= 768);
+
+      if (wasMobile !== this.isMobile()) {
+        this.sidebarCollapsed.set(this.isMobile());
       }
     });
   }
@@ -356,4 +438,3 @@ export class AppLayoutComponent {
     this.router.navigate(['/login']);
   }
 }
-

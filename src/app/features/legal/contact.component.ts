@@ -45,7 +45,6 @@ import {Component} from '@angular/core';
   `,
   styles: [`
     .legal-page {
-      min-height: 100vh;
       background: var(--color-bg-primary, #f5f5f5);
       padding: var(--spacing-xl, 2rem) var(--spacing-md, 1rem);
     }
