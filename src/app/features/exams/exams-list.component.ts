@@ -65,7 +65,11 @@ import {RegisterPromptModalComponent} from '../../shared/components/register-pro
                 }
               </div>
 
-              <a class="btn-primary" (click)="handleClick(exam)">Iniciar</a>
+              @if (exam.incoming) {
+                <a class="btn-primary disabled muted" aria-disabled="true">Em breve</a>
+              } @else {
+                <a class="btn-primary" (click)="handleClick(exam)">Iniciar</a>
+              }
             </div>
           }
         </div>
@@ -76,9 +80,16 @@ import {RegisterPromptModalComponent} from '../../shared/components/register-pro
           <p>Nenhum exame disponível no momento.</p>
         </div>
       }
+
     </div>
   `,
   styles: [`
+    .muted {
+      opacity: 0.6;
+      cursor: not-allowed !important;
+      background: #ccc;
+    }
+
     .exams-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -314,7 +325,7 @@ export class ExamsListComponent implements OnInit {
 
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
-        this.exams.set(exams);
+        this.exams.set([...exams, ...this.incomingExams()]);
         this.loading.set(false);
       },
       error: (error) => {
@@ -366,6 +377,29 @@ export class ExamsListComponent implements OnInit {
 
   goToLogin() {
     this.router.navigate(['/login']);
+  }
+
+  private incomingExams(): ExamResponse[] {
+    return [
+      {
+        id: '1f0ecad5-1bcb-63e8-8ec7-4b60a5d7c8e8',
+        title: 'AWS Certified Developer - Associate',
+        description: 'Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão.',
+        difficulty: 'MEDIUM',
+        totalQuestions: 329,
+        incoming: true,
+        slug: 'aws-developer-associate'
+      },
+      {
+        id: '2a1bdc34-2d4f-4c3b-9f7e-5b1e6d9f7c9f',
+        title: 'Microsoft Azure Fundamentals',
+        description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
+        difficulty: 'EASY',
+        totalQuestions: 156,
+        incoming: true,
+        slug: 'azure-fundamentals'
+      }
+    ];
   }
 }
 
