@@ -38,7 +38,7 @@ import { ExplanationResponse } from '../../api/domain';
 
           <div class="explanation-footer">
             <span class="ai-disclaimer">Explicação gerada com assistência de IA</span>
-            <span class="model-info">{{ explanation()!.model }}</span>
+            <span class="model-info">{{ modelName() }}</span>
           </div>
 
           @if (!feedbackSubmitted()) {
@@ -378,6 +378,11 @@ export class QuestionExplanationComponent {
         console.error('Error submitting feedback:', err);
       }
     });
+  }
+
+  modelName() {
+    // remove date suffix from model name if present
+    return this.explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
   }
 }
 
