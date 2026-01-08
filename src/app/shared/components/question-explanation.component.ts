@@ -15,7 +15,7 @@ import { ExplanationResponse } from '../../api/domain';
           class="btn-explain"
           (click)="requestExplanation()"
           [disabled]="loading()">
-          {{ loading() ? 'Gerando explicação...' : '💡 Explicar questão' }}
+          {{ loading() ? 'Gerando explicação...' : 'Explicar questão' }}
         </button>
       }
 

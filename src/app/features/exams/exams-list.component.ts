@@ -1,14 +1,23 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
+import {AuthFacade} from '../../core/auth/auth.facade';
+import {Router} from '@angular/router';
+import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RegisterPromptModalComponent],
   template: `
+    @if (showRegisterPrompt()) {
+      <app-register-prompt-modal (register)="goToLogin()"
+                                 (anonymous)="createAnonymousAndStay()"
+                                 (close)="showRegisterPrompt.set(false)"
+                                 [loading]="loadingAnonymous()">
+      </app-register-prompt-modal>
+    }
     <div class="exams-container">
       <h1>Exames Disponíveis</h1>
 
@@ -56,7 +65,7 @@ import {ExamResponse} from '../../api/domain';
                 }
               </div>
 
-              <a [routerLink]="['/exams', exam.id]" class="btn-primary">Iniciar Simulado</a>
+              <a class="btn-primary" (click)="handleClick(exam)">Iniciar Simulado</a>
             </div>
           }
         </div>
@@ -284,8 +293,14 @@ export class ExamsListComponent implements OnInit {
   loading = signal(false);
   error = signal('');
 
+  loadingAnonymous = signal<boolean>(false);
+  showRegisterPrompt = signal<boolean>(false);
+  examSelected = signal<ExamResponse | null>(null);
+
   constructor(
-    private examsApi: ExamsApiService
+    private examsApi: ExamsApiService,
+    private authFacade: AuthFacade,
+    private router: Router
   ) {
   }
 
@@ -317,6 +332,40 @@ export class ExamsListComponent implements OnInit {
       'HARD': 'Difícil'
     };
     return labels[difficulty] || difficulty;
+  }
+
+  handleClick(exam: ExamResponse): void {
+    this.examSelected.set(exam);
+
+    this.authFacade.ensureAuthenticated()
+      .subscribe((user) => {
+        if (user) {
+          this.router.navigate(['/exams', exam.id]);
+        } else {
+          this.showRegisterPrompt.set(true);
+        }
+      });
+  }
+
+  createAnonymousAndStay() {
+    this.loadingAnonymous.set(true);
+
+    this.authFacade.createAnonymousUser().subscribe({
+      next: () => {
+        this.loadingAnonymous.set(false);
+        this.showRegisterPrompt.set(false);
+        this.router.navigate(['/exams', this.examSelected()?.id]);
+      },
+      error: () => {
+        this.loadingAnonymous.set(false);
+        this.showRegisterPrompt.set(false);
+        console.error('Error creating anonymous user');
+      }
+    });
+  }
+
+  goToLogin() {
+    this.router.navigate(['/login']);
   }
 }
 

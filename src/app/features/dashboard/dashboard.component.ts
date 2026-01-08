@@ -5,36 +5,29 @@ import {AuthFacade} from '../../core/auth/auth.facade';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {StatsApiService} from '../../api/stats.service';
 import {AttemptResponse, UserStatsDto} from '../../api/domain';
-import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, RegisterPromptModalComponent],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="dashboard">
-      @if (showRegisterPrompt()) {
-        <app-register-prompt-modal (register)="goToLogin()"
-                                   (anonymous)="createAnonymousAndStay()"
-                                   (close)="showRegisterPrompt.set(false)"
-                                   [loading]="loadingAnonymous()">
-        </app-register-prompt-modal>
-      }
-
       @if (isFirstAccess()) {
-        <!-- Empty State para primeiro acesso -->
         <div class="welcome-state">
-          <div class="welcome-icon">🎯</div>
-          <h1>Bem-vindo ao simulacert!</h1>
-          <p class="welcome-intro">Escolha uma certificação e comece seu primeiro simulado agora</p>
-
+          <h1>Simulador de Certificações</h1>
+          <p class="welcome-intro">
+            Treine com simulados no formato real das principais certificações de cloud.
+          </p>
           <div class="quick-actions">
             <a routerLink="/exams" class="btn-primary-large">
-              Iniciar Primeiro Simulado
+              Iniciar Simulado
             </a>
-            <p class="helper-text">Escolha entre AWS, Azure, GCP e outras certificações</p>
+            <p class="helper-text">
+              AWS, Azure, GCP e outras certificações
+            </p>
           </div>
         </div>
+
       } @else {
         <!-- Dashboard normal com estatísticas -->
         <h1>Bem-vindo de volta!</h1>
@@ -557,8 +550,6 @@ export class DashboardComponent implements OnInit {
   recommendation = signal<string>('');
   recommendationCTA = signal<string>('');
   recommendationLink = signal<string>('/exams');
-  showRegisterPrompt = signal<boolean>(false);
-  loadingAnonymous = signal<boolean>(false);
 
   constructor(
     private authFacade: AuthFacade,
@@ -567,15 +558,11 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authFacade.ensureAuthenticated()
-      .subscribe((user) => {
-        if (user) {
-          this.loadStats(user.id);
-          this.loadRecentAttempts(user.id);
-        } else {
-          this.showRegisterPrompt.set(true);
-        }
-      });
+    const user = this.authFacade.currentUser();
+    if (user) {
+      this.loadStats(user.id);
+      this.loadRecentAttempts(user.id);
+    }
   }
 
   loadStats(userId: string): void {
@@ -675,26 +662,5 @@ export class DashboardComponent implements OnInit {
       'ABANDONED': 'Cancelado'
     };
     return statusMap[status] || status;
-  }
-
-  goToLogin() {
-    window.location.href = '/login';
-  }
-
-  createAnonymousAndStay() {
-    this.loadingAnonymous.set(true);
-    this.authFacade.createAnonymousUser().subscribe({
-      next: (anonUser) => {
-        this.loadingAnonymous.set(false);
-        this.showRegisterPrompt.set(false);
-        this.loadStats(anonUser.id);
-        this.loadRecentAttempts(anonUser.id);
-      },
-      error: (error) => {
-        this.loadingAnonymous.set(false);
-        this.showRegisterPrompt.set(false);
-        console.error('Error creating anonymous user:', error);
-      }
-    });
   }
 }

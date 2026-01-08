@@ -10,102 +10,116 @@ import {RouterLink} from '@angular/router';
     <div class="how-it-works-container">
       <div class="hero-section">
         <h1>Como Funciona</h1>
-        <p class="subtitle">Prepare-se para sua certificação em 4 passos simples</p>
+        <p class="subtitle">
+          Treinamento prático para certificações, focado no formato real de prova.
+        </p>
       </div>
 
       <div class="steps-section">
         <div class="step-card">
           <div class="step-number">1</div>
-          <div class="step-icon">📚</div>
-          <h2>Escolha sua Certificação</h2>
-          <p>Navegue entre AWS, Azure, GCP e outras certificações disponíveis. Cada simulado é atualizado regularmente
-            para refletir as mudanças nos exames oficiais.</p>
+          <h2>Selecione a Certificação</h2>
+          <p>
+            Escolha entre AWS, Azure, GCP e outras certificações disponíveis. Os simulados seguem
+            a estrutura e os domínios cobrados nos exames oficiais mais recentes.
+          </p>
         </div>
 
         <div class="step-card">
           <div class="step-number">2</div>
-          <div class="step-icon">✍️</div>
-          <h2>Faça os Simulados</h2>
-          <p>Responda questões no formato real do exame. Teste seus conhecimentos em ambiente que simula a pressão e o
-            tempo do exame oficial.</p>
+          <h2>Execute o Simulado</h2>
+          <p>
+            Responda questões no mesmo formato da prova real, com controle de tempo e nível
+            de dificuldade compatível com o exame oficial.
+          </p>
         </div>
 
         <div class="step-card">
           <div class="step-number">3</div>
-          <div class="step-icon">🤖</div>
-          <h2>Aprenda com IA</h2>
-          <p>Receba explicações detalhadas geradas por inteligência artificial para cada questão. Entenda não apenas a
-            resposta correta, mas o porquê.</p>
+          <h2>Analise as Respostas</h2>
+          <p>
+            Cada questão conta com explicações detalhadas, focadas no raciocínio correto
+            e nos conceitos exigidos pela certificação.
+          </p>
         </div>
 
         <div class="step-card">
           <div class="step-number">4</div>
-          <div class="step-icon">📊</div>
-          <h2>Acompanhe seu Progresso</h2>
-          <p>Analise suas estatísticas, identifique pontos fracos e acompanhe sua evolução ao longo do tempo até estar
-            pronto para o exame real.</p>
+          <h2>Acompanhe sua Evolução</h2>
+          <p>
+            Visualize estatísticas por domínio, identifique lacunas de conhecimento
+            e acompanhe seu progresso até estar pronto para a prova.
+          </p>
         </div>
       </div>
 
       <div class="features-section">
-        <h2>Por que escolher o simulacert?</h2>
+        <h2>Por que usar o SimulaCert</h2>
         <div class="features-grid">
           <div class="feature-item">
-            <span class="feature-icon">✓</span>
             <div class="feature-content">
-              <h3>Questões Atualizadas</h3>
-              <p>Banco de questões constantemente atualizado com base nas versões mais recentes dos exames</p>
+              <h3>Conteúdo Atualizado</h3>
+              <p>
+                Questões alinhadas às versões mais recentes dos exames oficiais.
+              </p>
             </div>
           </div>
 
           <div class="feature-item">
-            <span class="feature-icon">✓</span>
             <div class="feature-content">
-              <h3>Explicações com IA</h3>
-              <p>Entenda cada conceito com explicações geradas por modelos de linguagem avançados</p>
+              <h3>Explicações Objetivas</h3>
+              <p>
+                Foco no entendimento do conceito e no motivo da resposta correta.
+              </p>
             </div>
           </div>
 
           <div class="feature-item">
-            <span class="feature-icon">✓</span>
             <div class="feature-content">
-              <h3>Análise Detalhada</h3>
-              <p>Visualize seu desempenho por domínio, identifique áreas que precisam de mais estudo</p>
+              <h3>Análise por Domínio</h3>
+              <p>
+                Avalie seu desempenho por área e direcione melhor seus estudos.
+              </p>
             </div>
           </div>
 
           <div class="feature-item">
-            <span class="feature-icon">✓</span>
             <div class="feature-content">
-              <h3>Formato Real</h3>
-              <p>Simulados que replicam fielmente o formato e a dificuldade dos exames oficiais</p>
+              <h3>Formato Realista</h3>
+              <p>
+                Simulados construídos para reproduzir o estilo e a complexidade da prova real.
+              </p>
             </div>
           </div>
 
           <div class="feature-item">
-            <span class="feature-icon">✓</span>
             <div class="feature-content">
-              <h3>Sem Compromisso</h3>
-              <p>Comece gratuitamente, sem cartão de crédito. Cancele quando quiser</p>
+              <h3>Acesso Imediato</h3>
+              <p>
+                Comece sem burocracia e sem necessidade de cartão de crédito.
+              </p>
             </div>
           </div>
 
           <div class="feature-item">
-            <span class="feature-icon">✓</span>
             <div class="feature-content">
-              <h3>Multiplataforma</h3>
-              <p>Acesse de qualquer dispositivo - desktop, tablet ou smartphone</p>
+              <h3>Disponível em Qualquer Dispositivo</h3>
+              <p>
+                Utilize no desktop, tablet ou smartphone, quando e onde quiser.
+              </p>
             </div>
           </div>
         </div>
       </div>
 
       <div class="cta-section">
-        <h2>Pronto para começar?</h2>
-        <p>Crie sua conta grátis e faça seu primeiro simulado agora</p>
+        <h2>Comece a Treinar</h2>
+        <p>
+          Acesse os simulados e avalie seu nível antes da prova oficial.
+        </p>
         <div class="cta-buttons">
-          <a routerLink="/dashboard" class="btn-primary-large">Começar Gratuitamente</a>
-          <a routerLink="/login" class="btn-secondary">Já tenho conta</a>
+          <a routerLink="/dashboard" class="btn-primary-large">Iniciar Simulado</a>
+          <a routerLink="/login" class="btn-secondary">Acessar Conta</a>
         </div>
       </div>
     </div>
