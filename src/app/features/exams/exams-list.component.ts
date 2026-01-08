@@ -65,7 +65,7 @@ import {RegisterPromptModalComponent} from '../../shared/components/register-pro
                 }
               </div>
 
-              <a class="btn-primary" (click)="handleClick(exam)">Iniciar Simulado</a>
+              <a class="btn-primary" (click)="handleClick(exam)">Iniciar</a>
             </div>
           }
         </div>
