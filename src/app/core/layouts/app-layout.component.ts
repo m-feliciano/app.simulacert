@@ -17,7 +17,12 @@ import {FooterComponent} from '../../shared/components/footer.component';
         </div>
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
-          <button class="logout-btn" (click)="logout()">Sair</button>
+
+          @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
+            <button class="logout-btn" (click)="logout()">Sair</button>
+          } @else {
+            <button class="login-btn" routerLink="/login">Entrar</button>
+          }
         </div>
       </header>
 
@@ -140,6 +145,27 @@ import {FooterComponent} from '../../shared/components/footer.component';
     }
 
     .logout-btn:active {
+      transform: translateY(0);
+    }
+
+    .login-btn {
+      background: var(--color-primary-green);
+      border: none;
+      color: white;
+      padding: 8px 16px;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: var(--transition-fast);
+    }
+
+    .login-btn:hover {
+      background: var(--color-primary-green-dark);
+      transform: translateY(-1px);
+    }
+
+    .login-btn:active {
       transform: translateY(0);
     }
 

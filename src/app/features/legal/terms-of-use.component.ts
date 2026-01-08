@@ -1,10 +1,9 @@
 import {Component} from '@angular/core';
-import {RouterLink} from '@angular/router';
 
 @Component({
   selector: 'app-terms-of-use',
   standalone: true,
-  imports: [RouterLink],
+  imports: [],
   template: `
     <div class="legal-page">
       <div class="legal-container">

@@ -1,6 +1,7 @@
 import {Injectable} from '@angular/core';
-import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
-import {Observable} from 'rxjs';
+import {HttpErrorResponse, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
+import {catchError, switchMap} from 'rxjs/operators';
 import {AuthFacade} from '../auth/auth.facade';
 
 @Injectable()
@@ -16,22 +17,48 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor(private authFacade: AuthFacade) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const isPublicUrl = this.publicUrls.some(url => req.url.includes(url));
-
-    if (isPublicUrl) {
+    if (this.isPublicUrl(req.url)) {
       return next.handle(req);
     }
 
     const token = this.authFacade.token();
-    if (token) {
-      req = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${token}`
-        }
-      });
+    const authReq = token
+      ? this.addToken(req, token)
+      : req;
+
+    return next.handle(authReq).pipe(
+      catchError(err => this.handleAuthError(err, authReq, next))
+    );
+  }
+
+  private handleAuthError(
+    error: any,
+    req: HttpRequest<any>,
+    next: HttpHandler
+  ): Observable<HttpEvent<any>> {
+
+    if (!(error instanceof HttpErrorResponse) || error.status !== 401) {
+      return throwError(() => error);
     }
 
-    return next.handle(req);
+    return this.authFacade.generateRefreshToken().pipe(
+      switchMap(({token}) => {
+        const authReq = this.addToken(req, token);
+        return next.handle(authReq);
+      }),
+      catchError(refreshError => throwError(() => refreshError))
+    );
+  }
+
+  private addToken(req: HttpRequest<any>, token: string): HttpRequest<any> {
+    return req.clone({
+      setHeaders: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
+
+  private isPublicUrl(url: string): boolean {
+    return this.publicUrls.some(publicUrl => url.includes(publicUrl));
   }
 }
-

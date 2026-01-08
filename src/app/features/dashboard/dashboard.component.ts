@@ -5,13 +5,21 @@ import {AuthFacade} from '../../core/auth/auth.facade';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {StatsApiService} from '../../api/stats.service';
 import {AttemptResponse, UserStatsDto} from '../../api/domain';
+import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, RegisterPromptModalComponent],
   template: `
     <div class="dashboard">
+      @if (showRegisterPrompt()) {
+        <app-register-prompt-modal (register)="goToLogin()"
+                                   (anonymous)="createAnonymousAndStay()"
+                                   (close)="showRegisterPrompt.set(false)">
+        </app-register-prompt-modal>
+      }
+
       @if (isFirstAccess()) {
         <!-- Empty State para primeiro acesso -->
         <div class="welcome-state">
@@ -548,6 +556,7 @@ export class DashboardComponent implements OnInit {
   recommendation = signal<string>('');
   recommendationCTA = signal<string>('');
   recommendationLink = signal<string>('/exams');
+  showRegisterPrompt = signal<boolean>(false);
 
   constructor(
     private authFacade: AuthFacade,
@@ -556,11 +565,15 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const userId = this.authFacade.currentUser()?.id;
-    if (userId) {
-      this.loadStats(userId);
-      this.loadRecentAttempts(userId);
-    }
+    this.authFacade.ensureAuthenticated()
+      .subscribe((user) => {
+        if (user) {
+          this.loadStats(user.id);
+          this.loadRecentAttempts(user.id);
+        } else {
+          this.showRegisterPrompt.set(true);
+        }
+      });
   }
 
   loadStats(userId: string): void {
@@ -661,5 +674,22 @@ export class DashboardComponent implements OnInit {
     };
     return statusMap[status] || status;
   }
-}
 
+  goToLogin() {
+    window.location.href = '/login';
+  }
+
+  createAnonymousAndStay() {
+    this.authFacade.createAnonymousUser().subscribe({
+      next: (user) => {
+        this.showRegisterPrompt.set(false);
+        this.loadStats(user.id);
+        this.loadRecentAttempts(user.id);
+      },
+      error: (error) => {
+        this.showRegisterPrompt.set(false);
+        console.error('Error creating anonymous user:', error);
+      }
+    });
+  }
+}

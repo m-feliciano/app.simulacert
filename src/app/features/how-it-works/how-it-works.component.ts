@@ -104,7 +104,7 @@ import {RouterLink} from '@angular/router';
         <h2>Pronto para começar?</h2>
         <p>Crie sua conta grátis e faça seu primeiro simulado agora</p>
         <div class="cta-buttons">
-          <a routerLink="/register" class="btn-primary-large">Começar Gratuitamente</a>
+          <a routerLink="/dashboard" class="btn-primary-large">Começar Gratuitamente</a>
           <a routerLink="/login" class="btn-secondary">Já tenho conta</a>
         </div>
       </div>

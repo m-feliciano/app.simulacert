@@ -117,7 +117,7 @@ export class RegisterComponent {
         .subscribe({
           next: () => {
             this.loading.set(false);
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/login']);
           },
           error: (error) => {
             this.loading.set(false);

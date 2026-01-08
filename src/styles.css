@@ -1,6 +1,8 @@
 :root {
   --color-primary: #ff9900;
+  --color-primary-green: #2ecc71;
   --color-primary-dark: #ec7211;
+  --color-primary-green-dark: #27ae60;
   --color-secondary: #37475a;
   --color-dark: #232f3e;
   --color-danger: #d13212;
@@ -39,6 +41,10 @@
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s ease;
   --transition-slow: 0.5s ease;
+
+  --color-surface: #ffffff;
+  --color-on-surface: #333333;
+  --color-text-muted: #777777;
 }
 
 * {
