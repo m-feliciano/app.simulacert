@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, Input } from '@angular/core';
 
 @Component({
   selector: 'app-register-prompt-modal',
@@ -12,12 +12,16 @@ import { Component, Output, EventEmitter } from '@angular/core';
         </p>
 
         <div class="modal-actions">
-          <button class="btn-primary" (click)="onRegister()">
-            Criar conta e salvar meu progresso
+          <button class="btn-primary" (click)="onRegister()" [disabled]="loading">
+            Sim, quero me registrar
           </button>
 
-          <button class="btn-secondary" (click)="onAnonymous()">
-            Continuar sem conta
+          <button class="btn-secondary" (click)="onAnonymous()" [disabled]="loading">
+            @if (loading) {
+                <span class="spinner"></span>
+            } @else {
+                <span>Não, continuar sem conta</span>
+            }
           </button>
         </div>
 
@@ -136,6 +140,23 @@ import { Component, Output, EventEmitter } from '@angular/core';
       margin-bottom: 6px;
     }
 
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #fff;
+      border-top: 2px solid var(--color-primary-green,#28a745);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
@@ -155,19 +176,18 @@ import { Component, Output, EventEmitter } from '@angular/core';
   `]
 })
 export class RegisterPromptModalComponent {
+  @Input() loading = false;
   @Output() register = new EventEmitter<void>();
   @Output() anonymous = new EventEmitter<void>();
   @Output() close = new EventEmitter<void>();
 
-  onRegister(): void {
-    this.register.emit();
+  onRegister() {
+    if (!this.loading) this.register.emit();
   }
-
-  onAnonymous(): void {
-    this.anonymous.emit();
+  onAnonymous() {
+    if (!this.loading) this.anonymous.emit();
   }
-
-  onClose(): void {
-    this.close.emit();
+  onClose() {
+    if (!this.loading) this.close.emit();
   }
 }

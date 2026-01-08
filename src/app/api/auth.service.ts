@@ -70,6 +70,9 @@ export class AuthApiService {
   }
 
   refreshToken(refreshToken: string): Observable<{ token: string, refreshToken: string }> {
-    return this.http.post<{ token: string, refreshToken: string }>(`${this.baseUrl}/refresh-token`, {refreshToken});
+    return this.http.post<{
+      token: string,
+      refreshToken: string
+    }>(`${this.baseUrl}/refresh-token`, {refreshToken: refreshToken});
   }
 }

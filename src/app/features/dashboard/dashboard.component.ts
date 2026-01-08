@@ -16,7 +16,8 @@ import {RegisterPromptModalComponent} from '../../shared/components/register-pro
       @if (showRegisterPrompt()) {
         <app-register-prompt-modal (register)="goToLogin()"
                                    (anonymous)="createAnonymousAndStay()"
-                                   (close)="showRegisterPrompt.set(false)">
+                                   (close)="showRegisterPrompt.set(false)"
+                                   [loading]="loadingAnonymous()">
         </app-register-prompt-modal>
       }
 
@@ -557,6 +558,7 @@ export class DashboardComponent implements OnInit {
   recommendationCTA = signal<string>('');
   recommendationLink = signal<string>('/exams');
   showRegisterPrompt = signal<boolean>(false);
+  loadingAnonymous = signal<boolean>(false);
 
   constructor(
     private authFacade: AuthFacade,
@@ -680,13 +682,16 @@ export class DashboardComponent implements OnInit {
   }
 
   createAnonymousAndStay() {
+    this.loadingAnonymous.set(true);
     this.authFacade.createAnonymousUser().subscribe({
-      next: (user) => {
+      next: (anonUser) => {
+        this.loadingAnonymous.set(false);
         this.showRegisterPrompt.set(false);
-        this.loadStats(user.id);
-        this.loadRecentAttempts(user.id);
+        this.loadStats(anonUser.id);
+        this.loadRecentAttempts(anonUser.id);
       },
       error: (error) => {
+        this.loadingAnonymous.set(false);
         this.showRegisterPrompt.set(false);
         console.error('Error creating anonymous user:', error);
       }

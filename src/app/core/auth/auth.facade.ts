@@ -118,8 +118,7 @@ export class AuthFacade {
   }
 
   generateRefreshToken() {
-    const currentToken = this.token();
-    if (!currentToken) {
+    if (!this.token()) {
       return throwError(() => new Error('No token available for refresh'));
     }
 
@@ -128,9 +127,9 @@ export class AuthFacade {
       return throwError(() => new Error('No refresh token available'));
     }
 
-    let bearerToken = currentToken.startsWith('Bearer ')
-      ? currentToken
-      : `Bearer ${currentToken}`;
+    const bearerToken = currentRefreshToken.startsWith('Bearer ')
+      ? currentRefreshToken
+      : `Bearer ${currentRefreshToken}`;
 
     return this.authApi.refreshToken(bearerToken).pipe(
       tap(({token, refreshToken}) => {

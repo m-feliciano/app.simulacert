@@ -13,7 +13,7 @@ import {API_CONFIG, ApiConfig} from '../../api/config/api.config';
   template: `
     <div class="auth-card">
       <div class="logo-container">
-        <img ngSrc="/simulacert-logo.svg" alt="simulacert" class="auth-logo" height="96" width="360">
+        <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360">
       </div>
 
       <p class="tagline">Prepare-se para certificações AWS, Azure e GCP</p>
