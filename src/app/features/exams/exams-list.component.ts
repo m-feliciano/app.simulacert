@@ -386,7 +386,7 @@ export class ExamsListComponent implements OnInit {
         title: 'AWS Certified Developer - Associate',
         description: 'Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão.',
         difficulty: 'MEDIUM',
-        totalQuestions: 329,
+        totalQuestions: 235,
         incoming: true,
         slug: 'aws-developer-associate'
       },
@@ -395,7 +395,7 @@ export class ExamsListComponent implements OnInit {
         title: 'Microsoft Azure Fundamentals',
         description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
         difficulty: 'EASY',
-        totalQuestions: 156,
+        totalQuestions: 174,
         incoming: true,
         slug: 'azure-fundamentals'
       }
