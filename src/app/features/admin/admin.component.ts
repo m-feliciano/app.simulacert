@@ -421,7 +421,6 @@ export class AdminComponent implements OnInit {
 
     request.subscribe({
       next: () => {
-        this.searchUserByEmail();
         this.showToast(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`, 'success');
       },
       error: (error) => {
