@@ -128,7 +128,11 @@ export class AuthFacade {
       return throwError(() => new Error('No refresh token available'));
     }
 
-    return this.authApi.refreshToken(currentRefreshToken).pipe(
+    let bearerToken = currentToken.startsWith('Bearer ')
+      ? currentToken
+      : `Bearer ${currentToken}`;
+
+    return this.authApi.refreshToken(bearerToken).pipe(
       tap(({token, refreshToken}) => {
         localStorage.setItem(this.TOKEN_KEY, token);
         localStorage.setItem(this.REFRESH_KEY, refreshToken);
