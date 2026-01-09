@@ -25,7 +25,7 @@ import { SupportModalComponent } from '../../shared/components/support-modal.com
             <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
             <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
             @if (authFacade.isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="active" class="nav-item">Admin</a>
+              <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
             }
             <button class="nav-item support-btn" (click)="showSupportModal = true">
               <span class="nav-icon">☕</span> Apoie
@@ -62,7 +62,7 @@ import { SupportModalComponent } from '../../shared/components/support-modal.com
               @if (authFacade.isAdmin()) {
                 <a routerLink="/admin" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
                   <span class="nav-icon">⚙️</span>
-                  <span class="nav-label">Admin</span>
+                  <span class="nav-label">Console</span>
                 </a>
               }
               <button class="nav-item support-btn" (click)="showSupportModal = true">
