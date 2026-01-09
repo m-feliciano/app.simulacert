@@ -1,5 +1,5 @@
 import {computed, Injectable, signal} from '@angular/core';
-import {Observable, throwError} from 'rxjs';
+import {defer, map, Observable, of, throwError} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {AuthApiService} from '../../api/auth.service';
 import {AuthResponse, LoginRequest, RegisterRequest, UserResponse} from '../../api/domain';
@@ -15,8 +15,9 @@ interface AuthState {
   providedIn: 'root'
 })
 export class AuthFacade {
-  private readonly TOKEN_KEY = 'simulacert_token';
   private readonly USER_KEY = 'simulacert_user';
+  private readonly TOKEN_KEY = 'simulacert_token';
+  private readonly REFRESH_KEY = 'refresh_token';
 
   private state = signal<AuthState>({
     user: this.loadUserFromStorage(),
@@ -24,13 +25,13 @@ export class AuthFacade {
     isAuthenticated: !!this.loadTokenFromStorage()
   });
 
+  readonly isAnonymous = computed(() => this.state()?.user?.type == "ANONYMOUS");
   readonly currentUser = computed(() => this.state().user);
   readonly isAuthenticated = computed(() => this.state().isAuthenticated);
   readonly token = computed(() => this.state().token);
   readonly isAdmin = computed(() => this.state().user?.role === 'ADMIN');
 
   constructor(private authApi: AuthApiService) {}
-
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.authApi.login(request).pipe(
@@ -43,7 +44,19 @@ export class AuthFacade {
   }
 
   register(request: RegisterRequest): Observable<HttpResponse<void>> {
-    return this.authApi.register(request).pipe(
+    const current = localStorage.getItem(this.USER_KEY);
+    if (current) {
+      const anonUser: UserResponse = JSON.parse(current);
+      request.id = anonUser.id;
+    }
+
+    return this.authApi.register(request)
+      .pipe(
+        tap((response) => {
+          if (response && response.status === 200) {
+            this.clearAuth();
+          }
+        }),
       catchError(error => {
         return throwError(() => error);
       })
@@ -77,26 +90,67 @@ export class AuthFacade {
     );
   }
 
-  private handleAuthSuccess(response: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, response.token);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+  ensureAuthenticated(): Observable<UserResponse | null> {
+    return defer(() => {
+      const current = this.currentUser();
+      if (current) {
+        return of(current);
+      }
 
-    this.state.set({
-      user: response.user,
-      token: response.token,
-      isAuthenticated: true
+      const stored = localStorage.getItem(this.USER_KEY);
+      if (stored) {
+        const user: UserResponse = JSON.parse(stored);
+        this.updateUserState(user);
+        return of(user);
+      }
+
+      return of(null);
     });
   }
 
-  private clearAuth(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.USER_KEY);
+  createAnonymousUser(): Observable<UserResponse> {
+    return this.authApi.createAnonymousUser().pipe(
+      tap(auth => {
+        this.handleAuthSuccess(auth);
+      }),
+      map((auth) => auth.user)
+    );
+  }
 
-    this.state.set({
-      user: null,
-      token: null,
-      isAuthenticated: false
-    });
+  generateRefreshToken() {
+    if (!this.token()) {
+      return throwError(() => new Error('No token available for refresh'));
+    }
+
+    const currentRefreshToken = this.refreshToken();
+    if (!currentRefreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    const bearerToken = currentRefreshToken.startsWith('Bearer ')
+      ? currentRefreshToken
+      : `Bearer ${currentRefreshToken}`;
+
+    return this.authApi.refreshToken(bearerToken).pipe(
+      tap(({token, refreshToken}) => {
+        localStorage.setItem(this.TOKEN_KEY, token);
+        localStorage.setItem(this.REFRESH_KEY, refreshToken);
+
+        this.state.update(s => ({
+          ...s,
+          token: token,
+          authenticated: true
+        }));
+      }),
+      catchError(error => {
+        this.clearAuth();
+        return throwError(() => error);
+      })
+    );
+  }
+
+  refreshToken() {
+    return localStorage.getItem(this.REFRESH_KEY);
   }
 
   private loadTokenFromStorage(): string | null {
@@ -108,19 +162,47 @@ export class AuthFacade {
     return userJson ? JSON.parse(userJson) : null;
   }
 
+  private handleAuthSuccess(response: AuthResponse): void {
+    localStorage.setItem(this.TOKEN_KEY, response.token);
+    localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+
+    this.state.set({
+      user: response.user,
+      token: response.token,
+      isAuthenticated: true
+    });
+  }
+
+  private clearAuth(): void {
+    localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_KEY);
+
+    this.state.set({
+      user: null,
+      token: null,
+      isAuthenticated: false
+    });
+  }
+
   private loadCurrentUser() {
     this.authApi.getCurrentUser().subscribe({
       next: user => {
-        this.state.update(s => ({
-          ...s,
-          user: user
-        }));
+        this.updateUserState(user);
         localStorage.setItem(this.USER_KEY, JSON.stringify(user));
       },
       error: () => {
         this.clearAuth();
       }
     });
+  }
+
+  private updateUserState(user: UserResponse): void {
+    this.state.update(s => ({
+      ...s,
+      user: user
+    }));
   }
 }
 

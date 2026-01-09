@@ -15,7 +15,7 @@ import { ExplanationResponse } from '../../api/domain';
           class="btn-explain"
           (click)="requestExplanation()"
           [disabled]="loading()">
-          {{ loading() ? 'Gerando explicação...' : '💡 Explicar questão' }}
+          {{ loading() ? 'Gerando explicação...' : 'Explicar questão' }}
         </button>
       }
 
@@ -38,7 +38,7 @@ import { ExplanationResponse } from '../../api/domain';
 
           <div class="explanation-footer">
             <span class="ai-disclaimer">Explicação gerada com assistência de IA</span>
-            <span class="model-info">{{ explanation()!.model }}</span>
+            <span class="model-info">{{ modelName() }}</span>
           </div>
 
           @if (!feedbackSubmitted()) {
@@ -338,7 +338,7 @@ export class QuestionExplanationComponent {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set('Erro ao gerar explicação. Tente novamente.');
+        this.error.set('Você atingiu o limite de explicações gratuitas por hoje. Tente novamente mais tarde.');
         this.loading.set(false);
         console.error('Error generating explanation:', err);
       }
@@ -378,6 +378,11 @@ export class QuestionExplanationComponent {
         console.error('Error submitting feedback:', err);
       }
     });
+  }
+
+  modelName() {
+    // remove date suffix from model name if present
+    return this.explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
   }
 }
 

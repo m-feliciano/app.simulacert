@@ -1,14 +1,23 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
+import {AuthFacade} from '../../core/auth/auth.facade';
+import {Router} from '@angular/router';
+import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RegisterPromptModalComponent],
   template: `
+    @if (showRegisterPrompt()) {
+      <app-register-prompt-modal (register)="goToLogin()"
+                                 (anonymous)="createAnonymousAndStay()"
+                                 (close)="showRegisterPrompt.set(false)"
+                                 [loading]="loadingAnonymous()">
+      </app-register-prompt-modal>
+    }
     <div class="exams-container">
       <h1>Exames Disponíveis</h1>
 
@@ -56,7 +65,11 @@ import {ExamResponse} from '../../api/domain';
                 }
               </div>
 
-              <a [routerLink]="['/exams', exam.id]" class="btn-primary">Iniciar Simulado</a>
+              @if (exam.incoming) {
+                <a class="btn-primary disabled muted" aria-disabled="true">Em breve</a>
+              } @else {
+                <a class="btn-primary" (click)="handleClick(exam)">Iniciar</a>
+              }
             </div>
           }
         </div>
@@ -67,9 +80,16 @@ import {ExamResponse} from '../../api/domain';
           <p>Nenhum exame disponível no momento.</p>
         </div>
       }
+
     </div>
   `,
   styles: [`
+    .muted {
+      opacity: 0.6;
+      cursor: not-allowed !important;
+      background: #ccc;
+    }
+
     .exams-container {
       max-width: 1200px;
       margin: 0 auto;
@@ -284,8 +304,14 @@ export class ExamsListComponent implements OnInit {
   loading = signal(false);
   error = signal('');
 
+  loadingAnonymous = signal<boolean>(false);
+  showRegisterPrompt = signal<boolean>(false);
+  examSelected = signal<ExamResponse | null>(null);
+
   constructor(
-    private examsApi: ExamsApiService
+    private examsApi: ExamsApiService,
+    private authFacade: AuthFacade,
+    private router: Router
   ) {
   }
 
@@ -299,7 +325,7 @@ export class ExamsListComponent implements OnInit {
 
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
-        this.exams.set(exams);
+        this.exams.set([...exams, ...this.incomingExams()]);
         this.loading.set(false);
       },
       error: (error) => {
@@ -317,6 +343,63 @@ export class ExamsListComponent implements OnInit {
       'HARD': 'Difícil'
     };
     return labels[difficulty] || difficulty;
+  }
+
+  handleClick(exam: ExamResponse): void {
+    this.examSelected.set(exam);
+
+    this.authFacade.ensureAuthenticated()
+      .subscribe((user) => {
+        if (user) {
+          this.router.navigate(['/exams', exam.id]);
+        } else {
+          this.showRegisterPrompt.set(true);
+        }
+      });
+  }
+
+  createAnonymousAndStay() {
+    this.loadingAnonymous.set(true);
+
+    this.authFacade.createAnonymousUser().subscribe({
+      next: () => {
+        this.loadingAnonymous.set(false);
+        this.showRegisterPrompt.set(false);
+        this.router.navigate(['/exams', this.examSelected()?.id]);
+      },
+      error: () => {
+        this.loadingAnonymous.set(false);
+        this.showRegisterPrompt.set(false);
+        console.error('Error creating anonymous user');
+      }
+    });
+  }
+
+  goToLogin() {
+    this.router.navigate(['/login']);
+  }
+
+  private incomingExams(): ExamResponse[] {
+    return [
+      {
+        id: '1f0ecad5-1bcb-63e8-8ec7-4b60a5d7c8e8',
+        title: 'AWS Certified Developer - Associate',
+        description: 'Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão.',
+        difficulty: 'MEDIUM',
+        totalQuestions: 235,
+        incoming: true,
+        slug: 'aws-developer-associate'
+      },
+      {
+        id: '2a1bdc34-2d4f-4c3b-9f7e-5b1e6d9f7c9f',
+        title: 'Microsoft Azure Fundamentals',
+        description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
+        difficulty: 'EASY',
+        totalQuestions: 174,
+        incoming: true,
+        slug: 'azure-fundamentals'
+      }
+    ];
   }
 }
 

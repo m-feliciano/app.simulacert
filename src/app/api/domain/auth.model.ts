@@ -2,16 +2,18 @@ export interface AuthResponse {
   token: string;
   type: string;
   user: UserResponse;
+  refreshToken: string;
 }
 
 export interface LoginRequest {
   email: string;
-  password: string;
+  password?: string;
 }
 
 export interface RegisterRequest {
-  email: string;
+  id?: string;
   name?: string;
+  email: string;
   password: string;
 }
 
@@ -32,5 +34,7 @@ export interface UserResponse {
   id: string;
   name: string;
   role: UserRole;
+  type: string;
+  dummyPassword?: string;
 }
 

@@ -1,27 +1,31 @@
 import { Injectable } from '@angular/core';
-import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
+import {
+  HttpInterceptor,
+  HttpRequest,
+  HttpHandler,
+  HttpEvent,
+  HttpErrorResponse
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AuthFacade } from '../auth/auth.facade';
-import { Router } from '@angular/router';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
-  constructor(
-    private authFacade: AuthFacade,
-    private router: Router
-  ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          this.authFacade.logout();
-          this.router.navigate(['/login']);
+
+        if (error.status >= 500) {
+          console.error('Erro de servidor', error);
         }
+
+        if (error.status === 403) {
+          console.warn('Acesso negado', error);
+        }
+
         return throwError(() => error);
       })
     );
   }
 }
-

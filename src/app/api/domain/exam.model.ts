@@ -5,6 +5,8 @@ export interface ExamResponse {
   totalQuestions?: number;
   durationMinutes?: number;
   difficulty?: 'EASY' | 'MEDIUM' | 'HARD';
+  incoming?: boolean;
+  slug: string;
 }
 
 export interface CreateExamRequest {

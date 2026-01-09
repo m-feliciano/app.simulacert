@@ -18,13 +18,18 @@ import {StatsComponent} from './features/stats/stats.component';
 import {AdminComponent} from './features/admin/admin.component';
 import {authGuard} from './core/guards/auth.guard';
 import {adminGuard} from './core/guards/admin.guard';
+import {ContactComponent} from './features/legal/contact.component';
 
 export const routes: Routes = [
   {
     path: '',
+    redirectTo: 'dashboard',
+    pathMatch: 'full'
+  },
+  {
+    path: '',
     component: PublicLayoutComponent,
     children: [
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
       { path: 'login', component: LoginComponent },
       {path: 'register', component: RegisterComponent},
       {path: 'forgot-password', component: ForgotPasswordComponent},
@@ -32,7 +37,17 @@ export const routes: Routes = [
       {path: 'auth/callback', component: AuthCallbackComponent},
       {path: 'how-it-works', component: HowItWorksComponent},
       {path: 'termos-de-uso', component: TermsOfUseComponent},
+      {path: 'contato', component: ContactComponent},
       {path: 'politica-de-privacidade', component: PrivacyPolicyComponent}
+    ]
+  },
+  {
+    path: '',
+    component: AppLayoutComponent,
+    children: [
+      { path: 'dashboard', component: DashboardComponent },
+      { path: 'exams', component: ExamsListComponent },
+      {path: 'stats', component: StatsComponent},
     ]
   },
   {
@@ -40,12 +55,9 @@ export const routes: Routes = [
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'exams', component: ExamsListComponent },
       { path: 'exams/:id', component: ExamDetailComponent },
       { path: 'attempt/:id/result', component: ResultComponent },
       { path: 'attempt/:id/questions', loadComponent: () => import('./features/attempt-result/attempt-questions-result.component').then(m => m.AttemptQuestionsResultComponent) },
-      { path: 'stats', component: StatsComponent },
       { path: 'admin', component: AdminComponent, canActivate: [adminGuard] }
     ]
   },
@@ -54,5 +66,5 @@ export const routes: Routes = [
     component: AttemptRunnerComponent,
     canActivate: [authGuard]
   },
-  { path: '**', redirectTo: 'login' }
+  { path: '**', redirectTo: 'dashboard' },
 ];

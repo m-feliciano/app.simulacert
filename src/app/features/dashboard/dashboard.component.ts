@@ -13,19 +13,21 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
   template: `
     <div class="dashboard">
       @if (isFirstAccess()) {
-        <!-- Empty State para primeiro acesso -->
         <div class="welcome-state">
-          <div class="welcome-icon">🎯</div>
-          <h1>Bem-vindo ao simulacert!</h1>
-          <p class="welcome-intro">Escolha uma certificação e comece seu primeiro simulado agora</p>
-
+          <h1>Simulador de Certificações</h1>
+          <p class="welcome-intro">
+            Treine com simulados no formato real das principais certificações de cloud.
+          </p>
           <div class="quick-actions">
             <a routerLink="/exams" class="btn-primary-large">
-              Iniciar Primeiro Simulado
+              Iniciar
             </a>
-            <p class="helper-text">Escolha entre AWS, Azure, GCP e outras certificações</p>
+            <p class="helper-text">
+              AWS, Azure, GCP e outras certificações
+            </p>
           </div>
         </div>
+
       } @else {
         <!-- Dashboard normal com estatísticas -->
         <h1>Bem-vindo de volta!</h1>
@@ -556,10 +558,10 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const userId = this.authFacade.currentUser()?.id;
-    if (userId) {
-      this.loadStats(userId);
-      this.loadRecentAttempts(userId);
+    const user = this.authFacade.currentUser();
+    if (user) {
+      this.loadStats(user.id);
+      this.loadRecentAttempts(user.id);
     }
   }
 
@@ -662,4 +664,3 @@ export class DashboardComponent implements OnInit {
     return statusMap[status] || status;
   }
 }
-

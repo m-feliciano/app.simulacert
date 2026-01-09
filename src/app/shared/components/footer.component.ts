@@ -10,6 +10,7 @@ import {RouterLink} from '@angular/router';
       <div class="footer-content">
         <p class="copyright">© {{ currentYear }} SimulaCert. Todos os direitos reservados.</p>
         <nav class="footer-links">
+          <a routerLink="/contato" class="footer-link">Contato</a>
           <a routerLink="/termos-de-uso" class="footer-link">Termos de Uso</a>
           <a routerLink="/politica-de-privacidade" class="footer-link">Política de Privacidade</a>
         </nav>

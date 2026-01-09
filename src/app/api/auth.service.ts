@@ -56,5 +56,23 @@ export class AuthApiService {
   getCurrentUser() {
     return this.http.get<UserResponse>(`${this.baseUrl}/me`);
   }
-}
 
+  createAnonymousUser(): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(`${this.baseUrl}/users/anonymous`, {});
+  }
+
+  getUsers(email?: string): Observable<UserResponse[]> {
+    let url = `${this.baseUrl}/users`;
+    if (email) {
+      url += `?email=${encodeURIComponent(email)}`;
+    }
+    return this.http.get<UserResponse[]>(url);
+  }
+
+  refreshToken(refreshToken: string): Observable<{ token: string, refreshToken: string }> {
+    return this.http.post<{
+      token: string,
+      refreshToken: string
+    }>(`${this.baseUrl}/refresh-token`, {refreshToken: refreshToken});
+  }
+}
