@@ -24,9 +24,12 @@ import { SupportModalComponent } from '../../shared/components/support-modal.com
             <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
             <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
             <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
+
             @if (authFacade.isAdmin()) {
               <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
             }
+
+            <a routerLink="/news" routerLinkActive="false" class="nav-item muted">Novidades</a>
             <button class="nav-item support-btn" (click)="showSupportModal = true">
               <span class="nav-icon">☕</span> Apoie
             </button>
@@ -59,6 +62,11 @@ import { SupportModalComponent } from '../../shared/components/support-modal.com
                 <span class="nav-icon">📈</span>
                 <span class="nav-label">Estatísticas</span>
               </a>
+              <a routerLink="/news" routerLinkActive="false" class="nav-item muted" (click)="onNavItemClick()">
+                <span class="nav-icon">📰</span>
+                <span class="nav-label">Novidades</span>
+              </a>
+
               @if (authFacade.isAdmin()) {
                 <a routerLink="/admin" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
                   <span class="nav-icon">⚙️</span>
@@ -88,6 +96,17 @@ import { SupportModalComponent } from '../../shared/components/support-modal.com
     </div>
   `,
   styles: [`
+    .muted {
+      opacity: 0.6;
+      cursor: not-allowed !important;
+      color: #dddddd !important;
+    }
+
+    .muted:hover {
+      background: none !important;
+      color: inherit;
+    }
+
     .app-layout {
       display: flex;
       flex-direction: column;
