@@ -376,7 +376,7 @@ export class ExamsListComponent implements OnInit {
   }
 
   goToLogin() {
-    this.router.navigate(['/login']);
+    this.router.navigate(['/register']);
   }
 
   private incomingExams(): ExamResponse[] {
