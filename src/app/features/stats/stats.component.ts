@@ -173,7 +173,7 @@ export class StatsComponent implements OnInit {
     const statusMap: { [key: string]: string } = {
       'IN_PROGRESS': 'Em Andamento',
       'COMPLETED': 'Concluído',
-      'ABANDONED': 'Abandonado'
+      'ABANDONED': 'Cancelado'
     };
     return statusMap[status] || status;
   }
