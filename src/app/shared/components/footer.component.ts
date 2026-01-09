@@ -18,6 +18,12 @@ import {RouterLink} from '@angular/router';
     </footer>
   `,
   styles: [`
+    .footer-links a {
+      color: #bbb;
+    }
+    .footer-content p {
+      color: #bbb;
+    }
     .app-footer {
       background: var(--color-dark, #232F3E);
       color: rgba(255, 255, 255, 0.85);

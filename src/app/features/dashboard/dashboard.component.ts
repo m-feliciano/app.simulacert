@@ -12,95 +12,102 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
   imports: [CommonModule, RouterLink],
   template: `
     <div class="dashboard">
-      @if (isFirstAccess()) {
-        <div class="welcome-state">
-          <h1>Simulador de Certificações</h1>
-          <p class="welcome-intro">
-            Treine com simulados no formato real das principais certificações de cloud.
-          </p>
-          <div class="quick-actions">
-            <a routerLink="/exams" class="btn-primary-large">
-              Iniciar
-            </a>
-            <p class="helper-text">
-              AWS, Azure, GCP e outras certificações
-            </p>
-          </div>
+      @if (loading()) {
+        <div class="loading-indicator">
+          <span class="spinner"></span>
+          Carregando...
         </div>
-
       } @else {
-        <!-- Dashboard normal com estatísticas -->
-        <h1>Bem-vindo de volta!</h1>
-
-        <!-- Recomendações Inteligentes -->
-        @if (showRecommendations()) {
-          <div class="recommendations-section">
-            <div class="recommendation-card">
-              <div class="recommendation-icon">💡</div>
-              <div class="recommendation-content">
-                <h3>Recomendação para você</h3>
-                <p>{{ recommendation() }}</p>
-                <a [routerLink]="recommendationLink()" class="btn-recommendation">
-                  {{ recommendationCTA() }}
-                </a>
-              </div>
+        @if (isFirstAccess()) {
+          <div class="welcome-state">
+            <h1>Simulador de Certificações</h1>
+            <p class="welcome-intro">
+              Treine com simulados no formato real das principais certificações de cloud.
+            </p>
+            <div class="quick-actions">
+              <a routerLink="/exams" class="btn-primary-large">
+                Iniciar
+              </a>
+              <p class="helper-text">
+                AWS, Azure, GCP e outras certificações
+              </p>
             </div>
           </div>
-        }
 
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
-            <div class="stat-label">Total de Tentativas</div>
+        } @else {
+          <!-- Dashboard normal com estatísticas -->
+          <h1>Bem-vindo de volta!</h1>
+
+          <!-- Recomendações Inteligentes -->
+          @if (showRecommendations()) {
+            <div class="recommendations-section">
+              <div class="recommendation-card">
+                <div class="recommendation-icon">💡</div>
+                <div class="recommendation-content">
+                  <h3>Recomendação para você</h3>
+                  <p>{{ recommendation() }}</p>
+                  <a [routerLink]="recommendationLink()" class="btn-recommendation">
+                    {{ recommendationCTA() }}
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
+              <div class="stat-label">Total de Tentativas</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
+              <div class="stat-label">Tentativas Completas</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-value">{{ stats()?.averageScore?.toFixed(1) || 0 }}%</div>
+              <div class="stat-label">Média de Pontuação</div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-value">{{ stats()?.bestScore || 0 }}%</div>
+              <div class="stat-label">Melhor Pontuação</div>
+            </div>
           </div>
 
-          <div class="stat-card">
-            <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
-            <div class="stat-label">Tentativas Completas</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-value">{{ stats()?.averageScore?.toFixed(1) || 0 }}%</div>
-            <div class="stat-label">Média de Pontuação</div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-value">{{ stats()?.bestScore || 0 }}%</div>
-            <div class="stat-label">Melhor Pontuação</div>
-          </div>
-        </div>
-
-        <div class="section">
-          <h2>Tentativas Recentes</h2>
-          @if (recentAttempts().length > 0) {
-            <div class="attempts-list">
-              @for (attempt of recentAttempts(); track attempt.id) {
-                <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']">
-                  <div class="attempt-info">
-                    <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
-                    <div class="attempt-status" [class]="attempt.status.toLowerCase()">
-                      {{ formatStatus(attempt.status) }}
+          <div class="section">
+            <h2>Tentativas Recentes</h2>
+            @if (recentAttempts().length > 0) {
+              <div class="attempts-list">
+                @for (attempt of recentAttempts(); track attempt.id) {
+                  <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']">
+                    <div class="attempt-info">
+                      <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
+                      <div class="attempt-status" [class]="attempt.status.toLowerCase()">
+                        {{ formatStatus(attempt.status) }}
+                      </div>
                     </div>
-                  </div>
-                  @if (attempt.score) {
-                    <div class="attempt-score"
-                         [ngClass]="{'green': attempt.score >= 75,
+                    @if (attempt.score) {
+                      <div class="attempt-score"
+                           [ngClass]="{'green': attempt.score >= 75,
                                       'red': attempt.score < 40,
                                       'yellow': attempt.score >= 40 && attempt.score <= 74}
                                   ">
-                      {{ attempt.score }}%
-                    </div>
-                  }
-                </a>
-              }
-            </div>
-          }
-        </div>
+                        {{ attempt.score }}%
+                      </div>
+                    }
+                  </a>
+                }
+              </div>
+            }
+          </div>
 
-        <div class="actions">
-          <a routerLink="/exams" class="btn-primary">Fazer Novo Simulado</a>
-          <a routerLink="/stats" class="btn-secondary">Ver Estatísticas Completas</a>
-        </div>
+          <div class="actions">
+            <a routerLink="/exams" class="btn-primary">Fazer Novo Simulado</a>
+            <a routerLink="/stats" class="btn-secondary">Ver Estatísticas Completas</a>
+          </div>
+        }
       }
     </div>
   `,
@@ -540,6 +547,41 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
         transform: none;
       }
     }
+
+    .loading-indicator {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 1000;
+      text-align: center;
+      font-size: 18px;
+      color: var(--color-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.95);
+      border-radius: 8px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 32px 40px;
+      min-width: 220px;
+    }
+
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 3px solid #e0e0e0;
+      border-top: 3px solid var(--color-primary);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   `]
 })
 export class DashboardComponent implements OnInit {
@@ -550,6 +592,7 @@ export class DashboardComponent implements OnInit {
   recommendation = signal<string>('');
   recommendationCTA = signal<string>('');
   recommendationLink = signal<string>('/exams');
+  loading = signal<boolean>(false);
 
   constructor(
     private authFacade: AuthFacade,
@@ -566,15 +609,17 @@ export class DashboardComponent implements OnInit {
   }
 
   loadStats(userId: string): void {
+    this.loading.set(true);
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
         this.stats.set(stats);
-
         this.isFirstAccess.set(!stats.totalAttempts || stats.totalAttempts === 0);
 
         if (!this.isFirstAccess()) {
           this.generateRecommendations(stats);
         }
+
+        this.loading.set(false);
       },
       error: (error) => {
         console.error('Error loading stats:', error);
