@@ -163,6 +163,11 @@ label {
   color: #ccc;
 }
 
+.link-secondary {
+  color: #999;
+  font-size: 13px;
+}
+
 .auth-footer a {
   color: #ff9900;
   text-decoration: none;

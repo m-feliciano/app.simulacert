@@ -77,6 +77,7 @@ import {API_CONFIG, ApiConfig} from '../../api/config/api.config';
 
       <div class="auth-footer">
         <p class="cta-secondary">Já tem uma conta? <a routerLink="/login">Entrar</a></p>
+        <p class="link-secondary"><a routerLink="/how-it-works">Como funciona?</a></p>
       </div>
     </div>
   `
