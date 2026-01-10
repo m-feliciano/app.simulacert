@@ -1,4 +1,4 @@
-import {Routes} from '@angular/router';
+import {Routes, UrlSegment, UrlMatchResult} from '@angular/router';
 import {PublicLayoutComponent} from './core/layouts/public-layout.component';
 import {AppLayoutComponent} from './core/layouts/app-layout.component';
 import {LoginComponent} from './features/auth/login.component';
@@ -19,6 +19,17 @@ import {AdminComponent} from './features/admin/admin.component';
 import {authGuard} from './core/guards/auth.guard';
 import {adminGuard} from './core/guards/admin.guard';
 import {ContactComponent} from './features/legal/contact.component';
+import { ExamsSlugResolver } from './features/exams/exams-slug.resolver';
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function examsIdMatcher(segments: UrlSegment[]): UrlMatchResult | null {
+  // Espera: ['exams', '<uuid>']
+  if (segments.length === 2 && segments[0].path === 'exams' && uuidRegex.test(segments[1].path)) {
+    return { consumed: segments, posParams: { id: segments[1] } } as UrlMatchResult;
+  }
+  return null;
+}
 
 export const routes: Routes = [
   {
@@ -48,6 +59,10 @@ export const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'exams', component: ExamsListComponent },
       {path: 'stats', component: StatsComponent},
+      // matcher para id (UUID)
+      { matcher: examsIdMatcher, component: ExamDetailComponent },
+      // rota por slug textual com resolver (resolve exam object)
+      { path: 'exams/:slug', resolve: { exam: ExamsSlugResolver }, component: ExamDetailComponent },
     ]
   },
   {
@@ -55,7 +70,6 @@ export const routes: Routes = [
     component: AppLayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: 'exams/:id', component: ExamDetailComponent },
       { path: 'attempt/:id/result', component: ResultComponent },
       { path: 'attempt/:id/questions', loadComponent: () => import('./features/attempt-result/attempt-questions-result.component').then(m => m.AttemptQuestionsResultComponent) },
       { path: 'admin', component: AdminComponent, canActivate: [adminGuard] }

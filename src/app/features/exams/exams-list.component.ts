@@ -4,20 +4,12 @@ import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {Router} from '@angular/router';
-import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, RegisterPromptModalComponent],
+  imports: [CommonModule],
   template: `
-    @if (showRegisterPrompt()) {
-      <app-register-prompt-modal (register)="goToLogin()"
-                                 (anonymous)="createAnonymousAndStay()"
-                                 (close)="showRegisterPrompt.set(false)"
-                                 [loading]="loadingAnonymous()">
-      </app-register-prompt-modal>
-    }
     <div class="exams-container">
       <h1>Exames Disponíveis</h1>
 
@@ -304,10 +296,6 @@ export class ExamsListComponent implements OnInit {
   loading = signal(false);
   error = signal('');
 
-  loadingAnonymous = signal<boolean>(false);
-  showRegisterPrompt = signal<boolean>(false);
-  examSelected = signal<ExamResponse | null>(null);
-
   constructor(
     private examsApi: ExamsApiService,
     private authFacade: AuthFacade,
@@ -315,7 +303,7 @@ export class ExamsListComponent implements OnInit {
   ) {
   }
 
-  ngOnInit(): void {;
+  ngOnInit(): void {
     this.loadExams();
   }
 
@@ -346,37 +334,18 @@ export class ExamsListComponent implements OnInit {
   }
 
   handleClick(exam: ExamResponse): void {
-    this.examSelected.set(exam);
-
-    this.authFacade.ensureAuthenticated()
-      .subscribe((user) => {
-        if (user) {
-          this.router.navigate(['/exams', exam.id]);
-        } else {
-          this.showRegisterPrompt.set(true);
-        }
-      });
+    const slug = exam.slug;
+    if (slug && this.isTextualSlug(slug)) {
+      this.router.navigate(['/exams', slug]);
+    } else {
+      this.router.navigate(['/exams', exam.id]);
+    }
   }
 
-  createAnonymousAndStay() {
-    this.loadingAnonymous.set(true);
-
-    this.authFacade.createAnonymousUser().subscribe({
-      next: () => {
-        this.loadingAnonymous.set(false);
-        this.showRegisterPrompt.set(false);
-        this.router.navigate(['/exams', this.examSelected()?.id]);
-      },
-      error: () => {
-        this.loadingAnonymous.set(false);
-        this.showRegisterPrompt.set(false);
-        console.error('Error creating anonymous user');
-      }
-    });
-  }
-
-  goToLogin() {
-    this.router.navigate(['/register']);
+  private isTextualSlug(slug: string): boolean {
+    if (!slug) return false;
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return !uuidRegex.test(slug);
   }
 
   private incomingExams(): ExamResponse[] {

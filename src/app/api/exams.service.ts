@@ -44,5 +44,9 @@ export class ExamsApiService {
   importFromDirectory(): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/import/directory`, {});
   }
-}
 
+  getExamBySlug(slug: string): Observable<ExamResponse> {
+    const encoded = encodeURIComponent(slug);
+    return this.http.get<ExamResponse>(`${this.baseUrl}/slug/${encoded}`);
+  }
+}

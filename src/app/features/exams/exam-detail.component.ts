@@ -5,12 +5,21 @@ import {ExamsApiService} from '../../api/exams.service';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {ExamResponse} from '../../api/domain';
+import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RegisterPromptModalComponent],
   template: `
+    @if (showRegisterPrompt()) {
+      <app-register-prompt-modal (register)="goToRegister()"
+                                 (anonymous)="createAnonymousAndStart()"
+                                 (close)="showRegisterPrompt.set(false)"
+                                 [loading]="loadingAnonymous()">
+      </app-register-prompt-modal>
+    }
+
     <div class="exam-detail">
       <div class="breadcrumb">
         <a (click)="goBack()" class="back-link">← Voltar</a>
@@ -122,6 +131,8 @@ export class ExamDetailComponent implements OnInit {
   loading = signal(false);
   loadingExam = signal(false);
   errorMessage = signal('');
+  loadingAnonymous = signal(false);
+  showRegisterPrompt = signal(false);
   questionCount = signal(20);
   questionCountOptions = [10, 20, 30, 40, 50, 100];
 
@@ -138,23 +149,111 @@ export class ExamDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Primeiro, checa se o resolver já trouxe o exam (rota /exams/:slug)
+    const resolvedExam = this.route.snapshot.data['exam'] as ExamResponse | null | undefined;
     const examId = this.route.snapshot.paramMap.get('id');
+    const slug = this.route.snapshot.paramMap.get('slug');
+
+    if (resolvedExam) {
+      this.exam.set(resolvedExam);
+      return;
+    }
+
     if (examId) {
-      this.loadExam(examId);
+      this.loadExam(examId, true); // true = pode redirecionar para slug
+    } else if (slug) {
+      this.loadExamBySlug(slug);
     }
   }
 
-  loadExam(examId: string): void {
+  startExam(): void {
+    const currentExam = this.exam();
+    if (!currentExam) {
+      return;
+    }
+
+    if (!this.authFacade.currentUser()) {
+      this.showRegisterPrompt.set(true);
+      return;
+    }
+
+    this.doStartAttempt(currentExam);
+  }
+
+  private doStartAttempt(exam: ExamResponse): void {
+    this.loading.set(true);
+    this.errorMessage.set('');
+
+    this.attemptsApi.startAttempt({
+      examId: exam.id,
+      userId: this.authFacade.currentUser()!.id,
+      questionCount: this.questionCount()
+    }).subscribe({
+      next: (attempt) => {
+        this.router.navigate(['/attempt', attempt.id, 'run']);
+      },
+      error: (error) => {
+        this.loading.set(false);
+        this.errorMessage.set(error.error?.message || 'Erro ao iniciar exame');
+      }
+    });
+  }
+
+  createAnonymousAndStart() {
+    this.loadingAnonymous.set(true);
+    this.authFacade.createAnonymousUser().subscribe({
+      next: () => {
+        this.loadingAnonymous.set(false);
+        this.showRegisterPrompt.set(false);
+        const currentExam = this.exam();
+        if (currentExam) {
+          this.doStartAttempt(currentExam);
+        }
+      },
+      error: (err) => {
+        this.loadingAnonymous.set(false);
+        this.errorMessage.set('Erro ao criar usuário anônimo');
+        console.error('Error creating anonymous user', err);
+      }
+    });
+  }
+
+  goToRegister() {
+    this.router.navigate(['/register']);
+  }
+
+  loadExam(examId: string, redirectToSlug = false): void {
     this.loadingExam.set(true);
     this.errorMessage.set('');
 
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
+        if (redirectToSlug && exam.slug && this.isTextualSlug(exam.slug)) {
+          this.router.navigate(['/exams', exam.slug]);
+        } else {
+          this.exam.set(exam);
+          this.loadingExam.set(false);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading exam:', error);
+        this.errorMessage.set('Erro ao carregar exame');
+        this.loadingExam.set(false);
+      }
+    });
+  }
+
+  loadExamBySlug(slug: string): void {
+    this.loadingExam.set(true);
+    this.errorMessage.set('');
+
+    this.examsApi.getExamBySlug(slug).subscribe({
+      next: (exam) => {
         this.exam.set(exam);
         this.loadingExam.set(false);
       },
       error: (error) => {
-        console.error('Error loading exam:', error);
+        console.error('Error loading exam by slug:', error);
         this.errorMessage.set('Erro ao carregar exame');
         this.loadingExam.set(false);
       }
@@ -169,32 +268,14 @@ export class ExamDetailComponent implements OnInit {
     this.selectedMode.set(mode);
   }
 
-  startExam(): void {
-    const currentExam = this.exam();
-    if (!currentExam || !this.authFacade.currentUser()) {
-      return;
-    }
-
-    this.loading.set(true);
-    this.errorMessage.set('');
-
-    this.attemptsApi.startAttempt({
-      examId: currentExam.id,
-      userId: this.authFacade.currentUser()!.id,
-      questionCount: this.questionCount()
-    }).subscribe({
-      next: (attempt) => {
-        this.router.navigate(['/attempt', attempt.id, 'run']);
-      },
-      error: (error) => {
-        this.loading.set(false);
-        this.errorMessage.set(error.error?.message || 'Erro ao iniciar exame');
-      }
-    });
-  }
-
   goBack(): void {
     this.router.navigate(['/exams']);
   }
-}
 
+  private isTextualSlug(slug: string): boolean {
+    if (!slug) return false;
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    return !uuidRegex.test(slug);
+  }
+}
