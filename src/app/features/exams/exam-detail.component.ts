@@ -44,7 +44,8 @@ import {RegisterPromptModalComponent} from '../../shared/components/register-pro
           <div class="mode-cards">
             <div class="mode-card"
                  [class.selected]="selectedMode() === 'practice'"
-                 (click)="selectMode('practice')">
+                 style="background: #ccc; cursor: not-allowed;">
+
               <div class="mode-icon">📖</div>
               <h3>Modo Prática</h3>
               <ul class="mode-features">
@@ -149,7 +150,6 @@ export class ExamDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // Primeiro, checa se o resolver já trouxe o exam (rota /exams/:slug)
     const resolvedExam = this.route.snapshot.data['exam'] as ExamResponse | null | undefined;
     const examId = this.route.snapshot.paramMap.get('id');
     const slug = this.route.snapshot.paramMap.get('slug');
