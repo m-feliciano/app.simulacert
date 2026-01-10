@@ -100,7 +100,12 @@ import {ExamResponse} from '../../api/domain';
 
         <div class="actions">
           <button class="btn-primary" (click)="startExam()" [disabled]="loading()">
-            {{ loading() ? 'Iniciando...' : 'Iniciar Exame com ' + questionCount() + ' questões' }}
+            {{ loading() ? 'Iniciando...' : 'Iniciar com ' + questionCount() + ' questões' }}
+          </button>
+        </div>
+        <div class="actions">
+          <button class="btn-secondary" disabled type="button">
+            Imprimir (em breve)
           </button>
         </div>
       }
