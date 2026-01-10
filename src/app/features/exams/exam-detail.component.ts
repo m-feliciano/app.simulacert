@@ -127,7 +127,7 @@ export class ExamDetailComponent implements OnInit {
 
   selectedMode = signal<'practice' | 'exam'>('exam');
 
-  duration = computed(() => Math.round(this.questionCount() * 2));
+  duration = computed(() => Math.round(this.questionCount() * 1.5));
 
   constructor(
     private route: ActivatedRoute,
