@@ -4,11 +4,12 @@ import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {StatsApiService} from '../../api/stats.service';
 import {AttemptHistoryItemDto, AwsDomainStatsDto, UserStatsDto} from '../../api/domain';
+import { ScoreStatusComponent } from '../../shared/components/score-status/score-status.component';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent],
   template: `
     <div class="stats-container">
       <h1>Estatísticas</h1>
@@ -26,12 +27,20 @@ import {AttemptHistoryItemDto, AwsDomainStatsDto, UserStatsDto} from '../../api/
           </div>
 
           <div class="stat-card">
-            <div class="stat-value">{{ userStats()!.averageScore.toFixed(1) }}%</div>
+            <div class="stat-value">
+              <app-score-status [score]="userStats()!.averageScore">
+                {{ userStats()!.averageScore }}%
+              </app-score-status>
+            </div>
             <div class="stat-label">Pontuação Média</div>
           </div>
 
           <div class="stat-card">
-            <div class="stat-value">{{ userStats()!.bestScore }}%</div>
+            <div class="stat-value">
+              <app-score-status [score]="userStats()!.bestScore || 0">
+                {{ userStats()!.bestScore || 0 }}%
+              </app-score-status>
+            </div>
             <div class="stat-label">Melhor Pontuação</div>
           </div>
         </div>
@@ -63,7 +72,8 @@ import {AttemptHistoryItemDto, AwsDomainStatsDto, UserStatsDto} from '../../api/
       } @else {
         <div class="section empty-section">
           <h2>Performance por Domínio AWS</h2>
-          <p class="empty-message">Nenhum dado de domínio disponível. Complete alguns exames para ver suas estatísticas por domínio.</p>
+          <p class="empty-message">Nenhum dado de domínio disponível. Complete alguns exames para ver suas estatísticas
+            por domínio.</p>
         </div>
       }
 
@@ -81,18 +91,18 @@ import {AttemptHistoryItemDto, AwsDomainStatsDto, UserStatsDto} from '../../api/
               <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, 'result']">
                 <div class="col-date">{{ formatDate(attempt.startedAt) }}</div>
                 <div class="col-exam">{{ attempt.examTitle }}</div>
+
                 <div class="col-status">
                   <span class="status-badge" [class]="attempt.status.toLowerCase()">
                     {{ formatStatus(attempt.status) }}
                   </span>
                 </div>
+
                 <div class="col-score">
                   @if (attempt.score !== null && attempt.score !== undefined) {
-                    <span [class.passed]="attempt.score >= 72"
-                          [class.warning]="attempt.score >= 50 && attempt.score < 72"
-                          [class.failed]="attempt.score < 49">
-                      {{ attempt.score }}%
-                    </span>
+                    <app-score-status [score]="attempt.score">
+                      {{ attempt.score || 0 }}%
+                    </app-score-status>
                   } @else {
                     <span>-</span>
                   }
@@ -178,4 +188,3 @@ export class StatsComponent implements OnInit {
     return statusMap[status] || status;
   }
 }
-
