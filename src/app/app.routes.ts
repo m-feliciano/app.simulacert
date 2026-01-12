@@ -34,7 +34,7 @@ function examsIdMatcher(segments: UrlSegment[]): UrlMatchResult | null {
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'dashboard',
+    redirectTo: 'exams',
     pathMatch: 'full'
   },
   {

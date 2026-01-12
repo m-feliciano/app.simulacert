@@ -118,7 +118,7 @@ import {RouterLink} from '@angular/router';
           Acesse os simulados e avalie seu nível antes da prova oficial.
         </p>
         <div class="cta-buttons">
-          <a routerLink="/dashboard" class="btn-primary-large">Iniciar Simulado</a>
+          <a routerLink="/exams" class="btn-primary-large">Iniciar Simulado</a>
           <a routerLink="/login" class="btn-secondary">Acessar Conta</a>
         </div>
       </div>

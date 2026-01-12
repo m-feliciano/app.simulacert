@@ -5,11 +5,12 @@ import {AuthFacade} from '../../core/auth/auth.facade';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {StatsApiService} from '../../api/stats.service';
 import {AttemptResponse, UserStatsDto} from '../../api/domain';
+import { ScoreStatusComponent } from '../../shared/components/score-status/score-status.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent],
   template: `
     <div class="dashboard">
       @if (loading()) {
@@ -66,12 +67,21 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
             </div>
 
             <div class="stat-card">
-              <div class="stat-value">{{ stats()?.averageScore?.toFixed(1) || 0 }}%</div>
+              <div class="stat-value">
+                <app-score-status [score]="stats()?.averageScore || 0">
+                  {{ stats()?.averageScore || 0 }}%
+                </app-score-status>
+              </div>
               <div class="stat-label">Média de Pontuação</div>
             </div>
 
             <div class="stat-card">
-              <div class="stat-value">{{ stats()?.bestScore || 0 }}%</div>
+              <div class="stat-value">
+                <app-score-status
+                  [score]="stats()?.bestScore || 0">
+                  {{ stats()?.bestScore || 0 }}%
+                </app-score-status>
+              </div>
               <div class="stat-label">Melhor Pontuação</div>
             </div>
           </div>
@@ -92,8 +102,7 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
                       <div class="attempt-score"
                            [ngClass]="{'green': attempt.score >= 75,
                                       'red': attempt.score < 40,
-                                      'yellow': attempt.score >= 40 && attempt.score <= 74}
-                                  ">
+                                      'yellow': attempt.score >= 40 && attempt.score <= 74}">
                         {{ attempt.score }}%
                       </div>
                     }

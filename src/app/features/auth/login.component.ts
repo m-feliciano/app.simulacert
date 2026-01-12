@@ -130,7 +130,7 @@ export class LoginComponent {
       this.authFacade.login(this.loginForm.value).subscribe({
         next: () => {
           this.loading.set(false);
-          this.router.navigate(['/dashboard']);
+          this.router.navigate(['/exams']);
         },
         error: (error) => {
           this.loading.set(false);
