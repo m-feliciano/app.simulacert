@@ -139,7 +139,7 @@ export class AuthCallbackComponent implements OnInit {
         next: response => {
           this.status.set('success');
           this.authFacade.handleOAuthCallback(response.token);
-          setTimeout(() => this.router.navigate(['/dashboard']), 1200);
+          setTimeout(() => this.router.navigate(['/exams']), 1200);
         },
         error: () => {
           this.fail('Não foi possível validar sua autenticação.');
