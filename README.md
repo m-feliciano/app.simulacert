@@ -103,7 +103,7 @@ Padrões de commit recomendados
 
 Licença e contato
 
-Proprietary - © 2026 SimulaCert
+Proprietary - © 2026 SimulaCert - Marcelo Feliciano
 
 Website: https://simulacert.com
 API: https://api.simulacert.com

@@ -1,42 +1,52 @@
-import {Component} from '@angular/core';
+import {Component, Renderer2} from '@angular/core';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {Location} from '@angular/common';
 
 @Component({
   selector: 'contact-page',
   standalone: true,
+  imports: [SeoHeadDirective],
   template: `
-    <div class="legal-page">
-      <div class="legal-container">
-        <h1>Contato</h1>
-        <p class="last-updated">Última atualização: Janeiro de 2026</p>
+    <div seoHead
+         [seoTitle]="'Contato | SimulaCert'"
+         [seoDescription]="'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.'"
+         [seoRobots]="'index, follow'"
+         [seoCanonical]="canonicalUrl"
+         [renderer]="renderer">
+      <div class="legal-page">
+        <div class="legal-container">
+          <h1>Contato</h1>
+          <p class="last-updated">Última atualização: Janeiro de 2026</p>
 
-        <section>
-          <p>
-            Para dúvidas, sugestões ou qualquer assunto relacionado ao SimulaCert,
-            você pode entrar em contato pelos canais abaixo:
-          </p>
+          <section>
+            <p>
+              Para dúvidas, sugestões ou qualquer assunto relacionado ao SimulaCert,
+              você pode entrar em contato pelos canais abaixo:
+            </p>
 
-          <ul class="contact-list">
-            <li>
-              <strong>E-mail:</strong>
-              <a href="mailto:marcelofeliciano@tutamail.com">marcelofeliciano&#64;tutamail.com</a>
-            </li>
-            <li>
-              <strong>LinkedIn:</strong>
-              <a href="https://www.linkedin.com/in/feliciano-marcelo" target="_blank" rel="noopener">
-                linkedin.com/in/feliciano-marcelo
-              </a>
-            </li>
-            <li>
-              <strong>GitHub:</strong>
-              <a href="https://github.com/m-feliciano" target="_blank" rel="noopener">
-                github.com/m-feliciano
-              </a>
-            </li>
-          </ul>
-        </section>
+            <ul class="contact-list">
+              <li>
+                <strong>E-mail:</strong>
+                <a href="mailto:marcelofeliciano@tutamail.com">marcelofeliciano&#64;tutamail.com</a>
+              </li>
+              <li>
+                <strong>LinkedIn:</strong>
+                <a href="https://www.linkedin.com/in/feliciano-marcelo" target="_blank" rel="noopener">
+                  linkedin.com/in/feliciano-marcelo
+                </a>
+              </li>
+              <li>
+                <strong>GitHub:</strong>
+                <a href="https://github.com/m-feliciano" target="_blank" rel="noopener">
+                  github.com/m-feliciano
+                </a>
+              </li>
+            </ul>
+          </section>
 
-        <div class="back-link">
-          <a (click)="goBack()">← Voltar</a>
+          <div class="back-link">
+            <a (click)="goBack()">← Voltar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -114,6 +124,19 @@ import {Component} from '@angular/core';
   `]
 })
 export class ContactComponent {
+
+
+  constructor(private _renderer: Renderer2,
+              private location: Location) {
+  }
+
+  get renderer() {
+    return this._renderer;
+  }
+
+  get canonicalUrl(): string {
+    return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/contato')}`;
+  }
 
   goBack(): void {
     window.history.back();

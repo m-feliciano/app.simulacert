@@ -1,48 +1,58 @@
-import {Component, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, Renderer2, signal} from '@angular/core';
+import {CommonModule, Location} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RouterLink} from '@angular/router';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, SeoHeadDirective],
   template: `
-    <div class="auth-card">
-      <h2>Recuperar Senha</h2>
-      <p class="subtitle">Digite seu email e enviaremos um link para redefinir sua senha.</p>
+    <div seoHead
+         [seoTitle]="'Recuperar Senha | SimulaCert'"
+         [seoDescription]="'Recupere o acesso à sua conta SimulaCert.'"
+         [seoRobots]="'noindex, nofollow'"
+         [seoCanonical]="canonicalUrl"
+         [renderer]="renderer">
+      <div class="auth-card">
+        <h2>Recuperar Senha</h2>
+        <p class="subtitle">Digite seu email e enviaremos um link para redefinir sua senha.</p>
 
-      @if (emailSent()) {
-        <div class="success-message">
-          <span class="success-icon">✓</span>
-          <p>Email enviado com sucesso! Verifique sua caixa de entrada.</p>
-        </div>
-        <a routerLink="/login" class="btn-secondary">Voltar ao Login</a>
-      } @else {
-        <form [formGroup]="forgotPasswordForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label>Email</label>
-            <input type="email" formControlName="email" class="form-control" placeholder="seu@email.com"/>
-            @if (forgotPasswordForm.get('email')?.touched && forgotPasswordForm.get('email')?.invalid) {
-              <div class="error">
-                Email válido é obrigatório
-              </div>
-            }
+        @if (emailSent()) {
+          <div class="success-message">
+            <span class="success-icon">✓</span>
+            <p>Email enviado com sucesso! Verifique sua caixa de entrada.</p>
           </div>
+          <a routerLink="/login" class="btn-secondary">Voltar ao Login</a>
+        } @else {
+          <form [formGroup]="forgotPasswordForm" (ngSubmit)="onSubmit()"
+                aria-label="Formulário de recuperação de senha">
+            <div class="form-group">
+              <label for="forgot-email">Email</label>
+              <input id="forgot-email" type="email" formControlName="email" class="form-control"
+                     placeholder="seu@email.com" aria-required="true"/>
+              @if (forgotPasswordForm.get('email')?.touched && forgotPasswordForm.get('email')?.invalid) {
+                <div class="error" aria-live="polite">
+                  Email válido é obrigatório
+                </div>
+              }
+            </div>
 
-          @if (errorMessage()) {
-            <div class="error">{{ errorMessage() }}</div>
-          }
+            @if (errorMessage()) {
+              <div class="error" aria-live="polite">{{ errorMessage() }}</div>
+            }
 
-          <button type="submit" class="btn-primary" [disabled]="forgotPasswordForm.invalid || loading()">
-            {{ loading() ? 'Enviando...' : 'Enviar Link de Recuperação' }}
-          </button>
-        </form>
+            <button type="submit" class="btn-primary" [disabled]="forgotPasswordForm.invalid || loading()">
+              {{ loading() ? 'Enviando...' : 'Enviar Link de Recuperação' }}
+            </button>
+          </form>
 
-        <div class="auth-footer">
-          <p><a routerLink="/login">Voltar ao Login</a></p>
-        </div>
-      }
+          <div class="auth-footer">
+            <p><a routerLink="/login">Voltar ao Login</a></p>
+          </div>
+        }
+      </div>
     </div>
   `,
   styles: [`
@@ -198,10 +208,23 @@ export class ForgotPasswordComponent {
   errorMessage = signal('');
   emailSent = signal(false);
 
-  constructor(private fb: FormBuilder) {
+  constructor(
+    private fb: FormBuilder,
+    private _renderer: Renderer2,
+    private location: Location
+  ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
+  }
+
+  get renderer() {
+    return this._renderer;
+  }
+
+  get canonicalUrl(): string {
+    const base = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${base}${this.location.prepareExternalUrl('/forgot-password')}`;
   }
 
   onSubmit(): void {
@@ -214,7 +237,7 @@ export class ForgotPasswordComponent {
         this.emailSent.set(true);
       }, 1000);
 
-      // TODO Exemplo de implementação real:
+      // TODO: implementar chamada real para API
       /*
       this.authApi.requestPasswordReset(this.forgotPasswordForm.value.email)
         .subscribe({
@@ -231,4 +254,3 @@ export class ForgotPasswordComponent {
     }
   }
 }
-

@@ -1,123 +1,133 @@
-import {Component, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {Component, OnInit, Renderer2, signal} from '@angular/core';
+import {CommonModule, Location} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {StatsApiService} from '../../api/stats.service';
 import {AttemptResponse, UserStatsDto} from '../../api/domain';
-import { ScoreStatusComponent } from '../../shared/components/score-status/score-status.component';
+import {ScoreStatusComponent} from '../../shared/components/score-status/score-status.component';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective],
   template: `
-    <div class="dashboard">
-      @if (loading()) {
-        <div class="loading-indicator">
-          <span class="spinner"></span>
-          Carregando...
-        </div>
-      } @else {
-        @if (isFirstAccess()) {
-          <div class="welcome-state">
-            <h1>Simulador de Certificações</h1>
-            <p class="welcome-intro">
-              Treine com simulados no formato real das principais certificações de cloud.
-            </p>
-            <div class="quick-actions">
-              <a routerLink="/exams" class="btn-primary-large">
-                Iniciar
-              </a>
-              <p class="helper-text">
-                AWS, Azure, GCP e outras certificações
-              </p>
-            </div>
+    <div seoHead
+         [seoTitle]="'Dashboard | SimulaCert'"
+         [seoDescription]="'Acompanhe seu desempenho, estatísticas e recomendações personalizadas para simulados de certificação.'"
+         [seoRobots]="'index, follow'"
+         [seoCanonical]="canonicalUrl"
+         [renderer]="renderer">
+      <div class="dashboard">
+        @if (loading()) {
+          <div class="loading-indicator">
+            <span class="spinner"></span>
+            Carregando...
           </div>
-
         } @else {
-          <!-- Dashboard normal com estatísticas -->
-          <h1>Bem-vindo de volta!</h1>
+          @if (isFirstAccess()) {
+            <div class="welcome-state">
+              <h1>Simulador de Certificações</h1>
+              <p class="welcome-intro">
+                Treine com simulados no formato real das principais certificações de cloud.
+              </p>
+              <div class="quick-actions">
+                <a routerLink="/exams" class="btn-primary-large" aria-label="Ir para lista de exames">
+                  Iniciar
+                </a>
+                <p class="helper-text">
+                  AWS, Azure, GCP e outras certificações
+                </p>
+              </div>
+            </div>
 
-          <!-- Recomendações Inteligentes -->
-          @if (showRecommendations()) {
-            <div class="recommendations-section">
-              <div class="recommendation-card">
-                <div class="recommendation-icon">💡</div>
-                <div class="recommendation-content">
-                  <h3>Recomendação para você</h3>
-                  <p>{{ recommendation() }}</p>
-                  <a [routerLink]="recommendationLink()" class="btn-recommendation">
-                    {{ recommendationCTA() }}
-                  </a>
+          } @else {
+            <!-- Dashboard normal com estatísticas -->
+            <h1>Bem-vindo de volta!</h1>
+
+            <!-- Recomendações Inteligentes -->
+            @if (showRecommendations()) {
+              <div class="recommendations-section">
+                <div class="recommendation-card">
+                  <div class="recommendation-icon">💡</div>
+                  <div class="recommendation-content">
+                    <h3>Recomendação para você</h3>
+                    <p>{{ recommendation() }}</p>
+                    <a [routerLink]="recommendationLink()" class="btn-recommendation" aria-label="Ver recomendação">
+                      {{ recommendationCTA() }}
+                    </a>
+                  </div>
                 </div>
               </div>
+            }
+
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
+                <div class="stat-label">Total de Tentativas</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
+                <div class="stat-label">Tentativas Completas</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-value">
+                  <app-score-status [score]="stats()?.averageScore || 0">
+                    {{ stats()?.averageScore || 0 }}%
+                  </app-score-status>
+                </div>
+                <div class="stat-label">Média de Pontuação</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-value">
+                  <app-score-status
+                    [score]="stats()?.bestScore || 0">
+                    {{ stats()?.bestScore || 0 }}%
+                  </app-score-status>
+                </div>
+                <div class="stat-label">Melhor Pontuação</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <h2>Tentativas Recentes</h2>
+              @if (recentAttempts().length > 0) {
+                <div class="attempts-list">
+                  @for (attempt of recentAttempts(); track attempt.id) {
+                    <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']"
+                       aria-label="Ver resultado da tentativa">
+                      <div class="attempt-info">
+                        <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
+                        <div class="attempt-status" [class]="attempt.status.toLowerCase()">
+                          {{ formatStatus(attempt.status) }}
+                        </div>
+                      </div>
+                      @if (attempt.score) {
+                        <div class="attempt-score"
+                             [ngClass]="{'green': attempt.score >= 75,
+                                        'red': attempt.score < 40,
+                                        'yellow': attempt.score >= 40 && attempt.score <= 74}">
+                          {{ attempt.score }}%
+                        </div>
+                      }
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+
+            <div class="actions">
+              <a routerLink="/exams" class="btn-primary" aria-label="Fazer novo simulado">Fazer Novo Simulado</a>
+              <a routerLink="/stats" class="btn-secondary" aria-label="Ver estatísticas completas">Ver Estatísticas
+                Completas</a>
             </div>
           }
-
-          <div class="stats-grid">
-            <div class="stat-card">
-              <div class="stat-value">{{ stats()?.totalAttempts || 0 }}</div>
-              <div class="stat-label">Total de Tentativas</div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-value">{{ stats()?.completedAttempts || 0 }}</div>
-              <div class="stat-label">Tentativas Completas</div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-value">
-                <app-score-status [score]="stats()?.averageScore || 0">
-                  {{ stats()?.averageScore || 0 }}%
-                </app-score-status>
-              </div>
-              <div class="stat-label">Média de Pontuação</div>
-            </div>
-
-            <div class="stat-card">
-              <div class="stat-value">
-                <app-score-status
-                  [score]="stats()?.bestScore || 0">
-                  {{ stats()?.bestScore || 0 }}%
-                </app-score-status>
-              </div>
-              <div class="stat-label">Melhor Pontuação</div>
-            </div>
-          </div>
-
-          <div class="section">
-            <h2>Tentativas Recentes</h2>
-            @if (recentAttempts().length > 0) {
-              <div class="attempts-list">
-                @for (attempt of recentAttempts(); track attempt.id) {
-                  <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']">
-                    <div class="attempt-info">
-                      <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
-                      <div class="attempt-status" [class]="attempt.status.toLowerCase()">
-                        {{ formatStatus(attempt.status) }}
-                      </div>
-                    </div>
-                    @if (attempt.score) {
-                      <div class="attempt-score"
-                           [ngClass]="{'green': attempt.score >= 75,
-                                      'red': attempt.score < 40,
-                                      'yellow': attempt.score >= 40 && attempt.score <= 74}">
-                        {{ attempt.score }}%
-                      </div>
-                    }
-                  </a>
-                }
-              </div>
-            }
-          </div>
-
-          <div class="actions">
-            <a routerLink="/exams" class="btn-primary">Fazer Novo Simulado</a>
-            <a routerLink="/stats" class="btn-secondary">Ver Estatísticas Completas</a>
-          </div>
         }
-      }
+      </div>
     </div>
   `,
   styles: [`
@@ -594,6 +604,7 @@ import { ScoreStatusComponent } from '../../shared/components/score-status/score
   `]
 })
 export class DashboardComponent implements OnInit {
+
   stats = signal<UserStatsDto | null>(null);
   recentAttempts = signal<AttemptResponse[]>([]);
   isFirstAccess = signal<boolean>(true);
@@ -606,8 +617,19 @@ export class DashboardComponent implements OnInit {
   constructor(
     private authFacade: AuthFacade,
     private attemptsApi: AttemptsApiService,
-    private statsApi: StatsApiService
+    private statsApi: StatsApiService,
+    private _renderer: Renderer2,
+    private location: Location
   ) {}
+
+  get renderer() {
+    return this._renderer;
+  }
+
+  get canonicalUrl(): string {
+    const base = typeof window !== 'undefined' ? window.location.origin : '';
+    return `${base}${this.location.prepareExternalUrl('/dashboard')}`;
+  }
 
   ngOnInit(): void {
     const user = this.authFacade.currentUser();

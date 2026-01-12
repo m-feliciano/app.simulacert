@@ -1,71 +1,80 @@
-import {Component} from '@angular/core';
-import {Router} from '@angular/router';
+import {Component, Renderer2} from '@angular/core';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {Location} from '@angular/common';
 
 @Component({
   selector: 'app-privacy-policy',
   standalone: true,
-  imports: [],
+  imports: [SeoHeadDirective],
   template: `
-    <div class="legal-page">
-      <div class="legal-container">
-        <h1>Política de Privacidade</h1>
+    <div seoHead
+         [seoTitle]="'Política de Privacidade | SimulaCert'"
+         [seoDescription]="'Veja como a SimulaCert trata seus dados e informações pessoais.'"
+         [seoRobots]="'index, follow'"
+         [seoCanonical]="canonicalUrl"
+         [renderer]="renderer">
 
-        <p class="last-updated">Última atualização: Janeiro de 2026</p>
+      <div class="legal-page">
+        <div class="legal-container">
+          <h1>Política de Privacidade</h1>
 
-        <section>
-          <h2>1. Introdução</h2>
-          <p>Esta Política de Privacidade descreve como o SimulaCert coleta, usa e protege suas informações
-            pessoais.</p>
-        </section>
+          <p class="last-updated">Última atualização: Janeiro de 2026</p>
 
-        <section>
-          <h2>2. Informações Coletadas</h2>
-          <p>Coletamos as seguintes informações:</p>
-          <ul>
-            <li>Nome e email fornecidos no cadastro</li>
-            <li>Informações de progresso e resultados dos simulados</li>
-            <li>Dados de uso e navegação</li>
-          </ul>
-        </section>
+          <section>
+            <h2>1. Introdução</h2>
+            <p>Esta Política de Privacidade descreve como o SimulaCert coleta, usa e protege suas informações
+              pessoais.</p>
+          </section>
 
-        <section>
-          <h2>3. Uso das Informações</h2>
-          <p>Usamos suas informações para:</p>
-          <ul>
-            <li>Fornecer e melhorar nossos serviços</li>
-            <li>Personalizar sua experiência</li>
-            <li>Comunicar atualizações e novidades</li>
-          </ul>
-        </section>
+          <section>
+            <h2>2. Informações Coletadas</h2>
+            <p>Coletamos as seguintes informações:</p>
+            <ul>
+              <li>Nome e email fornecidos no cadastro</li>
+              <li>Informações de progresso e resultados dos simulados</li>
+              <li>Dados de uso e navegação</li>
+            </ul>
+          </section>
 
-        <section>
-          <h2>4. Compartilhamento de Dados</h2>
-          <p>Não vendemos ou compartilhamos suas informações pessoais com terceiros, exceto quando necessário para
-            operar o serviço ou quando exigido por lei.</p>
-        </section>
+          <section>
+            <h2>3. Uso das Informações</h2>
+            <p>Usamos suas informações para:</p>
+            <ul>
+              <li>Fornecer e melhorar nossos serviços</li>
+              <li>Personalizar sua experiência</li>
+              <li>Comunicar atualizações e novidades</li>
+            </ul>
+          </section>
 
-        <section>
-          <h2>5. Segurança</h2>
-          <p>Implementamos medidas de segurança para proteger suas informações contra acesso não autorizado.</p>
-        </section>
+          <section>
+            <h2>4. Compartilhamento de Dados</h2>
+            <p>Não vendemos ou compartilhamos suas informações pessoais com terceiros, exceto quando necessário para
+              operar o serviço ou quando exigido por lei.</p>
+          </section>
 
-        <section>
-          <h2>6. Seus Direitos</h2>
-          <p>Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento.</p>
-        </section>
+          <section>
+            <h2>5. Segurança</h2>
+            <p>Implementamos medidas de segurança para proteger suas informações contra acesso não autorizado.</p>
+          </section>
 
-        <section>
-          <h2>7. Cookies</h2>
-          <p>Utilizamos cookies para melhorar sua experiência e manter sua sessão ativa.</p>
-        </section>
+          <section>
+            <h2>6. Seus Direitos</h2>
+            <p>Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento.</p>
+          </section>
 
-        <section>
-          <h2>8. Contato</h2>
-          <p>Para questões sobre privacidade, entre em contato através do email de suporte.</p>
-        </section>
+          <section>
+            <h2>7. Cookies</h2>
+            <p>Utilizamos cookies para melhorar sua experiência e manter sua sessão ativa.</p>
+          </section>
 
-        <div class="back-link">
-          <a (click)="goBack()">← Voltar</a>
+          <section>
+            <h2>8. Contato</h2>
+            <p>Para questões sobre privacidade, entre em contato através do email de suporte.</p>
+          </section>
+
+          <div class="back-link">
+            <a (click)="goBack()">← Voltar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -147,10 +156,20 @@ import {Router} from '@angular/router';
 })
 export class PrivacyPolicyComponent {
 
-  constructor(private router: Router) {}
+
+  constructor(private _renderer: Renderer2,
+              private location: Location) {
+  }
+
+  get renderer() {
+    return this._renderer;
+  }
+
+  get canonicalUrl(): string {
+    return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/politica-de-privacidade')}`;
+  }
 
   goBack(): void {
     window.history.back();
   }
 }
-

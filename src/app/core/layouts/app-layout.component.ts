@@ -1,9 +1,9 @@
-import {Component, computed, signal} from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
-import { SupportModalComponent } from '../../shared/components/support-modal.component';
+import {SupportModalComponent} from '../../shared/components/support-modal.component';
 
 @Component({
   selector: 'app-layout',
