@@ -90,24 +90,6 @@ export class AuthFacade {
     );
   }
 
-  ensureAuthenticated(): Observable<UserResponse | null> {
-    return defer(() => {
-      const current = this.currentUser();
-      if (current) {
-        return of(current);
-      }
-
-      const stored = localStorage.getItem(this.USER_KEY);
-      if (stored) {
-        const user: UserResponse = JSON.parse(stored);
-        this.updateUserState(user);
-        return of(user);
-      }
-
-      return of(null);
-    });
-  }
-
   createAnonymousUser(): Observable<UserResponse> {
     return this.authApi.createAnonymousUser().pipe(
       tap(auth => {
