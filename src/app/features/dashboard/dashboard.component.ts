@@ -28,17 +28,21 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
         } @else {
           @if (isFirstAccess()) {
             <div class="welcome-state">
-              <h1>Simulador de Certificações</h1>
+              <h1>Simulados Gratuitos AWS, Azure e GCP para Certificações Cloud</h1>
+
               <p class="welcome-intro">
                 Treine com simulados no formato real das principais certificações de cloud.
               </p>
+
               <div class="quick-actions">
                 <a routerLink="/exams" class="btn-primary-large" aria-label="Ir para lista de exames">
                   Iniciar
                 </a>
+
                 <p class="helper-text">
                   AWS, Azure, GCP e outras certificações
                 </p>
+
               </div>
             </div>
 

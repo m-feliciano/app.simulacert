@@ -1,5 +1,5 @@
 import {Component, OnInit, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
+import {CommonModule, Location, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
 import {Router} from '@angular/router';
@@ -8,7 +8,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, SeoHeadDirective],
+  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage],
   template: `
     <div seoHead
          [seoTitle]="'Exames Disponíveis | SimulaCert'"
@@ -49,24 +49,29 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
                   }
                 </div>
 
+                @if (exam.slug) {
+                  <img class="exam-icon" [ngSrc]="exam.slug + '.png'" [alt]="exam.title + ' ícone'" width="150"
+                       height="150" priority/>
+                }
+
                 @if (exam.description) {
                   <p class="exam-description">{{ exam.description }}</p>
                 }
 
-                <div class="exam-meta">
-                  @if (exam.totalQuestions) {
-                    <div class="meta-item">
-                      <span class="meta-icon">📝</span>
-                      <span class="meta-text">{{ exam.totalQuestions }} questões</span>
-                    </div>
-                  }
-                  @if (exam.durationMinutes) {
-                    <div class="meta-item">
-                      <span class="meta-icon">⏱️</span>
-                      <span class="meta-text">{{ exam.durationMinutes }} min</span>
-                    </div>
-                  }
-                </div>
+                <!--                <div class="exam-meta">-->
+                <!--                  @if (exam.totalQuestions) {-->
+                <!--                    <div class="meta-item">-->
+                <!--                      <span class="meta-icon">📝</span>-->
+                <!--                      <span class="meta-text">{{ exam.totalQuestions }} questões</span>-->
+                <!--                    </div>-->
+                <!--                  }-->
+                <!--                  @if (exam.durationMinutes) {-->
+                <!--                    <div class="meta-item">-->
+                <!--                      <span class="meta-icon">⏱️</span>-->
+                <!--                      <span class="meta-text">{{ exam.durationMinutes }} min</span>-->
+                <!--                    </div>-->
+                <!--                  }-->
+                <!--                </div>-->
 
                 @if (exam.incoming) {
                   <a class="btn-primary disabled muted" aria-disabled="true" aria-label="Exame em breve">Em breve</a>
@@ -90,6 +95,12 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
   `,
   styles: [
     `
+      .exam-icon {
+        display: block;
+        margin: 16px auto;
+        max-width: 100%;
+        height: auto;
+      }
       .page-title {
         text-align: center;
         margin: 32px 0 24px 0;
@@ -444,21 +455,21 @@ export class ExamsListComponent implements OnInit {
     return [
       {
         id: '1f0ecad5-1bcb-63e8-8ec7-4b60a5d7c8e8',
-        title: 'AWS Certified Developer - Associate',
+        title: 'AWS Certified Developer - Associate (DVA-C02)',
         description: 'Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão.',
         difficulty: 'MEDIUM',
         totalQuestions: 235,
         incoming: true,
-        slug: 'aws-developer-associate'
+        slug: 'aws-certified-developer-dva-c02'
       },
       {
         id: '2a1bdc34-2d4f-4c3b-9f7e-5b1e6d9f7c9f',
-        title: 'Microsoft Azure Fundamentals',
+        title: 'Microsoft Certified Azure Fundamentals (AZ-900)',
         description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
         difficulty: 'EASY',
         totalQuestions: 174,
         incoming: true,
-        slug: 'azure-fundamentals'
+        slug: 'azure-certified-fundamentals-az-900'
       }
     ];
   }

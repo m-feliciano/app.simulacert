@@ -21,7 +21,14 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       <div class="stats-container">
         <h1>Estatísticas</h1>
 
-        @if (userStats()) {
+        @if (loading()) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Carregando estatísticas...</p>
+          </div>
+        } @else {
+
+          @if (userStats()) {
           <div class="stats-overview">
             <div class="stat-card">
               <div class="stat-value">{{ userStats()!.totalAttempts }}</div>
@@ -55,7 +62,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
         @if (domainStats().length > 0) {
           <div class="section">
-            <h2>Performance por Domínio AWS</h2>
+            <h2>Performance por Domínio</h2>
             <div class="domain-stats">
               @for (domain of domainStats(); track domain.awsDomain) {
                 <div class="domain-item">
@@ -78,10 +85,9 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
           </div>
         } @else {
           <div class="section empty-section">
-            <h2>Performance por Domínio AWS</h2>
+            <h2>Performance por Domínio</h2>
             <p class="empty-message">Nenhum dado de domínio disponível. Complete alguns exames para ver suas
-              estatísticas
-              por domínio.</p>
+              estatísticas por domínio.</p>
           </div>
         }
 
@@ -125,6 +131,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
           <a routerLink="/exams" class="btn-primary">Fazer Novo Exame</a>
           <a routerLink="/dashboard" class="btn-secondary">Voltar ao Dashboard</a>
         </div>
+        }
       </div>
     </div>
   `,
@@ -135,6 +142,7 @@ export class StatsComponent implements OnInit {
   userStats = signal<UserStatsDto | null>(null);
   domainStats = signal<AwsDomainStatsDto[]>([]);
   attemptHistory = signal<AttemptHistoryItemDto[]>([]);
+  loading = signal(true);
 
   constructor(
     private authFacade: AuthFacade,
@@ -156,25 +164,38 @@ export class StatsComponent implements OnInit {
     const userId = this.authFacade.currentUser()?.id;
     if (userId) {
       this.loadStats(userId);
+    } else {
+      this.loading.set(false);
     }
   }
 
   loadStats(userId: string): void {
+    let loaded = 0;
+
+    const done = () => {
+      loaded++;
+      if (loaded === 3) this.loading.set(false);
+    };
+
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
         this.userStats.set(stats);
+        done();
       },
       error: (error) => {
         console.error('Error loading user stats:', error);
+        done();
       }
     });
 
     this.statsApi.getPerformanceByDomain(userId).subscribe({
       next: (domains) => {
         this.domainStats.set(domains.sort((a, b) => b.accuracyRate - a.accuracyRate));
+        done();
       },
       error: (error) => {
         console.error('Error loading domain stats:', error);
+        done();
       }
     });
 
@@ -183,9 +204,11 @@ export class StatsComponent implements OnInit {
         this.attemptHistory.set(history.sort((a, b) =>
           new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
         ));
+        done();
       },
       error: (error) => {
         console.error('Error loading attempt history:', error);
+        done();
       }
     });
   }
