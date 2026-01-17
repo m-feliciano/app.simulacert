@@ -17,11 +17,17 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
   template: `
     <div class="attempt-questions-result">
       <h2>Revisão das Questões</h2>
-      <a class="btn-back" routerLink="/attempt/{{ route.snapshot.paramMap.get('id') }}/result">&larr; Voltar ao Resultado</a>
+
+      <div style="justify-self: end;">
+        <a class="btn-back"
+           routerLink="/attempt/{{ route.snapshot.paramMap.get('id') }}/result">&larr; Voltar ao Resultado
+        </a>
+      </div>
+
       @if (loading()) {
         <p>Carregando questões...</p>
-      }
-      @if (!loading()) {
+      } @else {
+
         @if (questions().length) {
           @for (q of questions(); track q.questionId; let i = $index) {
             <div class="question-card" [class.correct]="isCorrect(q)" [class.incorrect]="!isCorrect(q)">
@@ -32,6 +38,7 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
                 </span>
               </div>
               <div class="question-text">{{ q.text }}</div>
+
               <ul class="options-list">
                 @for (opt of q.options; track opt.key) {
                   <li [class.correct-option]="opt.isCorrect" [class.selected-option]="isSelectedOption(q, opt.key)">
