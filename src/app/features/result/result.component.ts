@@ -70,7 +70,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
             <div class="detail-card">
               <div class="detail-label">Questões</div>
-              <div class="detail-value">{{ attempt()!.questionIds.length }}</div>
+              <div class="detail-value">{{ formatQuestionsText() }}</div>
             </div>
           </div>
 
@@ -341,5 +341,21 @@ export class ResultComponent implements OnInit {
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';
     return `${base}${this.location.prepareExternalUrl(window.location.pathname)}`;
+  }
+
+  formatQuestionsText() : string {
+    const score = this.attempt()!.score;
+    const questions = this.attempt()!.questionIds.length;
+
+    if (score === undefined) {
+      return `Nenhuma questão correta`;
+    }
+
+    if (score === 100) {
+      return `Todas as ${questions} corretas`;
+    }
+
+    const correctAnswers = Math.round((score! / 100) * questions);
+    return `${correctAnswers} de ${questions} corretas`;
   }
 }

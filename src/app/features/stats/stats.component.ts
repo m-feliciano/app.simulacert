@@ -6,11 +6,12 @@ import {StatsApiService} from '../../api/stats.service';
 import {AttemptHistoryItemDto, AwsDomainStatsDto, UserStatsDto} from '../../api/domain';
 import {ScoreStatusComponent} from '../../shared/components/score-status/score-status.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe],
   template: `
     <div seoHead
          [seoTitle]="'Estatísticas | SimulaCert'"
@@ -43,7 +44,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
             <div class="stat-card">
               <div class="stat-value">
                 <app-score-status [score]="userStats()!.averageScore">
-                  {{ userStats()!.averageScore }}%
+                  {{ userStats()!.averageScore | formatPercentile }}%
                 </app-score-status>
               </div>
               <div class="stat-label">Pontuação Média</div>
@@ -52,7 +53,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
             <div class="stat-card">
               <div class="stat-value">
                 <app-score-status [score]="userStats()!.bestScore || 0">
-                  {{ userStats()!.bestScore || 0 }}%
+                  {{ userStats()!.bestScore || 0 | formatPercentile }}%
                 </app-score-status>
               </div>
               <div class="stat-label">Melhor Pontuação</div>
@@ -68,7 +69,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
                 <div class="domain-item">
                   <div class="domain-header">
                     <span class="domain-name">{{ domain.awsDomain || 'Domínio Geral' }}</span>
-                    <span class="domain-accuracy">{{ (domain.accuracyRate).toFixed(1) }}%</span>
+                    <span class="domain-accuracy">{{ domain.accuracyRate | formatPercentile }}%</span>
                   </div>
                   <div class="domain-bar">
                     <div class="domain-fill" [style.width.%]="domain.accuracyRate"></div>

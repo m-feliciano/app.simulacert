@@ -7,11 +7,12 @@ import {StatsApiService} from '../../api/stats.service';
 import {AttemptResponse, UserStatsDto} from '../../api/domain';
 import {ScoreStatusComponent} from '../../shared/components/score-status/score-status.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe],
   template: `
     <div seoHead
          [seoTitle]="'Dashboard | SimulaCert'"
@@ -83,7 +84,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
               <div class="stat-card">
                 <div class="stat-value">
                   <app-score-status [score]="stats()?.averageScore || 0">
-                    {{ stats()?.averageScore || 0 }}%
+                    {{ stats()?.averageScore || 0 | formatPercentile }}%
                   </app-score-status>
                 </div>
                 <div class="stat-label">Média de Pontuação</div>
@@ -93,7 +94,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
                 <div class="stat-value">
                   <app-score-status
                     [score]="stats()?.bestScore || 0">
-                    {{ stats()?.bestScore || 0 }}%
+                    {{ stats()?.bestScore || 0 | formatPercentile }}%
                   </app-score-status>
                 </div>
                 <div class="stat-label">Melhor Pontuação</div>
@@ -118,7 +119,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
                              [ngClass]="{'green': attempt.score >= 75,
                                         'red': attempt.score < 40,
                                         'yellow': attempt.score >= 40 && attempt.score <= 74}">
-                          {{ attempt.score }}%
+                          {{ attempt.score | formatPercentile }}%
                         </div>
                       }
                     </a>
