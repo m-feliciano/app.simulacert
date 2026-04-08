@@ -11,10 +11,9 @@ export class SeoHeadDirective implements OnInit, OnChanges {
   @Input() seoRobots = 'index, follow';
   // SEO canonical is the preferred URL for the page
   @Input() seoCanonical = '';
-  @Input() renderer!: Renderer2;
 
   constructor(
-    private seoService: SeoService,
+    private seoService: SeoService
   ) {
   }
 
@@ -40,7 +39,7 @@ export class SeoHeadDirective implements OnInit, OnChanges {
     }
 
     if (this.seoCanonical) {
-      this.seoService.updateCanonical(this.seoCanonical, this.renderer);
+      this.seoService.updateCanonical(this.seoCanonical);
     }
   }
 }

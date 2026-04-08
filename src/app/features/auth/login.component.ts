@@ -16,8 +16,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="'Login | SimulaCert'"
          [seoDescription]="'Acesse sua conta SimulaCert para treinar simulados de certificação.'"
          [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="auth-card">
         <div class="logo-container">
           <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360"/>
@@ -111,7 +110,6 @@ export class LoginComponent {
     private authFacade: AuthFacade,
     private router: Router,
     @Inject(API_CONFIG) private config: ApiConfig,
-    private _renderer: Renderer2,
     private location: Location
   ) {
     this.loginForm = this.fb.group({
@@ -121,9 +119,7 @@ export class LoginComponent {
     this.baseUrl = this.config.baseUrl;
   }
 
-  get renderer() {
-    return this._renderer;
-  }
+
 
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';

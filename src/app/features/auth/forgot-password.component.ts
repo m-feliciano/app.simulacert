@@ -13,8 +13,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="'Recuperar Senha | SimulaCert'"
          [seoDescription]="'Recupere o acesso à sua conta SimulaCert.'"
          [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="auth-card">
         <h2>Recuperar Senha</h2>
         <p class="subtitle">Digite seu email e enviaremos um link para redefinir sua senha.</p>
@@ -210,16 +209,11 @@ export class ForgotPasswordComponent {
 
   constructor(
     private fb: FormBuilder,
-    private _renderer: Renderer2,
     private location: Location
   ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
-  }
-
-  get renderer() {
-    return this._renderer;
   }
 
   get canonicalUrl(): string {

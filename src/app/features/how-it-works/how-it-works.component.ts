@@ -12,8 +12,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="'Como Funciona | SimulaCert'"
          [seoDescription]="'Entenda como funciona a plataforma SimulaCert para simulados de certificação em cloud.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
 
       <div class="how-it-works-container">
         <div class="hero-section">
@@ -137,15 +136,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 })
 export class HowItWorksComponent {
 
-
-  constructor(private _renderer: Renderer2,
-              private location: Location
-  ) {
-  }
-
-  get renderer() {
-    return this._renderer;
-  }
+  constructor(private location: Location) {}
 
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';

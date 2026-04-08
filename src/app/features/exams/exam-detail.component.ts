@@ -17,8 +17,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="exam() ? exam()!.title + ' | SimulaCert' : 'Simulado | SimulaCert'"
          [seoDescription]="exam() ? (exam()!.description || 'Simulado de certificação.') : 'Simulado de certificação.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
 
       @if (showRegisterPrompt()) {
         <app-register-prompt-modal (register)="goToRegister()"
@@ -157,12 +156,7 @@ export class ExamDetailComponent implements OnInit {
     private examsApi: ExamsApiService,
     private attemptsApi: AttemptsApiService,
     private authFacade: AuthFacade,
-    private _renderer: Renderer2
   ) {}
-
-  get renderer() {
-    return this._renderer;
-  }
 
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';

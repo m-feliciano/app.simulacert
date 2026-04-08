@@ -18,8 +18,7 @@ import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
          [seoTitle]="'Dashboard | SimulaCert'"
          [seoDescription]="'Acompanhe seu desempenho, estatísticas e recomendações personalizadas para simulados de certificação.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="dashboard">
         @if (loading()) {
           <div class="loading-indicator">
@@ -155,13 +154,8 @@ export class DashboardComponent implements OnInit {
     private authFacade: AuthFacade,
     private attemptsApi: AttemptsApiService,
     private statsApi: StatsApiService,
-    private _renderer: Renderer2,
     private location: Location
   ) {}
-
-  get renderer() {
-    return this._renderer;
-  }
 
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';

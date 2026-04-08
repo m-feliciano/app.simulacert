@@ -17,8 +17,7 @@ import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
          [seoTitle]="'Estatísticas | SimulaCert'"
          [seoDescription]="'Veja suas estatísticas de desempenho nos simulados da SimulaCert.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="stats-container">
         <h1>Estatísticas</h1>
 
@@ -148,13 +147,8 @@ export class StatsComponent implements OnInit {
   constructor(
     private authFacade: AuthFacade,
     private statsApi: StatsApiService,
-    private _renderer: Renderer2,
     private location: Location
   ) {}
-
-  get renderer() {
-    return this._renderer;
-  }
 
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';

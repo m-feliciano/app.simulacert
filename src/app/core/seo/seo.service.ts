@@ -1,10 +1,12 @@
-import {Injectable, Renderer2} from '@angular/core';
+import {DOCUMENT, Inject, Injectable} from '@angular/core';
 import {Meta, Title} from '@angular/platform-browser';
 
 @Injectable({providedIn: 'root'})
 export class SeoService {
 
-  constructor(private title: Title, private meta: Meta) {
+  constructor(private title: Title,
+              private meta: Meta,
+              @Inject(DOCUMENT) private document: Document) {
   }
 
   updateTitle(title: string) {
@@ -19,13 +21,15 @@ export class SeoService {
     this.meta.updateTag({name: 'robots', content: robots});
   }
 
-  updateCanonical(url: string, renderer: Renderer2) {
-    const link: HTMLLinkElement = renderer.createElement('link');
-    renderer.setAttribute(link, 'rel', 'canonical');
-    renderer.setAttribute(link, 'href', url);
+  updateCanonical(url: string) {
+    let link = this.document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
 
-    const old = document.head.querySelector('link[rel=canonical]');
-    if (old) renderer.removeChild(document.head, old);
-    renderer.appendChild(document.head, link);
+    if (!link) {
+      link = this.document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      this.document.head.appendChild(link);
+    }
+
+    link.setAttribute('href', url);
   }
 }

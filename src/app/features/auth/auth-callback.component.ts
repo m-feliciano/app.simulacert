@@ -117,6 +117,7 @@ export class AuthCallbackComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.queryParams
+      // We only need to process the query parameters once, so we use `first()` to complete after the first emission.
       .pipe(first(), takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
         const code = params['code'];

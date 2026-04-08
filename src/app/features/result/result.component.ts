@@ -16,8 +16,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="'Resultado do Exame | SimulaCert'"
          [seoDescription]="'Veja o resultado detalhado do seu simulado na SimulaCert.'"
          [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="result-container">
         @if (loading()) {
           <div class="loading-state">
@@ -249,13 +248,8 @@ export class ResultComponent implements OnInit {
     private route: ActivatedRoute,
     private attemptsApi: AttemptsApiService,
     private examsApi: ExamsApiService,
-    private _renderer: Renderer2,
     private location: Location
   ) {}
-
-  get renderer() {
-    return this._renderer;
-  }
 
   get isPassed(): boolean {
     const score = this.attempt()?.score || 0;

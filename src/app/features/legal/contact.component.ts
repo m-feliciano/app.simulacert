@@ -11,8 +11,7 @@ import {Location} from '@angular/common';
          [seoTitle]="'Contato | SimulaCert'"
          [seoDescription]="'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="legal-page">
         <div class="legal-container">
           <h1>Contato</h1>
@@ -125,14 +124,7 @@ import {Location} from '@angular/common';
 })
 export class ContactComponent {
 
-
-  constructor(private _renderer: Renderer2,
-              private location: Location) {
-  }
-
-  get renderer() {
-    return this._renderer;
-  }
+  constructor(private location: Location) {}
 
   get canonicalUrl(): string {
     return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/contato')}`;

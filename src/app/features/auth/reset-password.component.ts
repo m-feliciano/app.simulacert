@@ -13,8 +13,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="'Redefinir Senha | SimulaCert'"
          [seoDescription]="'Defina uma nova senha para sua conta SimulaCert.'"
          [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="auth-card">
         <h2>Redefinir Senha</h2>
         <p class="subtitle">Digite sua nova senha.</p>
@@ -210,7 +209,6 @@ export class ResetPasswordComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private _renderer: Renderer2,
     private location: Location
   ) {
     this.resetPasswordForm = this.fb.group({
@@ -219,9 +217,7 @@ export class ResetPasswordComponent implements OnInit {
     }, {validators: this.passwordMatchValidator});
   }
 
-  get renderer() {
-    return this._renderer;
-  }
+
 
   get canonicalUrl(): string {
     const base = typeof window !== 'undefined' ? window.location.origin : '';

@@ -14,8 +14,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
          [seoTitle]="'Exames Disponíveis | SimulaCert'"
          [seoDescription]="'Simulados para certificações AWS, Azure, GCP e outras. Prepare-se com questões atualizadas e explicações detalhadas.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
 
       <h1 class="page-title">Exames Disponíveis</h1>
       <div class="exams-container">
@@ -392,13 +391,8 @@ export class ExamsListComponent implements OnInit {
   constructor(
     private examsApi: ExamsApiService,
     private router: Router,
-    private _renderer: Renderer2,
     private location: Location
   ) {
-  }
-
-  get renderer() {
-    return this._renderer;
   }
 
   get canonicalUrl(): string {

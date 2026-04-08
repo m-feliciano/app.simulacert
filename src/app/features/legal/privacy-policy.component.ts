@@ -11,8 +11,7 @@ import {Location} from '@angular/common';
          [seoTitle]="'Política de Privacidade | SimulaCert'"
          [seoDescription]="'Veja como a SimulaCert trata seus dados e informações pessoais.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
 
       <div class="legal-page">
         <div class="legal-container">
@@ -156,14 +155,7 @@ import {Location} from '@angular/common';
 })
 export class PrivacyPolicyComponent {
 
-
-  constructor(private _renderer: Renderer2,
-              private location: Location) {
-  }
-
-  get renderer() {
-    return this._renderer;
-  }
+  constructor(private location: Location) {}
 
   get canonicalUrl(): string {
     return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/politica-de-privacidade')}`;

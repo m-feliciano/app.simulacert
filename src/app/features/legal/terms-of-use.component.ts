@@ -11,8 +11,7 @@ import {Location} from '@angular/common';
          [seoTitle]="'Termos de Uso | SimulaCert'"
          [seoDescription]="'Leia os Termos de Uso da plataforma SimulaCert.'"
          [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl"
-         [renderer]="renderer">
+         [seoCanonical]="canonicalUrl">
       <div class="legal-page">
         <div class="legal-container">
           <h1>Termos de Uso</h1>
@@ -129,13 +128,7 @@ import {Location} from '@angular/common';
 })
 export class TermsOfUseComponent {
 
-
-  constructor(private _renderer: Renderer2, private location: Location) {
-  }
-
-  get renderer() {
-    return this._renderer;
-  }
+  constructor( private location: Location) {}
 
   get canonicalUrl(): string {
     return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/termos-de-uso')}`;
