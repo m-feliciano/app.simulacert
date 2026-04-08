@@ -1,20 +1,18 @@
-import {Component, OnInit, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location, NgOptimizedImage} from '@angular/common';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
 import {Router} from '@angular/router';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-exams-list',
   standalone: true,
   imports: [CommonModule, SeoHeadDirective, NgOptimizedImage],
   template: `
-    <div seoHead
-         [seoTitle]="'Exames Disponíveis | SimulaCert'"
-         [seoDescription]="'Simulados para certificações AWS, Azure, GCP e outras. Prepare-se com questões atualizadas e explicações detalhadas.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
 
       <h1 class="page-title">Exames Disponíveis</h1>
       <div class="exams-container">
@@ -391,17 +389,35 @@ export class ExamsListComponent implements OnInit {
   constructor(
     private examsApi: ExamsApiService,
     private router: Router,
-    private location: Location
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
-  }
-
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/exams')}`;
   }
 
   ngOnInit(): void {
     this.loadExams();
+
+    const seo = this.seoFactory.website({
+      title: 'Exames Disponíveis | SimulaCert',
+      description: 'Simulados para certificações AWS, Azure, GCP e outras. Prepare-se com questões atualizadas e explicações detalhadas.',
+      canonicalPath: '/exams',
+      robots: 'index, follow',
+      jsonLdId: 'exams-list',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Exames Disponíveis',
+        description: 'Simulados para certificações AWS, Azure, GCP e outras.',
+        url: this.seoFactory.canonicalFromPath('/exams'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    })
+
+    this.seoFacade.set(seo);
   }
 
   loadExams(): void {
@@ -468,9 +484,3 @@ export class ExamsListComponent implements OnInit {
     ];
   }
 }
-
-// Checklist infraestrutura (fora do código):
-// - Ativar Gzip/Brotli
-// - Ativar HTTP/2 ou HTTP/3
-// - Monitorar tempo de resposta da API
-// - Priorizar renderização do <h1> e skeleton

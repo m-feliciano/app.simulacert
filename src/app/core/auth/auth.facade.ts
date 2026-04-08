@@ -1,9 +1,10 @@
-import {computed, Injectable, signal} from '@angular/core';
-import {defer, map, Observable, of, throwError} from 'rxjs';
+import {computed, Inject, Injectable, signal} from '@angular/core';
+import {map, Observable, throwError} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {AuthApiService} from '../../api/auth.service';
 import {AuthResponse, LoginRequest, RegisterRequest, UserResponse} from '../../api/domain';
 import {HttpResponse} from '@angular/common/http';
+import {LOCAL_STORAGE} from '../storage/local-storage.token';
 
 interface AuthState {
   user: UserResponse | null;
@@ -20,9 +21,9 @@ export class AuthFacade {
   private readonly REFRESH_KEY = 'refresh_token';
 
   private state = signal<AuthState>({
-    user: this.loadUserFromStorage(),
-    token: this.loadTokenFromStorage(),
-    isAuthenticated: !!this.loadTokenFromStorage()
+    user: null,
+    token: null,
+    isAuthenticated: false
   });
 
   readonly isAnonymous = computed(() => this.state()?.user?.type == "ANONYMOUS");
@@ -31,7 +32,19 @@ export class AuthFacade {
   readonly token = computed(() => this.state().token);
   readonly isAdmin = computed(() => this.state().user?.role === 'ADMIN');
 
-  constructor(private authApi: AuthApiService) {}
+  constructor(
+    private authApi: AuthApiService,
+    @Inject(LOCAL_STORAGE) private storage: Storage,
+  ) {
+    const token = this.loadTokenFromStorage();
+    const user = this.loadUserFromStorage();
+
+    this.state.set({
+      user,
+      token,
+      isAuthenticated: !!token,
+    });
+  }
 
   login(request: LoginRequest): Observable<AuthResponse> {
     return this.authApi.login(request).pipe(
@@ -44,7 +57,7 @@ export class AuthFacade {
   }
 
   register(request: RegisterRequest): Observable<HttpResponse<void>> {
-    const current = localStorage.getItem(this.USER_KEY);
+    const current = this.storage.getItem(this.USER_KEY) ?? null;
     if (current) {
       const anonUser: UserResponse = JSON.parse(current);
       request.id = anonUser.id;
@@ -64,8 +77,7 @@ export class AuthFacade {
   }
 
   handleOAuthCallback(token: string): void {
-    // O backend já retorna o token JWT pronto para uso
-    localStorage.setItem(this.TOKEN_KEY, token);
+    this.storage.setItem(this.TOKEN_KEY, token);
 
     this.state.set({
       user: null,
@@ -74,6 +86,37 @@ export class AuthFacade {
     });
 
     this.loadCurrentUser();
+  }
+
+  generateRefreshToken() {
+    if (!this.token()) {
+      return throwError(() => new Error('No token available for refresh'));
+    }
+
+    const currentRefreshToken = this.refreshToken();
+    if (!currentRefreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+
+    const bearerToken = currentRefreshToken.startsWith('Bearer ')
+      ? currentRefreshToken : `Bearer ${currentRefreshToken}`;
+
+    return this.authApi.refreshToken(bearerToken).pipe(
+      tap(({token, refreshToken}) => {
+        this.storage.setItem(this.TOKEN_KEY, token);
+        this.storage.setItem(this.REFRESH_KEY, refreshToken);
+
+        this.state.update(s => ({
+          ...s,
+          token: token,
+          isAuthenticated: true
+        }));
+      }),
+      catchError(error => {
+        this.clearAuth();
+        return throwError(() => error);
+      })
+    );
   }
 
   logout(): void {
@@ -99,55 +142,23 @@ export class AuthFacade {
     );
   }
 
-  generateRefreshToken() {
-    if (!this.token()) {
-      return throwError(() => new Error('No token available for refresh'));
-    }
-
-    const currentRefreshToken = this.refreshToken();
-    if (!currentRefreshToken) {
-      return throwError(() => new Error('No refresh token available'));
-    }
-
-    const bearerToken = currentRefreshToken.startsWith('Bearer ')
-      ? currentRefreshToken
-      : `Bearer ${currentRefreshToken}`;
-
-    return this.authApi.refreshToken(bearerToken).pipe(
-      tap(({token, refreshToken}) => {
-        localStorage.setItem(this.TOKEN_KEY, token);
-        localStorage.setItem(this.REFRESH_KEY, refreshToken);
-
-        this.state.update(s => ({
-          ...s,
-          token: token,
-          authenticated: true
-        }));
-      }),
-      catchError(error => {
-        this.clearAuth();
-        return throwError(() => error);
-      })
-    );
-  }
-
   refreshToken() {
-    return localStorage.getItem(this.REFRESH_KEY);
+    return this.storage.getItem(this.REFRESH_KEY) ?? null;
   }
 
   private loadTokenFromStorage(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    return this.storage.getItem(this.TOKEN_KEY) ?? null;
   }
 
   private loadUserFromStorage(): UserResponse | null {
-    const userJson = localStorage.getItem(this.USER_KEY);
+    const userJson = this.storage.getItem(this.USER_KEY) ?? null;
     return userJson ? JSON.parse(userJson) : null;
   }
 
   private handleAuthSuccess(response: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, response.token);
-    localStorage.setItem(this.REFRESH_KEY, response.refreshToken);
-    localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+    this.storage.setItem(this.TOKEN_KEY, response.token);
+    this.storage.setItem(this.REFRESH_KEY, response.refreshToken);
+    this.storage.setItem(this.USER_KEY, JSON.stringify(response.user));
 
     this.state.set({
       user: response.user,
@@ -157,9 +168,9 @@ export class AuthFacade {
   }
 
   private clearAuth(): void {
-    localStorage.removeItem(this.USER_KEY);
-    localStorage.removeItem(this.TOKEN_KEY);
-    localStorage.removeItem(this.REFRESH_KEY);
+    this.storage.removeItem(this.USER_KEY);
+    this.storage.removeItem(this.TOKEN_KEY);
+    this.storage.removeItem(this.REFRESH_KEY);
 
     this.state.set({
       user: null,
@@ -172,7 +183,7 @@ export class AuthFacade {
     this.authApi.getCurrentUser().subscribe({
       next: user => {
         this.updateUserState(user);
-        localStorage.setItem(this.USER_KEY, JSON.stringify(user));
+        this.storage.setItem(this.USER_KEY, JSON.stringify(user));
       },
       error: () => {
         this.clearAuth();

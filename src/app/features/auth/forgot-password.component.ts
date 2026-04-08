@@ -1,19 +1,17 @@
-import {Component, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
+import {Component, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {RouterLink} from '@angular/router';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-forgot-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="'Recuperar Senha | SimulaCert'"
-         [seoDescription]="'Recupere o acesso à sua conta SimulaCert.'"
-         [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="auth-card">
         <h2>Recuperar Senha</h2>
         <p class="subtitle">Digite seu email e enviaremos um link para redefinir sua senha.</p>
@@ -209,16 +207,22 @@ export class ForgotPasswordComponent {
 
   constructor(
     private fb: FormBuilder,
-    private location: Location
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]
     });
-  }
 
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/forgot-password')}`;
+    const seo = this.seoFactory.website({
+      title: 'Recuperar Senha | SimulaCert',
+      description: 'Recupere o acesso à sua conta SimulaCert.',
+      canonicalPath: '/forgot-password',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'forgot-password',
+    });
+
+    this.seoFacade.set(seo);
   }
 
   onSubmit(): void {

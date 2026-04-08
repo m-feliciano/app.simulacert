@@ -1,10 +1,12 @@
-import {Component, Inject, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location, NgOptimizedImage} from '@angular/common';
+import {Component, Inject, signal} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {API_CONFIG, ApiConfig} from '../../api/config/api.config';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-login',
@@ -12,11 +14,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NgOptimizedImage, SeoHeadDirective],
   styleUrls: ['./login.component.css'],
   template: `
-    <div seoHead
-         [seoTitle]="'Login | SimulaCert'"
-         [seoDescription]="'Acesse sua conta SimulaCert para treinar simulados de certificação.'"
-         [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="auth-card">
         <div class="logo-container">
           <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360"/>
@@ -98,6 +96,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 })
 export class LoginComponent {
 
+
   loginForm: FormGroup;
   loading = signal(false);
   loadingGoogle = signal(false);
@@ -110,20 +109,24 @@ export class LoginComponent {
     private authFacade: AuthFacade,
     private router: Router,
     @Inject(API_CONFIG) private config: ApiConfig,
-    private location: Location
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
     this.baseUrl = this.config.baseUrl;
-  }
 
+    const meta = this.seoFactory.website({
+      title: 'Login | SimulaCert',
+      description: 'Acesse sua conta SimulaCert para treinar simulados de certificação.',
+      canonicalPath: '/login',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'login',
+    });
 
-
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/login')}`;
+    this.seoFacade.set(meta);
   }
 
   loginWithGoogle(): void {

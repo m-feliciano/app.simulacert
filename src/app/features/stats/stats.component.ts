@@ -1,5 +1,5 @@
-import {Component, OnInit, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {StatsApiService} from '../../api/stats.service';
@@ -7,17 +7,15 @@ import {AttemptHistoryItemDto, AwsDomainStatsDto, UserStatsDto} from '../../api/
 import {ScoreStatusComponent} from '../../shared/components/score-status/score-status.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
   imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe],
   template: `
-    <div seoHead
-         [seoTitle]="'Estatísticas | SimulaCert'"
-         [seoDescription]="'Veja suas estatísticas de desempenho nos simulados da SimulaCert.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="stats-container">
         <h1>Estatísticas</h1>
 
@@ -147,12 +145,18 @@ export class StatsComponent implements OnInit {
   constructor(
     private authFacade: AuthFacade,
     private statsApi: StatsApiService,
-    private location: Location
-  ) {}
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
+  ) {
+    const meta = this.seoFactory.website({
+      title: 'Estatísticas | SimulaCert',
+      description: 'Veja suas estatísticas de desempenho nos simulados da SimulaCert.',
+      canonicalPath: '/stats',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'stats',
+    });
 
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/stats')}`;
+    this.seoFacade.set(meta);
   }
 
   ngOnInit(): void {

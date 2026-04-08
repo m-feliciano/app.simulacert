@@ -1,4 +1,4 @@
-import {Component, computed, OnInit, Renderer2, signal} from '@angular/core';
+import {Component, computed, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
@@ -7,18 +7,15 @@ import {AuthFacade} from '../../core/auth/auth.facade';
 import {ExamResponse} from '../../api/domain';
 import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
   imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="exam() ? exam()!.title + ' | SimulaCert' : 'Simulado | SimulaCert'"
-         [seoDescription]="exam() ? (exam()!.description || 'Simulado de certificação.') : 'Simulado de certificação.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
-
+    <div seoHead>
       @if (showRegisterPrompt()) {
         <app-register-prompt-modal (register)="goToRegister()"
                                    (anonymous)="createAnonymousAndStart()"
@@ -137,6 +134,8 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 })
 export class ExamDetailComponent implements OnInit {
 
+  questionCountOptions = [10, 20, 30, 40, 50, 100];
+
   exam = signal<ExamResponse | null>(null);
   loading = signal(false);
   loadingExam = signal(false);
@@ -144,10 +143,7 @@ export class ExamDetailComponent implements OnInit {
   loadingAnonymous = signal(false);
   showRegisterPrompt = signal(false);
   questionCount = signal(20);
-  questionCountOptions = [10, 20, 30, 40, 50, 100];
-
   selectedMode = signal<'practice' | 'exam'>('exam');
-
   duration = computed(() => Math.round(this.questionCount() * 1.5));
 
   constructor(
@@ -156,12 +152,62 @@ export class ExamDetailComponent implements OnInit {
     private examsApi: ExamsApiService,
     private attemptsApi: AttemptsApiService,
     private authFacade: AuthFacade,
-  ) {}
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
+  ) {
+  }
 
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
+  get seo() {
     const exam = this.exam();
-    return `${base}${exam ? '/exams/' + (exam!.slug || exam!.id) : ''}`;
+    const title = exam ? `${exam.title} | SimulaCert` : 'Simulado | SimulaCert';
+    const description = exam?.description || 'Simulado de certificação.';
+    const canonicalUrl = exam?.slug ? this.seoFactory.canonicalFromPath(`/exams/${exam.slug}`) : '';
+    const origin = this.seoFactory.origin();
+    const image = exam?.slug ? `${origin}/${exam.slug}.png` : `${origin}/simulacert-logo.svg`;
+
+    const jsonLd = exam?.slug
+      ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {'@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/`},
+            {'@type': 'ListItem', position: 2, name: 'Exames', item: `${origin}/exams`},
+            {'@type': 'ListItem', position: 3, name: exam.title, item: canonicalUrl},
+          ],
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: exam.title,
+          description,
+          url: canonicalUrl,
+          isPartOf: {'@type': 'WebSite', name: 'SimulaCert', url: origin},
+        },
+      ]
+      : null;
+
+    return this.seoFactory.build({
+      title,
+      description,
+      robots: 'index, follow',
+      canonicalUrl,
+      openGraph: exam?.slug
+        ? {
+          type: 'article',
+          url: canonicalUrl,
+          image,
+        }
+        : undefined,
+      twitter: exam?.slug
+        ? {
+          card: 'summary_large_image',
+          image,
+        }
+        : undefined,
+      jsonLd,
+      jsonLdId: 'exam-detail',
+    });
   }
 
   ngOnInit(): void {
@@ -171,21 +217,42 @@ export class ExamDetailComponent implements OnInit {
 
     if (resolvedExam) {
       this.exam.set(resolvedExam);
+      this.seoFacade.set(this.seo);
       return;
     }
 
     if (examId) {
-      this.loadExam(examId, true); // true = pode redirecionar para slug
+      this.loadExam(examId, true);
     } else if (slug) {
       this.loadExamBySlug(slug);
     }
   }
 
+  loadExam(examId: string, redirectToSlug = false): void {
+    this.loadingExam.set(true);
+    this.errorMessage.set('');
+
+    this.examsApi.getExam(examId).subscribe({
+      next: (exam) => {
+        if (redirectToSlug && exam.slug && this.isTextualSlug(exam.slug)) {
+          this.router.navigate(['/exams', exam.slug]);
+        } else {
+          this.exam.set(exam);
+          this.applySeo();
+          this.loadingExam.set(false);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading exam:', error);
+        this.errorMessage.set('Erro ao carregar exame');
+        this.loadingExam.set(false);
+      }
+    });
+  }
+
   startExam(): void {
     const currentExam = this.exam();
-    if (!currentExam) {
-      return;
-    }
+    if (!currentExam) return;
 
     if (!this.authFacade.currentUser()) {
       this.showRegisterPrompt.set(true);
@@ -237,27 +304,6 @@ export class ExamDetailComponent implements OnInit {
     this.router.navigate(['/register']);
   }
 
-  loadExam(examId: string, redirectToSlug = false): void {
-    this.loadingExam.set(true);
-    this.errorMessage.set('');
-
-    this.examsApi.getExam(examId).subscribe({
-      next: (exam) => {
-        if (redirectToSlug && exam.slug && this.isTextualSlug(exam.slug)) {
-          this.router.navigate(['/exams', exam.slug]);
-        } else {
-          this.exam.set(exam);
-          this.loadingExam.set(false);
-        }
-      },
-      error: (error) => {
-        console.error('Error loading exam:', error);
-        this.errorMessage.set('Erro ao carregar exame');
-        this.loadingExam.set(false);
-      }
-    });
-  }
-
   loadExamBySlug(slug: string): void {
     this.loadingExam.set(true);
     this.errorMessage.set('');
@@ -265,6 +311,7 @@ export class ExamDetailComponent implements OnInit {
     this.examsApi.getExamBySlug(slug).subscribe({
       next: (exam) => {
         this.exam.set(exam);
+        this.applySeo();
         this.loadingExam.set(false);
       },
       error: (error) => {
@@ -273,6 +320,10 @@ export class ExamDetailComponent implements OnInit {
         this.loadingExam.set(false);
       }
     });
+  }
+
+  private applySeo(): void {
+    this.seoFacade.set(this.seo);
   }
 
   selectQuestionCount(count: number): void {

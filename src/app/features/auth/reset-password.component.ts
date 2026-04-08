@@ -1,19 +1,17 @@
-import {Component, OnInit, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="'Redefinir Senha | SimulaCert'"
-         [seoDescription]="'Defina uma nova senha para sua conta SimulaCert.'"
-         [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="auth-card">
         <h2>Redefinir Senha</h2>
         <p class="subtitle">Digite sua nova senha.</p>
@@ -200,6 +198,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 })
 export class ResetPasswordComponent implements OnInit {
 
+
   resetPasswordForm: FormGroup;
   loading = signal(false);
   errorMessage = signal('');
@@ -209,19 +208,23 @@ export class ResetPasswordComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
-    private location: Location
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
     this.resetPasswordForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
     }, {validators: this.passwordMatchValidator});
-  }
 
+    const seo = this.seoFactory.website({
+      title: 'Redefinir Senha | SimulaCert',
+      description: 'Defina uma nova senha para sua conta SimulaCert.',
+      canonicalPath: '/reset-password',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'reset-password',
+    });
 
-
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/reset-password')}`;
+    this.seoFacade.set(seo);
   }
 
   ngOnInit(): void {

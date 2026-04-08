@@ -1,22 +1,20 @@
-import {Component, OnInit, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptResponse, AttemptStatus, ExamResponse} from '../../api/domain';
 import {ReviewCardComponent} from '../../shared/components/review-card.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   imports: [CommonModule, RouterLink, ReviewCardComponent, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="'Resultado do Exame | SimulaCert'"
-         [seoDescription]="'Veja o resultado detalhado do seu simulado na SimulaCert.'"
-         [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="result-container">
         @if (loading()) {
           <div class="loading-state">
@@ -248,8 +246,17 @@ export class ResultComponent implements OnInit {
     private route: ActivatedRoute,
     private attemptsApi: AttemptsApiService,
     private examsApi: ExamsApiService,
-    private location: Location
-  ) {}
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
+  ) {
+    this.seoFacade.set(this.seoFactory.website({
+      title: 'Resultado do Exame | SimulaCert',
+      description: 'Veja o resultado detalhado do seu simulado na SimulaCert.',
+      canonicalPath: '/attempt/result',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'result',
+    }));
+  }
 
   get isPassed(): boolean {
     const score = this.attempt()?.score || 0;
@@ -332,10 +339,6 @@ export class ResultComponent implements OnInit {
     return `${hours}h ${minutes}min`;
   }
 
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl(window.location.pathname)}`;
-  }
 
   formatQuestionsText() : string {
     const score = this.attempt()!.score;

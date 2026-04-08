@@ -1,18 +1,15 @@
-import {Component, Renderer2} from '@angular/core';
+import {Component} from '@angular/core';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
-import {Location} from '@angular/common';
+import {CommonModule} from '@angular/common';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-privacy-policy',
   standalone: true,
-  imports: [SeoHeadDirective],
+  imports: [CommonModule, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="'Política de Privacidade | SimulaCert'"
-         [seoDescription]="'Veja como a SimulaCert trata seus dados e informações pessoais.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
-
+    <div seoHead>
       <div class="legal-page">
         <div class="legal-container">
           <h1>Política de Privacidade</h1>
@@ -155,13 +152,35 @@ import {Location} from '@angular/common';
 })
 export class PrivacyPolicyComponent {
 
-  constructor(private location: Location) {}
+  constructor(private seoFactory: SeoFactoryService,
+              private seoFacade: SeoFacadeService) {
 
-  get canonicalUrl(): string {
-    return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/politica-de-privacidade')}`;
+    const seo = this.seoFactory.website({
+      title: 'Política de Privacidade | SimulaCert',
+      description: 'Veja como a SimulaCert trata seus dados e informações pessoais.',
+      canonicalPath: '/politica-de-privacidade',
+      robots: 'index, follow',
+      jsonLdId: 'privacy-policy',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Política de Privacidade',
+        description: 'Veja como a SimulaCert trata seus dados e informações pessoais.',
+        url: this.seoFactory.canonicalFromPath('/politica-de-privacidade'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
+
+    this.seoFacade.set(seo);
   }
 
   goBack(): void {
-    window.history.back();
+    if (typeof window !== 'undefined') {
+      window.history.back();
+    }
   }
 }

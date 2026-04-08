@@ -440,6 +440,11 @@ export class AppLayoutComponent {
   }
 
   private checkIfMobile(): void {
+    if (typeof window === 'undefined') {
+      this.isMobile.set(false);
+      return;
+    }
+
     this.isMobile.set(window.innerWidth <= 768);
 
     window.addEventListener('resize', () => {

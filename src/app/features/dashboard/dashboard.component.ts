@@ -1,5 +1,5 @@
-import {Component, OnInit, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location} from '@angular/common';
+import {Component, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -8,17 +8,16 @@ import {AttemptResponse, UserStatsDto} from '../../api/domain';
 import {ScoreStatusComponent} from '../../shared/components/score-status/score-status.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoMeta} from '../../core/seo/seo.model';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe],
   template: `
-    <div seoHead
-         [seoTitle]="'Dashboard | SimulaCert'"
-         [seoDescription]="'Acompanhe seu desempenho, estatísticas e recomendações personalizadas para simulados de certificação.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="dashboard">
         @if (loading()) {
           <div class="loading-indicator">
@@ -141,6 +140,8 @@ import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
 })
 export class DashboardComponent implements OnInit {
 
+  seo!: SeoMeta;
+
   stats = signal<UserStatsDto | null>(null);
   recentAttempts = signal<AttemptResponse[]>([]);
   isFirstAccess = signal<boolean>(true);
@@ -150,24 +151,43 @@ export class DashboardComponent implements OnInit {
   recommendationLink = signal<string>('/exams');
   loading = signal<boolean>(false);
 
-  constructor(
-    private authFacade: AuthFacade,
-    private attemptsApi: AttemptsApiService,
-    private statsApi: StatsApiService,
-    private location: Location
-  ) {}
-
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/dashboard')}`;
-  }
-
   ngOnInit(): void {
     const user = this.authFacade.currentUser();
     if (user) {
       this.loadStats(user.id);
       this.loadRecentAttempts(user.id);
     }
+  }
+
+  constructor(
+    private authFacade: AuthFacade,
+    private attemptsApi: AttemptsApiService,
+    private statsApi: StatsApiService,
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
+  ) {
+    const seo = this.seoFactory.website({
+      title: 'Dashboard | SimulaCert',
+      description: 'Acompanhe seu desempenho, estatísticas e recomendações personalizadas para simulados de certificação.',
+      canonicalPath: '/dashboard',
+      robots: 'index, follow',
+      jsonLdId: 'dashboard',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Dashboard',
+        description: 'Acompanhe seu desempenho, estatísticas e recomendações personalizadas para simulados de certificação.',
+        url: this.seoFactory.canonicalFromPath('/dashboard'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
+
+    this.seoFacade.set(seo);
+
   }
 
   loadStats(userId: string): void {

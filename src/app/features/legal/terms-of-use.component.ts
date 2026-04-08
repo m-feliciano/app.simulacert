@@ -1,17 +1,15 @@
-import {Component, Renderer2} from '@angular/core';
+import {Component} from '@angular/core';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
-import {Location} from '@angular/common';
+import {CommonModule} from '@angular/common';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-terms-of-use',
   standalone: true,
-  imports: [SeoHeadDirective],
+  imports: [CommonModule, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="'Termos de Uso | SimulaCert'"
-         [seoDescription]="'Leia os Termos de Uso da plataforma SimulaCert.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="legal-page">
         <div class="legal-container">
           <h1>Termos de Uso</h1>
@@ -128,10 +126,29 @@ import {Location} from '@angular/common';
 })
 export class TermsOfUseComponent {
 
-  constructor( private location: Location) {}
+  constructor(private seoFactory: SeoFactoryService,
+              private seoFacade: SeoFacadeService) {
+    const seo = this.seoFactory.website({
+      title: 'Termos de Uso | SimulaCert',
+      description: 'Leia os Termos de Uso da plataforma SimulaCert.',
+      canonicalPath: '/termos-de-uso',
+      robots: 'index, follow',
+      jsonLdId: 'terms-of-use',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Termos de Uso',
+        description: 'Leia os Termos de Uso da plataforma SimulaCert.',
+        url: this.seoFactory.canonicalFromPath('/termos-de-uso'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
 
-  get canonicalUrl(): string {
-    return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/termos-de-uso')}`;
+    this.seoFacade.set(seo);
   }
 
   goBack(): void {

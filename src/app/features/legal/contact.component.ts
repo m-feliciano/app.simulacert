@@ -1,17 +1,15 @@
-import {Component, Renderer2} from '@angular/core';
+import {Component} from '@angular/core';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
-import {Location} from '@angular/common';
+import {CommonModule} from '@angular/common';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'contact-page',
   standalone: true,
-  imports: [SeoHeadDirective],
+  imports: [CommonModule, SeoHeadDirective],
   template: `
-    <div seoHead
-         [seoTitle]="'Contato | SimulaCert'"
-         [seoDescription]="'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.'"
-         [seoRobots]="'index, follow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="legal-page">
         <div class="legal-container">
           <h1>Contato</h1>
@@ -124,10 +122,28 @@ import {Location} from '@angular/common';
 })
 export class ContactComponent {
 
-  constructor(private location: Location) {}
+  constructor(private seoFactory: SeoFactoryService, private seoFacade: SeoFacadeService) {
+    const seo = this.seoFactory.website({
+      title: 'Contato | SimulaCert',
+      description: 'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.',
+      canonicalPath: '/contato',
+      robots: 'index, follow',
+      jsonLdId: 'contact',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        name: 'Contato',
+        description: 'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.',
+        url: this.seoFactory.canonicalFromPath('/contato'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
 
-  get canonicalUrl(): string {
-    return `${typeof window !== 'undefined' ? window.location.origin : ''}${this.location.prepareExternalUrl('/contato')}`;
+    this.seoFacade.set(seo);
   }
 
   goBack(): void {

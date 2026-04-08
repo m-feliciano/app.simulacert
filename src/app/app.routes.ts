@@ -20,6 +20,7 @@ function examsIdMatcher(segments: UrlSegment[]): UrlMatchResult | null {
 
 export const routes: Routes = [
   { path: '', redirectTo: 'exams', pathMatch: 'full' },
+  { path: '404', loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent) },
   {
     path: '',
     component: PublicLayoutComponent,
@@ -58,5 +59,5 @@ export const routes: Routes = [
   },
 
   { path: 'attempt/:id/run', component: AttemptRunnerComponent, canActivate: [authGuard] },
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', loadComponent: () => import('./features/not-found/not-found.component').then(m => m.NotFoundComponent)},
 ];

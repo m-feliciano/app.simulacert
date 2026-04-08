@@ -1,10 +1,12 @@
-import {Component, Inject, Renderer2, signal} from '@angular/core';
-import {CommonModule, Location, NgOptimizedImage} from '@angular/common';
+import {Component, Inject, signal} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {Router, RouterLink} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {API_CONFIG, ApiConfig} from '../../api/config/api.config';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-register',
@@ -12,11 +14,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
   imports: [CommonModule, ReactiveFormsModule, RouterLink, NgOptimizedImage, SeoHeadDirective],
   styleUrls: ['./register.component.css'],
   template: `
-    <div seoHead
-         [seoTitle]="'Cadastro | SimulaCert'"
-         [seoDescription]="'Crie sua conta gratuita na SimulaCert e comece a treinar para certificações.'"
-         [seoRobots]="'noindex, nofollow'"
-         [seoCanonical]="canonicalUrl">
+    <div seoHead>
       <div class="auth-card">
         <div class="logo-container">
           <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360">
@@ -92,6 +90,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 })
 export class RegisterComponent {
 
+
   registerForm: FormGroup;
   loading = signal(false);
   loadingGoogle = signal(false);
@@ -103,20 +102,24 @@ export class RegisterComponent {
     private authFacade: AuthFacade,
     private router: Router,
     @Inject(API_CONFIG) private config: ApiConfig,
-    private location: Location
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
     this.baseUrl = this.config.baseUrl;
-  }
 
+    const seo = this.seoFactory.website({
+      title: 'Cadastro | SimulaCert',
+      description: 'Crie sua conta gratuita na SimulaCert e comece a treinar para certificações.',
+      canonicalPath: '/register',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'register',
+    });
 
-
-  get canonicalUrl(): string {
-    const base = typeof window !== 'undefined' ? window.location.origin : '';
-    return `${base}${this.location.prepareExternalUrl('/register')}`;
+    this.seoFacade.set(seo);
   }
 
   registerWithGoogle(): void {
