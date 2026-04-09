@@ -54,7 +54,6 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
               class="question-nav-btn"
               [class.active]="$index === currentQuestionIndex()"
               [class.answered]="answeredQuestions().has($index)"
-              [disabled]="!answeredQuestions().has($index) && $index !== currentQuestionIndex()"
               (click)="goToQuestion($index)">
               {{ $index + 1 }}
             </button>
@@ -109,13 +108,13 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
                 ← Anterior
               </button>
 
-              <button
-                class="btn-secondary"
-                (click)="nextQuestion()"
-                [disabled]="!selectedAnswers()[currentQuestionIndex()] ||
-                             selectedAnswers()[currentQuestionIndex()].length !== getExpectedAnswerCount(currentQuestion)">
-                Próxima →
-              </button>
+              @if (currentQuestionIndex() < questions().length - 1) {
+                <button class="btn-secondary"
+                        (click)="nextQuestion()"
+                        [disabled]="!selectedAnswers()[currentQuestionIndex()] || selectedAnswers()[currentQuestionIndex()].length !== getExpectedAnswerCount(currentQuestion)">
+                  Próxima →
+                </button>
+              }
 
               @if (currentQuestionIndex() === questions().length - 1) {
                 <button class="btn-finish" (click)="submitCurrentAnswer(); confirmFinish()">
@@ -250,37 +249,38 @@ export class AttemptRunnerComponent implements OnInit {
   toggleAnswer(optionKey: string): void {
     const currentIdx = this.currentQuestionIndex();
 
-    if (!this.selectedAnswers()[currentIdx]) {
-      this.selectedAnswers()[currentIdx] = [];
-    }
-
-    const currentAnswers = [...this.selectedAnswers()[currentIdx]];
+    const currentMap = this.selectedAnswers();
+    const currentAnswers = [...(currentMap[currentIdx] ?? [])];
     const expectedCount = this.getExpectedAnswerCount(this.currentQuestion!);
+
+    let nextAnswers: string[] = currentAnswers;
 
     if (expectedCount === 1) {
       if (currentAnswers.length === 1 && currentAnswers[0] === optionKey) {
-        this.selectedAnswers()[currentIdx] = [];
+        nextAnswers = [];
       } else {
-        this.selectedAnswers()[currentIdx] = [optionKey];
+        nextAnswers = [optionKey];
       }
     } else {
       const optionIndex = currentAnswers.indexOf(optionKey);
       if (optionIndex > -1) {
-        currentAnswers.splice(optionIndex, 1);
-        this.selectedAnswers()[currentIdx] = currentAnswers;
-      } else {
-        if (currentAnswers.length < expectedCount) {
-          this.selectedAnswers()[currentIdx] = [...currentAnswers, optionKey].sort();
-        }
+        nextAnswers = currentAnswers.filter(a => a !== optionKey);
+      } else if (currentAnswers.length < expectedCount) {
+        nextAnswers = [...currentAnswers, optionKey].sort();
       }
     }
+
+    this.selectedAnswers.set({
+      ...currentMap,
+      [currentIdx]: nextAnswers,
+    });
 
     this.saveLocalProgress();
   }
 
   private clearLocalProgress(): void {
     try {
-      localStorage.removeItem(this.getStorageKey());
+      this.storage.removeItem(this.getStorageKey());
     } catch (err) {
     }
   }
@@ -292,7 +292,7 @@ export class AttemptRunnerComponent implements OnInit {
         this.loadQuestions();
       },
       error: (error) => {
-        console.error('Error loading attempt:', error);
+        console.error(error);
         this.error.set('Erro ao carregar tentativa. Por favor, tente novamente.');
         this.loading.set(false);
       }
@@ -306,7 +306,7 @@ export class AttemptRunnerComponent implements OnInit {
         this.checkIfLoaded();
       },
       error: (error) => {
-        console.error('Error loading exam:', error);
+        console.error(error);
         this.error.set('Erro ao carregar exame.');
         this.loading.set(false);
       }
@@ -320,7 +320,7 @@ export class AttemptRunnerComponent implements OnInit {
         this.checkIfLoaded();
       },
       error: (error) => {
-        console.error('Error loading questions:', error);
+        console.error(error);
         this.error.set('Erro ao carregar questões.');
         this.loading.set(false);
       }
@@ -371,7 +371,7 @@ export class AttemptRunnerComponent implements OnInit {
   }
 
   protected submitCurrentAnswer(): void {
-    if (!this.currentQuestion || !this.selectedAnswers) return;
+    if (!this.currentQuestion) return;
 
     const currentIdx = this.currentQuestionIndex();
     const currentAnswers = this.selectedAnswers()[currentIdx];
@@ -386,16 +386,20 @@ export class AttemptRunnerComponent implements OnInit {
     this.attemptsApi.submitAnswer(this.attemptId, questionId, {selectedOption})
       .subscribe({
         next: () => {
-          this.answeredQuestions().add(currentIdx);
+          this.answeredQuestions.update(set => {
+            const next = new Set(set);
+            next.add(currentIdx);
+            return next;
+          });
         },
-        error: (error) => console.error('Error submitting:', error)
+        error: (error) => console.error(error)
       });
   }
 
   private saveLocalProgress(): void {
     try {
       const progress = {
-        selectedAnswers: this.selectedAnswers,
+        selectedAnswers: this.selectedAnswers(),
         answeredQuestions: Array.from(this.answeredQuestions()),
         currentQuestionIndex: this.currentQuestionIndex(),
         timeRemaining: this.timeRemaining(),
@@ -405,7 +409,7 @@ export class AttemptRunnerComponent implements OnInit {
       this.storage.setItem(this.getStorageKey(), JSON.stringify(progress));
 
     } catch (error) {
-      console.error('Error saving progress to this.storage:', error);
+      console.error(error);
     }
   }
 
@@ -428,7 +432,7 @@ export class AttemptRunnerComponent implements OnInit {
     if (!saved) return;
 
     const progress = JSON.parse(saved);
-    this.selectedAnswers = progress.selectedAnswers || {};
+    this.selectedAnswers.set(progress.selectedAnswers || {});
     this.answeredQuestions.set(new Set(progress.answeredQuestions || []));
 
     if (progress.currentQuestionIndex !== undefined) {
@@ -480,6 +484,7 @@ export class AttemptRunnerComponent implements OnInit {
   }
 
   finishAttempt(): void {
+    if (this.finishingAttempt()) return;
     this.submitCurrentAnswer();
 
     this.finishingAttempt.set(true);
@@ -492,7 +497,7 @@ export class AttemptRunnerComponent implements OnInit {
         this.router.navigate(['/attempt', this.attemptId, 'result']);
       },
       error: (error) => {
-        console.error('Error finishing attempt:', error);
+        console.error(error);
         this.finishingAttempt.set(false);
         this.finishError.set('Erro ao finalizar o exame. Suas respostas estão salvas. Por favor, tente novamente.');
       }
