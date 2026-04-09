@@ -5,7 +5,6 @@ import {SeoMeta} from './seo.model';
 @Injectable({providedIn: 'root'})
 export class SeoFacadeService {
   private readonly state = signal<SeoMeta | null>(null);
-  readonly seo = this.state.asReadonly();
 
   constructor(private seoService: SeoService) {
   }
@@ -31,6 +30,13 @@ export class SeoFacadeService {
     const current = this.state();
     const id = current?.jsonLdId || 'page';
     this.seoService.removeJsonLd(id);
+  }
+
+  update() {
+    const current = this.state();
+    if (current) {
+      this.set(current);
+    }
   }
 }
 
