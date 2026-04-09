@@ -34,7 +34,7 @@ export class AuthFacade {
 
   constructor(
     private authApi: AuthApiService,
-    @Inject(LOCAL_STORAGE) private storage: Storage,
+    @Inject(LOCAL_STORAGE) private storage: Storage | null,
   ) {
     const token = this.loadTokenFromStorage();
     const user = this.loadUserFromStorage();
@@ -57,7 +57,7 @@ export class AuthFacade {
   }
 
   register(request: RegisterRequest): Observable<HttpResponse<void>> {
-    const current = this.storage.getItem(this.USER_KEY) ?? null;
+    const current = this.storage?.getItem(this.USER_KEY) ?? null;
     if (current) {
       const anonUser: UserResponse = JSON.parse(current);
       request.id = anonUser.id;
@@ -77,7 +77,7 @@ export class AuthFacade {
   }
 
   handleOAuthCallback(token: string): void {
-    this.storage.setItem(this.TOKEN_KEY, token);
+    this.storage?.setItem(this.TOKEN_KEY, token);
 
     this.state.set({
       user: null,
@@ -103,8 +103,8 @@ export class AuthFacade {
 
     return this.authApi.refreshToken(bearerToken).pipe(
       tap(({token, refreshToken}) => {
-        this.storage.setItem(this.TOKEN_KEY, token);
-        this.storage.setItem(this.REFRESH_KEY, refreshToken);
+        this.storage?.setItem(this.TOKEN_KEY, token);
+        this.storage?.setItem(this.REFRESH_KEY, refreshToken);
 
         this.state.update(s => ({
           ...s,
@@ -143,22 +143,22 @@ export class AuthFacade {
   }
 
   refreshToken() {
-    return this.storage.getItem(this.REFRESH_KEY) ?? null;
+    return this.storage?.getItem(this.REFRESH_KEY) ?? null;
   }
 
   private loadTokenFromStorage(): string | null {
-    return this.storage.getItem(this.TOKEN_KEY) ?? null;
+    return this.storage?.getItem(this.TOKEN_KEY) ?? null;
   }
 
   private loadUserFromStorage(): UserResponse | null {
-    const userJson = this.storage.getItem(this.USER_KEY) ?? null;
+    const userJson = this.storage?.getItem(this.USER_KEY) ?? null;
     return userJson ? JSON.parse(userJson) : null;
   }
 
   private handleAuthSuccess(response: AuthResponse): void {
-    this.storage.setItem(this.TOKEN_KEY, response.token);
-    this.storage.setItem(this.REFRESH_KEY, response.refreshToken);
-    this.storage.setItem(this.USER_KEY, JSON.stringify(response.user));
+    this.storage?.setItem(this.TOKEN_KEY, response.token);
+    this.storage?.setItem(this.REFRESH_KEY, response.refreshToken);
+    this.storage?.setItem(this.USER_KEY, JSON.stringify(response.user));
 
     this.state.set({
       user: response.user,
@@ -168,9 +168,9 @@ export class AuthFacade {
   }
 
   private clearAuth(): void {
-    this.storage.removeItem(this.USER_KEY);
-    this.storage.removeItem(this.TOKEN_KEY);
-    this.storage.removeItem(this.REFRESH_KEY);
+    this.storage?.removeItem(this.USER_KEY);
+    this.storage?.removeItem(this.TOKEN_KEY);
+    this.storage?.removeItem(this.REFRESH_KEY);
 
     this.state.set({
       user: null,
@@ -183,7 +183,7 @@ export class AuthFacade {
     this.authApi.getCurrentUser().subscribe({
       next: user => {
         this.updateUserState(user);
-        this.storage.setItem(this.USER_KEY, JSON.stringify(user));
+        this.storage?.setItem(this.USER_KEY, JSON.stringify(user));
       },
       error: () => {
         this.clearAuth();

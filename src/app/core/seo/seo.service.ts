@@ -23,6 +23,7 @@ export class SeoService {
   }
 
   updateCanonical(url: string) {
+    const normalized = this.normalizeUrl(url);
     let link = this.document.head.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
 
     if (!link) {
@@ -31,7 +32,8 @@ export class SeoService {
       this.document.head.appendChild(link);
     }
 
-    link.setAttribute('href', url);
+    link.setAttribute('href', normalized);
+    this.updateMetaProperty('og:url', normalized);
   }
 
   updateOpenGraph(og: SeoOpenGraph): void {
@@ -91,6 +93,22 @@ export class SeoService {
   }
 
   private normalizeJsonLdId(id: string): string {
-    return id.startsWith('ld-json:') ? id.replace(':', '-') : `ld-json-${id}`;
+    const raw = id.startsWith('ld-json:') ? id : `ld-json-${id}`;
+    return raw.replace(/[^a-zA-Z0-9_-]/g, '-');
+  }
+
+  private normalizeUrl(url: string): string {
+    const trimmed = (url || '').trim();
+    if (!trimmed) return trimmed;
+
+    try {
+      const u = new URL(trimmed);
+      if (u.pathname !== '/' && trimmed.endsWith('/')) {
+        return trimmed.replace(/\/+$/, '');
+      }
+      return trimmed;
+    } catch {
+      return trimmed;
+    }
   }
 }

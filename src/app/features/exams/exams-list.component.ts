@@ -6,13 +6,15 @@ import {Router} from '@angular/router';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
+import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.component';
 
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage],
+  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent],
   template: `
     <div seoHead>
+      <app-breadcrumbs [items]="[{label: 'Home', url: '/'},{label: 'Exames'}]" />
 
       <h1 class="page-title">Exames Disponíveis</h1>
       <div class="exams-container">

@@ -9,11 +9,15 @@ import {RegisterPromptModalComponent} from '../../shared/components/register-pro
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
+import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.component';
+import {SeoRichTemplateComponent} from '../../shared/components/seo-rich-template.component';
+import {RelatedExamsComponent} from './related-exams.component';
+import {getExamSeoContent} from './exam-seo-content.registry';
 
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
-  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective],
+  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent],
   template: `
     <div seoHead>
       @if (showRegisterPrompt()) {
@@ -25,7 +29,9 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
       }
 
       <div class="exam-detail">
-        <div class="breadcrumb">
+        <app-breadcrumbs [items]="breadcrumbs()" />
+
+        <div class="breadcrumb" style="display:none">
           <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
         </div>
 
@@ -122,6 +128,9 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
               Imprimir (em breve)
             </button>
           </div>
+
+          <app-seo-rich-template [exam]="exam()!" />
+          <app-related-exams [currentExam]="exam()!" />
         }
 
         @if (errorMessage()) {
@@ -165,6 +174,22 @@ export class ExamDetailComponent implements OnInit {
     const origin = this.seoFactory.origin();
     const image = exam?.slug ? `${origin}/${exam.slug}.png` : `${origin}/simulacert-logo.svg`;
 
+     const content = getExamSeoContent(exam);
+     const faqJsonLd = exam?.slug
+       ? {
+         '@context': 'https://schema.org',
+         '@type': 'FAQPage',
+         mainEntity: content.faq.map((f) => ({
+           '@type': 'Question',
+           name: f.question,
+           acceptedAnswer: {
+             '@type': 'Answer',
+             text: f.answer,
+           },
+         })),
+       }
+       : null;
+
     const jsonLd = exam?.slug
       ? [
         {
@@ -184,13 +209,14 @@ export class ExamDetailComponent implements OnInit {
           url: canonicalUrl,
           isPartOf: {'@type': 'WebSite', name: 'SimulaCert', url: origin},
         },
+        ...(faqJsonLd ? [faqJsonLd] : []),
       ]
       : null;
 
     return this.seoFactory.build({
       title,
       description,
-      robots: 'index, follow',
+      robots: exam?.slug ? 'index, follow' : 'noindex, follow',
       canonicalUrl,
       openGraph: exam?.slug
         ? {
@@ -219,6 +245,14 @@ export class ExamDetailComponent implements OnInit {
       this.exam.set(resolvedExam);
       this.seoFacade.set(this.seo);
       return;
+    } else {
+      this.seoFacade.set(this.seoFactory.website({
+        title: 'Simulado não encontrado | SimulaCert',
+        description: 'O simulado solicitado não foi encontrado. Veja a lista de exames disponíveis.',
+        canonicalPath: '/exams',
+        robots: 'noindex, follow',
+        jsonLdId: 'exam-not-found'
+      }));
     }
 
     if (examId) {
@@ -344,4 +378,13 @@ export class ExamDetailComponent implements OnInit {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return !uuidRegex.test(slug);
   }
+
+  breadcrumbs = computed(() => {
+    const exam = this.exam();
+    return [
+      {label: 'Home', url: '/'},
+      {label: 'Exames', url: '/exams'},
+      {label: exam?.title || 'Simulado'},
+    ];
+  });
 }

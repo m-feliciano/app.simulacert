@@ -4,13 +4,14 @@ import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
 import {SupportModalComponent} from '../../shared/components/support-modal.component';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective],
   template: `
-    <div class="app-layout">
+    <div class="app-layout" seoHead>
       <header class="topbar">
         <div class="topbar-left">
           @if (isMobile()) {
