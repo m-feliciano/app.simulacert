@@ -1,10 +1,11 @@
-import {Component, computed, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, Inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptQuestionResponse, ExamResponse} from '../../api/domain';
 import {interval, Subscription} from 'rxjs';
+import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
 
 @Component({
   selector: 'app-attempt-runner',
@@ -51,6 +52,7 @@ import {interval, Subscription} from 'rxjs';
               class="question-nav-btn"
               [class.active]="$index === currentQuestionIndex()"
               [class.answered]="answeredQuestions.has($index)"
+              [disabled]="!answeredQuestions.has($index) && $index !== currentQuestionIndex()"
               (click)="goToQuestion($index)">
               {{ $index + 1 }}
             </button>
@@ -108,7 +110,9 @@ import {interval, Subscription} from 'rxjs';
               <button
                 class="btn-secondary"
                 (click)="nextQuestion()"
-                [disabled]="currentQuestionIndex() === questions().length - 1">
+                [disabled]="currentQuestionIndex() === questions().length - 1
+                    || !selectedAnswers[currentQuestionIndex()]
+                    || selectedAnswers[currentQuestionIndex()].length !== getExpectedAnswerCount(currentQuestion)">
                 Próxima →
               </button>
 
@@ -202,7 +206,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService
+    private examsApi: ExamsApiService,
+    @Inject(LOCAL_STORAGE) private storage: Storage,
   ) {}
 
   get currentQuestion(): AttemptQuestionResponse | null {
@@ -238,16 +243,16 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         timestamp: new Date().toISOString()
       };
 
-      localStorage.setItem(this.getStorageKey(), JSON.stringify(progress));
+      this.storage.setItem(this.getStorageKey(), JSON.stringify(progress));
 
     } catch (error) {
-      console.error('Error saving progress to localStorage:', error);
+      console.error('Error saving progress to this.storage:', error);
     }
   }
 
   private loadLocalProgress(): void {
     try {
-      const saved = localStorage.getItem(this.getStorageKey());
+      const saved = this.storage.getItem(this.getStorageKey());
       if (saved) {
         const progress = JSON.parse(saved);
         this.selectedAnswers = progress.selectedAnswers || {};
@@ -263,15 +268,14 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       }
 
     } catch (error) {
-      console.error('Error loading progress from localStorage:', error);
+      console.error('Error loading progress from this.storage:', error);
     }
   }
 
   private clearLocalProgress(): void {
     try {
       localStorage.removeItem(this.getStorageKey());
-    } catch (error) {
-      console.error('Error clearing progress from localStorage:', error);
+    } catch (err) {
     }
   }
 
@@ -332,10 +336,16 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   startTimer(): void {
+    let i = 0;
+
     this.timerSubscription = interval(1000).subscribe(() => {
       if (this.timeRemaining() > 0) {
         this.timeRemaining.update(t => t - 1);
-        this.saveLocalProgress();
+
+        if (++i % 5 === 0) {
+          this.saveLocalProgress();
+        }
+
       } else {
         this.finishAttempt();
       }

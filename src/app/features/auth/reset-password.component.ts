@@ -1,59 +1,65 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {ActivatedRoute, Router, RouterLink} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-reset-password',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, SeoHeadDirective],
   template: `
-    <div class="auth-card">
-      <h2>Redefinir Senha</h2>
-      <p class="subtitle">Digite sua nova senha.</p>
+    <div seoHead>
+      <div class="auth-card">
+        <h2>Redefinir Senha</h2>
+        <p class="subtitle">Digite sua nova senha.</p>
 
-      @if (passwordReset()) {
-        <div class="success-message">
-          <span class="success-icon">✓</span>
-          <p>Senha redefinida com sucesso!</p>
-        </div>
-        <a routerLink="/login" class="btn-primary">Ir para Login</a>
-      } @else {
-        <form [formGroup]="resetPasswordForm" (ngSubmit)="onSubmit()">
-          <div class="form-group">
-            <label>Nova Senha</label>
-            <input type="password" formControlName="password" class="form-control" placeholder="Mínimo 6 caracteres"/>
-            @if (resetPasswordForm.get('password')?.touched && resetPasswordForm.get('password')?.invalid) {
-              <div class="error">
-                Senha deve ter no mínimo 6 caracteres
-              </div>
-            }
+        @if (passwordReset()) {
+          <div class="success-message">
+            <span class="success-icon">✓</span>
+            <p>Senha redefinida com sucesso!</p>
           </div>
+          <a routerLink="/login" class="btn-primary">Ir para Login</a>
+        } @else {
+          <form [formGroup]="resetPasswordForm" (ngSubmit)="onSubmit()" aria-label="Formulário de redefinição de senha">
+            <div class="form-group">
+              <label for="reset-password">Nova Senha</label>
+              <input id="reset-password" type="password" formControlName="password" class="form-control"
+                     placeholder="Mínimo 6 caracteres" aria-required="true"/>
+              @if (resetPasswordForm.get('password')?.touched && resetPasswordForm.get('password')?.invalid) {
+                <div class="error" aria-live="polite">
+                  Senha deve ter no mínimo 6 caracteres
+                </div>
+              }
+            </div>
 
-          <div class="form-group">
-            <label>Confirmar Senha</label>
-            <input type="password" formControlName="confirmPassword" class="form-control"
-                   placeholder="Digite a senha novamente"/>
-            @if (resetPasswordForm.get('confirmPassword')?.touched && resetPasswordForm.hasError('mismatch')) {
-              <div class="error">
-                As senhas não conferem
-              </div>
+            <div class="form-group">
+              <label for="reset-confirm-password">Confirmar Senha</label>
+              <input id="reset-confirm-password" type="password" formControlName="confirmPassword" class="form-control"
+                     placeholder="Digite a senha novamente" aria-required="true"/>
+              @if (resetPasswordForm.get('confirmPassword')?.touched && resetPasswordForm.hasError('mismatch')) {
+                <div class="error" aria-live="polite">
+                  As senhas não conferem
+                </div>
+              }
+            </div>
+
+            @if (errorMessage()) {
+              <div class="error" aria-live="polite">{{ errorMessage() }}</div>
             }
+
+            <button type="submit" class="btn-primary" [disabled]="resetPasswordForm.invalid || loading()">
+              {{ loading() ? 'Redefinindo...' : 'Redefinir Senha' }}
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            <p><a routerLink="/login">Voltar ao Login</a></p>
           </div>
-
-          @if (errorMessage()) {
-            <div class="error">{{ errorMessage() }}</div>
-          }
-
-          <button type="submit" class="btn-primary" [disabled]="resetPasswordForm.invalid || loading()">
-            {{ loading() ? 'Redefinindo...' : 'Redefinir Senha' }}
-          </button>
-        </form>
-
-        <div class="auth-footer">
-          <p><a routerLink="/login">Voltar ao Login</a></p>
-        </div>
-      }
+        }
+      </div>
     </div>
   `,
   styles: [`
@@ -191,6 +197,8 @@ import {ActivatedRoute, Router, RouterLink} from '@angular/router';
   `]
 })
 export class ResetPasswordComponent implements OnInit {
+
+
   resetPasswordForm: FormGroup;
   loading = signal(false);
   errorMessage = signal('');
@@ -199,13 +207,24 @@ export class ResetPasswordComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
     this.resetPasswordForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(6)]],
       confirmPassword: ['', Validators.required]
     }, {validators: this.passwordMatchValidator});
+
+    const seo = this.seoFactory.website({
+      title: 'Redefinir Senha | SimulaCert',
+      description: 'Defina uma nova senha para sua conta SimulaCert.',
+      canonicalPath: '/reset-password',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'reset-password',
+    });
+
+    this.seoFacade.set(seo);
   }
 
   ngOnInit(): void {
@@ -249,4 +268,3 @@ export class ResetPasswordComponent implements OnInit {
     }
   }
 }
-

@@ -6,128 +6,145 @@ import {AttemptsApiService} from '../../api/attempts.service';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {ExamResponse} from '../../api/domain';
 import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
+import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.component';
+import {SeoRichTemplateComponent} from '../../shared/components/seo-rich-template.component';
+import {RelatedExamsComponent} from './related-exams.component';
+import {getExamSeoContent} from './exam-seo-content.registry';
 
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
-  imports: [CommonModule, RegisterPromptModalComponent],
+  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent],
   template: `
-    @if (showRegisterPrompt()) {
-      <app-register-prompt-modal (register)="goToRegister()"
-                                 (anonymous)="createAnonymousAndStart()"
-                                 (close)="showRegisterPrompt.set(false)"
-                                 [loading]="loadingAnonymous()">
-      </app-register-prompt-modal>
-    }
-
-    <div class="exam-detail">
-      <div class="breadcrumb">
-        <a (click)="goBack()" class="back-link">← Voltar</a>
-      </div>
-
-      @if (loadingExam()) {
-        <div class="loading-state">
-          <p>Carregando detalhes do exame...</p>
-        </div>
+    <div seoHead>
+      @if (showRegisterPrompt()) {
+        <app-register-prompt-modal (register)="goToRegister()"
+                                   (anonymous)="createAnonymousAndStart()"
+                                   (close)="showRegisterPrompt.set(false)"
+                                   [loading]="loadingAnonymous()">
+        </app-register-prompt-modal>
       }
 
-      @if (!loadingExam() && exam()) {
-        <div class="exam-header">
-          <h1>{{ exam()!.title }}</h1>
-          @if (exam()!.description) {
-            <p class="exam-description">{{ exam()!.description }}</p>
-          }
+      <div class="exam-detail">
+        <app-breadcrumbs [items]="breadcrumbs()" />
+
+        <div class="breadcrumb" style="display:none">
+          <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
         </div>
 
-        <div class="mode-selection">
-          <h2>Escolha o modo de estudo</h2>
-          <div class="mode-cards">
-            <div class="mode-card"
-                 [class.selected]="selectedMode() === 'practice'"
-                 style="background: #ccc; cursor: not-allowed;">
-
-              <div class="mode-icon">📖</div>
-              <h3>Modo Prática</h3>
-              <ul class="mode-features">
-                <li>✓ Veja explicações durante o simulado</li>
-                <li>✓ Sem limite de tempo</li>
-                <li>✓ Ideal para aprender</li>
-                <li>✓ Feedback imediato</li>
-              </ul>
-            </div>
-
-            <div class="mode-card"
-                 [class.selected]="selectedMode() === 'exam'"
-                 (click)="selectMode('exam')">
-              <div class="mode-icon">⏱️</div>
-              <h3>Modo Exame</h3>
-              <ul class="mode-features">
-                <li>✓ Simula o exame real</li>
-                <li>✓ Tempo cronometrado</li>
-                <li>✓ Sem explicações durante</li>
-                <li>✓ Resultados ao final</li>
-              </ul>
-            </div>
+        @if (loadingExam()) {
+          <div class="loading-state">
+            <p>Carregando detalhes do exame...</p>
           </div>
-        </div>
+        }
 
-        <div class="exam-info">
-          <div class="info-card">
-            <h3>Informações do Exame</h3>
-            <ul>
-              <li><strong>Tipo:</strong> Simulado AWS</li>
-              <li><strong>Duração:</strong> {{ duration() }} minutos</li>
-              <li><strong>Questões:</strong> {{ questionCount() }}</li>
-              <li><strong>Pontuação mínima:</strong> 72%</li>
-            </ul>
-          </div>
-
-          <div class="info-card">
-            <h3>Regras</h3>
-            <ul>
-              <li>Você terá {{ duration() }} minutos para completar o exame</li>
-              <li>São {{ questionCount() }} questões de múltipla escolha</li>
-              <li>Não é possível pausar o exame</li>
-              <li>Você pode revisar suas respostas antes de finalizar</li>
-            </ul>
-          </div>
-        </div>
-
-        <div class="question-selector">
-          <h3>Quantidade de Questões</h3>
-          <div class="question-options">
-            @for (count of questionCountOptions; track count) {
-              <button
-                class="question-option"
-                [class.selected]="questionCount() === count"
-                (click)="selectQuestionCount(count)"
-                type="button">
-                {{ count }} questões
-              </button>
+        @if (!loadingExam() && exam()) {
+          <div class="exam-header">
+            <h1>{{ exam()!.title }}</h1>
+            @if (exam()!.description) {
+              <p class="exam-description">{{ exam()!.description }}</p>
             }
           </div>
-        </div>
 
-        <div class="actions">
-          <button class="btn-primary" (click)="startExam()" [disabled]="loading()">
-            {{ loading() ? 'Iniciando...' : 'Iniciar com ' + questionCount() + ' questões' }}
-          </button>
-        </div>
-        <div class="actions">
-          <button class="btn-secondary" disabled type="button">
-            Imprimir (em breve)
-          </button>
-        </div>
-      }
+          <div class="mode-selection">
+            <h2>Escolha o modo de estudo</h2>
+            <div class="mode-cards">
+              <div class="mode-card"
+                   [class.selected]="selectedMode() === 'practice'"
+                   style="background: #ccc; cursor: not-allowed;">
 
-      @if (errorMessage()) {
-        <div class="error">{{ errorMessage() }}</div>
-      }
+                <div class="mode-icon">📖</div>
+                <h3>Modo Prática</h3>
+                <ul class="mode-features">
+                  <li>✓ Veja explicações durante o simulado</li>
+                  <li>✓ Sem limite de tempo</li>
+                  <li>✓ Ideal para aprender</li>
+                  <li>✓ Feedback imediato</li>
+                </ul>
+              </div>
+
+              <div class="mode-card"
+                   [class.selected]="selectedMode() === 'exam'"
+                   (click)="selectMode('exam')">
+                <div class="mode-icon">⏱️</div>
+                <h3>Modo Exame</h3>
+                <ul class="mode-features">
+                  <li>✓ Simula o exame real</li>
+                  <li>✓ Tempo cronometrado</li>
+                  <li>✓ Sem explicações durante</li>
+                  <li>✓ Resultados ao final</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="exam-info">
+            <div class="info-card">
+              <h3>Informações do Exame</h3>
+              <ul>
+                <li><strong>Tipo:</strong> Simulado AWS</li>
+                <li><strong>Duração:</strong> {{ duration() }} minutos</li>
+                <li><strong>Questões:</strong> {{ questionCount() }}</li>
+                <li><strong>Pontuação mínima:</strong> 72%</li>
+              </ul>
+            </div>
+
+            <div class="info-card">
+              <h3>Regras</h3>
+              <ul>
+                <li>Você terá {{ duration() }} minutos para completar o exame</li>
+                <li>São {{ questionCount() }} questões de múltipla escolha</li>
+                <li>Não é possível pausar o exame</li>
+                <li>Você pode revisar suas respostas antes de finalizar</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="question-selector">
+            <h3>Quantidade de Questões</h3>
+            <div class="question-options">
+              @for (count of questionCountOptions; track count) {
+                <button
+                  class="question-option"
+                  [class.selected]="questionCount() === count"
+                  (click)="selectQuestionCount(count)"
+                  type="button">
+                  {{ count }} questões
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" (click)="startExam()" [disabled]="loading()" aria-label="Iniciar simulado">
+              {{ loading() ? 'Iniciando...' : 'Iniciar com ' + questionCount() + ' questões' }}
+            </button>
+          </div>
+          <div class="actions">
+            <button class="btn-secondary" disabled type="button" aria-label="Imprimir simulado (em breve)">
+              Imprimir (em breve)
+            </button>
+          </div>
+
+          <app-seo-rich-template [exam]="exam()!" />
+          <app-related-exams [currentExam]="exam()!" />
+        }
+
+        @if (errorMessage()) {
+          <div class="error">{{ errorMessage() }}</div>
+        }
+      </div>
     </div>
   `,
   styleUrls: ['./exam-detail.component.css']
 })
 export class ExamDetailComponent implements OnInit {
+
+  questionCountOptions = [10, 20, 30, 40, 50, 100];
+
   exam = signal<ExamResponse | null>(null);
   loading = signal(false);
   loadingExam = signal(false);
@@ -135,10 +152,7 @@ export class ExamDetailComponent implements OnInit {
   loadingAnonymous = signal(false);
   showRegisterPrompt = signal(false);
   questionCount = signal(20);
-  questionCountOptions = [10, 20, 30, 40, 50, 100];
-
   selectedMode = signal<'practice' | 'exam'>('exam');
-
   duration = computed(() => Math.round(this.questionCount() * 1.5));
 
   constructor(
@@ -146,8 +160,81 @@ export class ExamDetailComponent implements OnInit {
     private router: Router,
     private examsApi: ExamsApiService,
     private attemptsApi: AttemptsApiService,
-    private authFacade: AuthFacade
-  ) {}
+    private authFacade: AuthFacade,
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
+  ) {
+  }
+
+  get seo() {
+    const exam = this.exam();
+    const title = exam ? `${exam.title} | SimulaCert` : 'Simulado | SimulaCert';
+    const description = exam?.description || 'Simulado de certificação.';
+    const canonicalUrl = exam?.slug ? this.seoFactory.canonicalFromPath(`/exams/${exam.slug}`) : '';
+    const origin = this.seoFactory.origin();
+    const image = exam?.slug ? `${origin}/${exam.slug}.png` : `${origin}/simulacert-logo.svg`;
+
+     const content = getExamSeoContent(exam);
+     const faqJsonLd = exam?.slug
+       ? {
+         '@context': 'https://schema.org',
+         '@type': 'FAQPage',
+         mainEntity: content.faq.map((f) => ({
+           '@type': 'Question',
+           name: f.question,
+           acceptedAnswer: {
+             '@type': 'Answer',
+             text: f.answer,
+           },
+         })),
+       }
+       : null;
+
+    const jsonLd = exam?.slug
+      ? [
+        {
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          itemListElement: [
+            {'@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/`},
+            {'@type': 'ListItem', position: 2, name: 'Exames', item: `${origin}/exams`},
+            {'@type': 'ListItem', position: 3, name: exam.title, item: canonicalUrl},
+          ],
+        },
+        {
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          name: exam.title,
+          description,
+          url: canonicalUrl,
+          isPartOf: {'@type': 'WebSite', name: 'SimulaCert', url: origin},
+        },
+        ...(faqJsonLd ? [faqJsonLd] : []),
+      ]
+      : null;
+
+    return this.seoFactory.build({
+      title,
+      description,
+      robots: exam?.slug ? 'index, follow' : 'noindex, follow',
+      canonicalUrl,
+      openGraph: exam?.slug
+        ? {
+          type: 'article',
+          url: canonicalUrl,
+          image,
+        }
+        : undefined,
+      twitter: exam?.slug
+        ? {
+          card: 'summary_large_image',
+          image,
+        }
+        : undefined,
+      jsonLd,
+      jsonLdId: 'exam-detail',
+    });
+  }
 
   ngOnInit(): void {
     const resolvedExam = this.route.snapshot.data['exam'] as ExamResponse | null | undefined;
@@ -156,21 +243,50 @@ export class ExamDetailComponent implements OnInit {
 
     if (resolvedExam) {
       this.exam.set(resolvedExam);
+      this.seoFacade.set(this.seo);
       return;
+    } else {
+      this.seoFacade.set(this.seoFactory.website({
+        title: 'Simulado não encontrado | SimulaCert',
+        description: 'O simulado solicitado não foi encontrado. Veja a lista de exames disponíveis.',
+        canonicalPath: '/exams',
+        robots: 'noindex, follow',
+        jsonLdId: 'exam-not-found'
+      }));
     }
 
     if (examId) {
-      this.loadExam(examId, true); // true = pode redirecionar para slug
+      this.loadExam(examId, true);
     } else if (slug) {
       this.loadExamBySlug(slug);
     }
   }
 
+  loadExam(examId: string, redirectToSlug = false): void {
+    this.loadingExam.set(true);
+    this.errorMessage.set('');
+
+    this.examsApi.getExam(examId).subscribe({
+      next: (exam) => {
+        if (redirectToSlug && exam.slug && this.isTextualSlug(exam.slug)) {
+          this.router.navigate(['/exams', exam.slug]);
+        } else {
+          this.exam.set(exam);
+          this.applySeo();
+          this.loadingExam.set(false);
+        }
+      },
+      error: (error) => {
+        console.error('Error loading exam:', error);
+        this.errorMessage.set('Erro ao carregar exame');
+        this.loadingExam.set(false);
+      }
+    });
+  }
+
   startExam(): void {
     const currentExam = this.exam();
-    if (!currentExam) {
-      return;
-    }
+    if (!currentExam) return;
 
     if (!this.authFacade.currentUser()) {
       this.showRegisterPrompt.set(true);
@@ -222,27 +338,6 @@ export class ExamDetailComponent implements OnInit {
     this.router.navigate(['/register']);
   }
 
-  loadExam(examId: string, redirectToSlug = false): void {
-    this.loadingExam.set(true);
-    this.errorMessage.set('');
-
-    this.examsApi.getExam(examId).subscribe({
-      next: (exam) => {
-        if (redirectToSlug && exam.slug && this.isTextualSlug(exam.slug)) {
-          this.router.navigate(['/exams', exam.slug]);
-        } else {
-          this.exam.set(exam);
-          this.loadingExam.set(false);
-        }
-      },
-      error: (error) => {
-        console.error('Error loading exam:', error);
-        this.errorMessage.set('Erro ao carregar exame');
-        this.loadingExam.set(false);
-      }
-    });
-  }
-
   loadExamBySlug(slug: string): void {
     this.loadingExam.set(true);
     this.errorMessage.set('');
@@ -250,6 +345,7 @@ export class ExamDetailComponent implements OnInit {
     this.examsApi.getExamBySlug(slug).subscribe({
       next: (exam) => {
         this.exam.set(exam);
+        this.applySeo();
         this.loadingExam.set(false);
       },
       error: (error) => {
@@ -258,6 +354,10 @@ export class ExamDetailComponent implements OnInit {
         this.loadingExam.set(false);
       }
     });
+  }
+
+  private applySeo(): void {
+    this.seoFacade.set(this.seo);
   }
 
   selectQuestionCount(count: number): void {
@@ -278,4 +378,13 @@ export class ExamDetailComponent implements OnInit {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return !uuidRegex.test(slug);
   }
+
+  breadcrumbs = computed(() => {
+    const exam = this.exam();
+    return [
+      {label: 'Home', url: '/'},
+      {label: 'Exames', url: '/exams'},
+      {label: exam?.title || 'Simulado'},
+    ];
+  });
 }

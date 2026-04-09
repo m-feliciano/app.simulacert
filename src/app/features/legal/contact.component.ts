@@ -1,42 +1,49 @@
 import {Component} from '@angular/core';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {CommonModule} from '@angular/common';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'contact-page',
   standalone: true,
+  imports: [CommonModule, SeoHeadDirective],
   template: `
-    <div class="legal-page">
-      <div class="legal-container">
-        <h1>Contato</h1>
-        <p class="last-updated">Última atualização: Janeiro de 2026</p>
+    <div seoHead>
+      <div class="legal-page">
+        <div class="legal-container">
+          <h1>Contato</h1>
+          <p class="last-updated">Última atualização: Janeiro de 2026</p>
 
-        <section>
-          <p>
-            Para dúvidas, sugestões ou qualquer assunto relacionado ao SimulaCert,
-            você pode entrar em contato pelos canais abaixo:
-          </p>
+          <section>
+            <p>
+              Para dúvidas, sugestões ou qualquer assunto relacionado ao SimulaCert,
+              você pode entrar em contato pelos canais abaixo:
+            </p>
 
-          <ul class="contact-list">
-            <li>
-              <strong>E-mail:</strong>
-              <a href="mailto:marcelofeliciano@tutamail.com">marcelofeliciano&#64;tutamail.com</a>
-            </li>
-            <li>
-              <strong>LinkedIn:</strong>
-              <a href="https://www.linkedin.com/in/feliciano-marcelo" target="_blank" rel="noopener">
-                linkedin.com/in/feliciano-marcelo
-              </a>
-            </li>
-            <li>
-              <strong>GitHub:</strong>
-              <a href="https://github.com/m-feliciano" target="_blank" rel="noopener">
-                github.com/m-feliciano
-              </a>
-            </li>
-          </ul>
-        </section>
+            <ul class="contact-list">
+              <li>
+                <strong>E-mail:</strong>
+                <a href="mailto:marcelofeliciano@tutamail.com">marcelofeliciano&#64;tutamail.com</a>
+              </li>
+              <li>
+                <strong>LinkedIn:</strong>
+                <a href="https://www.linkedin.com/in/feliciano-marcelo" target="_blank" rel="noopener">
+                  linkedin.com/in/feliciano-marcelo
+                </a>
+              </li>
+              <li>
+                <strong>GitHub:</strong>
+                <a href="https://github.com/m-feliciano" target="_blank" rel="noopener">
+                  github.com/m-feliciano
+                </a>
+              </li>
+            </ul>
+          </section>
 
-        <div class="back-link">
-          <a (click)="goBack()">← Voltar</a>
+          <div class="back-link">
+            <a (click)="goBack()">← Voltar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -114,6 +121,30 @@ import {Component} from '@angular/core';
   `]
 })
 export class ContactComponent {
+
+  constructor(private seoFactory: SeoFactoryService, private seoFacade: SeoFacadeService) {
+    const seo = this.seoFactory.website({
+      title: 'Contato | SimulaCert',
+      description: 'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.',
+      canonicalPath: '/contato',
+      robots: 'index, follow',
+      jsonLdId: 'contact',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'ContactPage',
+        name: 'Contato',
+        description: 'Entre em contato com a equipe SimulaCert para dúvidas, sugestões ou suporte.',
+        url: this.seoFactory.canonicalFromPath('/contato'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
+
+    this.seoFacade.set(seo);
+  }
 
   goBack(): void {
     window.history.back();

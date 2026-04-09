@@ -1,71 +1,76 @@
 import {Component} from '@angular/core';
-import {Router} from '@angular/router';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {CommonModule} from '@angular/common';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-privacy-policy',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, SeoHeadDirective],
   template: `
-    <div class="legal-page">
-      <div class="legal-container">
-        <h1>Política de Privacidade</h1>
+    <div seoHead>
+      <div class="legal-page">
+        <div class="legal-container">
+          <h1>Política de Privacidade</h1>
 
-        <p class="last-updated">Última atualização: Janeiro de 2026</p>
+          <p class="last-updated">Última atualização: Janeiro de 2026</p>
 
-        <section>
-          <h2>1. Introdução</h2>
-          <p>Esta Política de Privacidade descreve como o SimulaCert coleta, usa e protege suas informações
-            pessoais.</p>
-        </section>
+          <section>
+            <h2>1. Introdução</h2>
+            <p>Esta Política de Privacidade descreve como o SimulaCert coleta, usa e protege suas informações
+              pessoais.</p>
+          </section>
 
-        <section>
-          <h2>2. Informações Coletadas</h2>
-          <p>Coletamos as seguintes informações:</p>
-          <ul>
-            <li>Nome e email fornecidos no cadastro</li>
-            <li>Informações de progresso e resultados dos simulados</li>
-            <li>Dados de uso e navegação</li>
-          </ul>
-        </section>
+          <section>
+            <h2>2. Informações Coletadas</h2>
+            <p>Coletamos as seguintes informações:</p>
+            <ul>
+              <li>Nome e email fornecidos no cadastro</li>
+              <li>Informações de progresso e resultados dos simulados</li>
+              <li>Dados de uso e navegação</li>
+            </ul>
+          </section>
 
-        <section>
-          <h2>3. Uso das Informações</h2>
-          <p>Usamos suas informações para:</p>
-          <ul>
-            <li>Fornecer e melhorar nossos serviços</li>
-            <li>Personalizar sua experiência</li>
-            <li>Comunicar atualizações e novidades</li>
-          </ul>
-        </section>
+          <section>
+            <h2>3. Uso das Informações</h2>
+            <p>Usamos suas informações para:</p>
+            <ul>
+              <li>Fornecer e melhorar nossos serviços</li>
+              <li>Personalizar sua experiência</li>
+              <li>Comunicar atualizações e novidades</li>
+            </ul>
+          </section>
 
-        <section>
-          <h2>4. Compartilhamento de Dados</h2>
-          <p>Não vendemos ou compartilhamos suas informações pessoais com terceiros, exceto quando necessário para
-            operar o serviço ou quando exigido por lei.</p>
-        </section>
+          <section>
+            <h2>4. Compartilhamento de Dados</h2>
+            <p>Não vendemos ou compartilhamos suas informações pessoais com terceiros, exceto quando necessário para
+              operar o serviço ou quando exigido por lei.</p>
+          </section>
 
-        <section>
-          <h2>5. Segurança</h2>
-          <p>Implementamos medidas de segurança para proteger suas informações contra acesso não autorizado.</p>
-        </section>
+          <section>
+            <h2>5. Segurança</h2>
+            <p>Implementamos medidas de segurança para proteger suas informações contra acesso não autorizado.</p>
+          </section>
 
-        <section>
-          <h2>6. Seus Direitos</h2>
-          <p>Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento.</p>
-        </section>
+          <section>
+            <h2>6. Seus Direitos</h2>
+            <p>Você tem o direito de acessar, corrigir ou excluir suas informações pessoais a qualquer momento.</p>
+          </section>
 
-        <section>
-          <h2>7. Cookies</h2>
-          <p>Utilizamos cookies para melhorar sua experiência e manter sua sessão ativa.</p>
-        </section>
+          <section>
+            <h2>7. Cookies</h2>
+            <p>Utilizamos cookies para melhorar sua experiência e manter sua sessão ativa.</p>
+          </section>
 
-        <section>
-          <h2>8. Contato</h2>
-          <p>Para questões sobre privacidade, entre em contato através do email de suporte.</p>
-        </section>
+          <section>
+            <h2>8. Contato</h2>
+            <p>Para questões sobre privacidade, entre em contato através do email de suporte.</p>
+          </section>
 
-        <div class="back-link">
-          <a (click)="goBack()">← Voltar</a>
+          <div class="back-link">
+            <a (click)="goBack()">← Voltar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -147,10 +152,35 @@ import {Router} from '@angular/router';
 })
 export class PrivacyPolicyComponent {
 
-  constructor(private router: Router) {}
+  constructor(private seoFactory: SeoFactoryService,
+              private seoFacade: SeoFacadeService) {
+
+    const seo = this.seoFactory.website({
+      title: 'Política de Privacidade | SimulaCert',
+      description: 'Veja como a SimulaCert trata seus dados e informações pessoais.',
+      canonicalPath: '/politica-de-privacidade',
+      robots: 'index, follow',
+      jsonLdId: 'privacy-policy',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Política de Privacidade',
+        description: 'Veja como a SimulaCert trata seus dados e informações pessoais.',
+        url: this.seoFactory.canonicalFromPath('/politica-de-privacidade'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
+
+    this.seoFacade.set(seo);
+  }
 
   goBack(): void {
-    window.history.back();
+    if (typeof window !== 'undefined') {
+      window.history.back();
+    }
   }
 }
-

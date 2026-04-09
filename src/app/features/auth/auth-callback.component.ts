@@ -4,12 +4,17 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {first} from 'rxjs';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-auth-callback',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SeoHeadDirective],
   template: `
+    <div seoHead>
+
     <div class="auth-callback">
       @if (status() === 'processing') {
         <div class="loader">
@@ -34,6 +39,7 @@ import {first} from 'rxjs';
           <p class="redirect-msg">Redirecionando para página de login...</p>
         </div>
       }
+    </div>
     </div>
   `,
   styles: [`
@@ -111,12 +117,24 @@ export class AuthCallbackComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private authFacade: AuthFacade
+    private authFacade: AuthFacade,
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
+    const seo = this.seoFactory.website({
+      title: 'Autenticando... | SimulaCert',
+      description: 'Processando autenticação na SimulaCert.',
+      canonicalPath: '/auth/callback',
+      robots: 'noindex, nofollow',
+      jsonLdId: 'auth-callback',
+    });
+
+    this.seoFacade.set(seo);
   }
 
   ngOnInit(): void {
     this.route.queryParams
+      // We only need to process the query parameters once, so we use `first()` to complete after the first emission.
       .pipe(first(), takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
         const code = params['code'];

@@ -1,13 +1,14 @@
 import {Component} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
 import {FooterComponent} from '../../shared/components/footer.component';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
 @Component({
   selector: 'app-public-layout',
   standalone: true,
-  imports: [RouterOutlet, FooterComponent],
+  imports: [RouterOutlet, FooterComponent, SeoHeadDirective],
   template: `
-    <div class="public-layout">
+    <div class="public-layout" seoHead>
       <div class="public-layout-content">
         <router-outlet />
       </div>

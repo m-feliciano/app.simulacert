@@ -1,0 +1,17 @@
+User-agent: *
+# Sitemap is served dynamically by the SSR server.
+Sitemap: https://app.simulacert.com/sitemap.xml
+
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /auth/
+Disallow: /admin
+Disallow: /user/anon
+
+Disallow: /stats
+Disallow: /attempt/
+
+Allow: /

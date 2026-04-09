@@ -1,13 +1,14 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import {Component, EventEmitter, Output} from '@angular/core';
 
 @Component({
   selector: 'app-support-modal',
   standalone: true,
   template: `
-    <div class="support-modal-backdrop" (click)="close.emit()">
-      <div class="support-modal-content" (click)="$event.stopPropagation()">
+    <div class="support-modal-backdrop" (click)="close.emit()" role="dialog" aria-modal="true"
+         aria-labelledby="support-modal-title">
+      <div class="support-modal-content" (click)="$event.stopPropagation()" tabindex="-1">
         <button class="close-btn" (click)="close.emit()" aria-label="Fechar">×</button>
-        <h3>☕ Apoie o SimulaCert</h3>
+        <h3 id="support-modal-title">☕ Apoie o SimulaCert</h3>
         <p>Se este projeto te ajuda, considere apoiar com um café!</p>
         <a href="https://ko-fi.com/simulacert" target="_blank" rel="noopener" class="support-btn">
           Apoiar no Ko-fi
@@ -83,4 +84,3 @@ import { Component, Output, EventEmitter } from '@angular/core';
 export class SupportModalComponent {
   @Output() close = new EventEmitter<void>();
 }
-

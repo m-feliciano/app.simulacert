@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -17,13 +17,25 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
   template: `
     <div class="attempt-questions-result">
       <h2>Revisão das Questões</h2>
-      <a class="btn-back" routerLink="/attempt/{{ route.snapshot.paramMap.get('id') }}/result">&larr; Voltar ao Resultado</a>
+
+      <div style="justify-self: end;">
+        <a class="btn-back"
+           routerLink="/attempt/{{ route.snapshot.paramMap.get('id') }}/result">&larr; Voltar
+        </a>
+      </div>
+
+      <div class="filter-bar">
+        <button [class.active]="filter() === 'all'" (click)="setFilter('all')">{{ questions().length}} todas</button>
+        <button [class.active]="filter() === 'correct'" (click)="setFilter('correct')">{{ filterBy('correct').length }} corretas</button>
+        <button [class.active]="filter() === 'incorrect'" (click)="setFilter('incorrect')">{{ filterBy('incorrect').length }} incorretas</button>
+      </div>
+
       @if (loading()) {
         <p>Carregando questões...</p>
-      }
-      @if (!loading()) {
-        @if (questions().length) {
-          @for (q of questions(); track q.questionId; let i = $index) {
+      } @else {
+
+        @if (filteredQuestions().length) {
+          @for (q of filteredQuestions(); track q.questionId; let i = $index) {
             <div class="question-card" [class.correct]="isCorrect(q)" [class.incorrect]="!isCorrect(q)">
               <div class="question-header">
                 <span class="question-index">Questão {{ i + 1 }}</span>
@@ -32,6 +44,7 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
                 </span>
               </div>
               <div class="question-text">{{ q.text }}</div>
+
               <ul class="options-list">
                 @for (opt of q.options; track opt.key) {
                   <li [class.correct-option]="opt.isCorrect" [class.selected-option]="isSelectedOption(q, opt.key)">
@@ -69,12 +82,19 @@ export class AttemptQuestionsResultComponent implements OnInit {
   exam = signal<ExamResponse | null>(null);
   loading = signal(true);
 
+  filter = signal<'all' | 'correct' | 'incorrect'>('all');
+  filteredQuestions = signal<AttemptQuestionResponse[]>([]);
+
   constructor(
     protected route: ActivatedRoute,
     private api: AttemptQuestionsApiService,
     private attemptsApi: AttemptsApiService,
     private examsApi: ExamsApiService
-  ) {}
+  ) {
+    effect(() => {
+      this.updateFilteredQuestions();
+    });
+  }
 
   ngOnInit(): void {
     const attemptId = this.route.snapshot.paramMap.get('id');
@@ -103,6 +123,36 @@ export class AttemptQuestionsResultComponent implements OnInit {
       });
     } else {
       this.loading.set(false);
+    }
+  }
+
+  setFilter(f: 'all' | 'correct' | 'incorrect') {
+    this.filter.set(f);
+  }
+
+  private updateFilteredQuestions() {
+    const all = this.questions();
+    const f = this.filter();
+
+    if (f === 'all') {
+      this.filteredQuestions.set(all);
+
+    } else if (f === 'correct') {
+      this.filteredQuestions.set(all.filter(q => this.isCorrect(q)));
+
+    } else {
+      this.filteredQuestions.set(all.filter(q => !this.isCorrect(q)));
+    }
+  }
+
+  filterBy(f: 'all' | 'correct' | 'incorrect'): AttemptQuestionResponse[] {
+    const all = this.questions();
+    if (f === 'all') {
+      return all;
+    } else if (f === 'correct') {
+      return all.filter(q => this.isCorrect(q));
+    } else {
+      return all.filter(q => !this.isCorrect(q));
     }
   }
 

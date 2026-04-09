@@ -1,52 +1,61 @@
 import {Component} from '@angular/core';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {CommonModule} from '@angular/common';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Component({
   selector: 'app-terms-of-use',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, SeoHeadDirective],
   template: `
-    <div class="legal-page">
-      <div class="legal-container">
-        <h1>Termos de Uso</h1>
+    <div seoHead>
+      <div class="legal-page">
+        <div class="legal-container">
+          <h1>Termos de Uso</h1>
 
-        <p class="last-updated">Última atualização: Janeiro de 2026</p>
+          <p class="last-updated">Última atualização: Janeiro de 2026</p>
 
-        <section>
-          <h2>1. Aceitação dos Termos</h2>
-          <p>Ao acessar e usar o SimulaCert, você concorda com estes Termos de Uso.</p>
-        </section>
+          <section>
+            <h2>1. Aceitação dos Termos</h2>
+            <p>Ao acessar e usar o SimulaCert, você concorda com estes Termos de Uso.</p>
+          </section>
 
-        <section>
-          <h2>2. Descrição do Serviço</h2>
-          <p>O SimulaCert é uma plataforma de simulados para certificações profissionais de tecnologia.</p>
-        </section>
+          <section>
+            <h2>2. Descrição do Serviço</h2>
+            <p>O SimulaCert é uma plataforma de simulados para certificações profissionais de tecnologia.</p>
+          </section>
 
-        <section>
-          <h2>3. Isenção de Responsabilidade</h2>
-          <p>Este site não é afiliado, patrocinado ou endossado por provedores oficiais de certificações, incluindo mas
-            não limitado à AWS (Amazon Web Services).</p>
-          <p>O conteúdo fornecido é apenas para fins educacionais e de preparação. As marcas registradas mencionadas são
-            propriedade de seus respectivos donos.</p>
-        </section>
+          <section>
+            <h2>3. Isenção de Responsabilidade</h2>
+            <p>Este site não é afiliado, patrocinado ou endossado por provedores oficiais de certificações, incluindo
+              mas
+              não limitado à AWS (Amazon Web Services).</p>
+            <p>O conteúdo fornecido é apenas para fins educacionais e de preparação. As marcas registradas mencionadas
+              são
+              propriedade de seus respectivos donos.</p>
+          </section>
 
-        <section>
-          <h2>4. Uso Aceitável</h2>
-          <p>Você concorda em usar o SimulaCert apenas para fins legais e de acordo com estes termos.</p>
-        </section>
+          <section>
+            <h2>4. Uso Aceitável</h2>
+            <p>Você concorda em usar o SimulaCert apenas para fins legais e de acordo com estes termos.</p>
+          </section>
 
-        <section>
-          <h2>5. Propriedade Intelectual</h2>
-          <p>Todo o conteúdo do SimulaCert, incluindo textos, gráficos e código, é propriedade do SimulaCert ou de seus
-            licenciadores.</p>
-        </section>
+          <section>
+            <h2>5. Propriedade Intelectual</h2>
+            <p>Todo o conteúdo do SimulaCert, incluindo textos, gráficos e código, é propriedade do SimulaCert ou de
+              seus
+              licenciadores.</p>
+          </section>
 
-        <section>
-          <h2>6. Modificações</h2>
-          <p>Reservamo-nos o direito de modificar estes termos a qualquer momento.</p>
-        </section>
+          <section>
+            <h2>6. Modificações</h2>
+            <p>Reservamo-nos o direito de modificar estes termos a qualquer momento.</p>
+          </section>
 
-        <div class="back-link">
-          <a (click)="goBack()">← Voltar</a>
+          <div class="back-link">
+            <a (click)="goBack()">← Voltar</a>
+          </div>
         </div>
       </div>
     </div>
@@ -117,8 +126,32 @@ import {Component} from '@angular/core';
 })
 export class TermsOfUseComponent {
 
+  constructor(private seoFactory: SeoFactoryService,
+              private seoFacade: SeoFacadeService) {
+    const seo = this.seoFactory.website({
+      title: 'Termos de Uso | SimulaCert',
+      description: 'Leia os Termos de Uso da plataforma SimulaCert.',
+      canonicalPath: '/termos-de-uso',
+      robots: 'index, follow',
+      jsonLdId: 'terms-of-use',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Termos de Uso',
+        description: 'Leia os Termos de Uso da plataforma SimulaCert.',
+        url: this.seoFactory.canonicalFromPath('/termos-de-uso'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      },
+    });
+
+    this.seoFacade.set(seo);
+  }
+
   goBack(): void {
     window.history.back();
   }
 }
-

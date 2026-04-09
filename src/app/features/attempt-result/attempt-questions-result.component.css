@@ -121,3 +121,52 @@
   margin-left: 8px;
 }
 
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin: 0 0 32px 0;
+  justify-content: flex-start;
+}
+
+.filter-bar button {
+  background: #f5f7fa;
+  color: #37475a;
+  border: 1px solid #dbe2ea;
+  border-radius: 6px;
+  padding: 7px 18px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  outline: none;
+}
+
+.filter-bar button.active,
+.filter-bar button:focus {
+  background: #1976d2;
+  color: #fff;
+  border-color: #1976d2;
+}
+
+/* Cores específicas para botões de filtro corretas/incorretas */
+.filter-bar button.active:nth-child(2) {
+  background: #4caf50;
+  color: #fff;
+  border-color: #4caf50;
+}
+.filter-bar button.active:nth-child(3) {
+  background: #f44336;
+  color: #fff;
+  border-color: #f44336;
+}
+
+.filter-bar button:hover:not(.active):nth-child(2) {
+  background: #e8f5e9;
+  color: #388e3c;
+  border-color: #4caf50;
+}
+.filter-bar button:hover:not(.active):nth-child(3) {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #f44336;
+}

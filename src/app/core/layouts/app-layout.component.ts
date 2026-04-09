@@ -1,16 +1,17 @@
-import {Component, computed, signal} from '@angular/core';
+import {Component, signal} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
-import { SupportModalComponent } from '../../shared/components/support-modal.component';
+import {SupportModalComponent} from '../../shared/components/support-modal.component';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective],
   template: `
-    <div class="app-layout">
+    <div class="app-layout" seoHead>
       <header class="topbar">
         <div class="topbar-left">
           @if (isMobile()) {
@@ -440,6 +441,11 @@ export class AppLayoutComponent {
   }
 
   private checkIfMobile(): void {
+    if (typeof window === 'undefined') {
+      this.isMobile.set(false);
+      return;
+    }
+
     this.isMobile.set(window.innerWidth <= 768);
 
     window.addEventListener('resize', () => {
