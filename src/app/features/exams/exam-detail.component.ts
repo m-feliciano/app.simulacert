@@ -97,7 +97,7 @@ import {getExamSeoContent} from './exam-seo-content.registry';
               <ul>
                 <li>Você terá {{ duration() }} minutos para completar o exame</li>
                 <li>São {{ questionCount() }} questões de múltipla escolha</li>
-                <li>Não é possível pausar o exame</li>
+                <li>Você pode pausar e retomar o exame a qualquer momento</li>
                 <li>Você pode revisar suas respostas antes de finalizar</li>
               </ul>
             </div>

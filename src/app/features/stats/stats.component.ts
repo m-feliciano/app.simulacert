@@ -100,7 +100,7 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
                 <div class="col-score">Pontuação</div>
               </div>
               @for (attempt of attemptHistory(); track attempt.attemptId) {
-                <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, 'result']">
+                <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, attempt.status === 'IN_PROGRESS' ? 'run' : 'result']">
                   <div class="col-date">{{ formatDate(attempt.startedAt) }}</div>
                   <div class="col-exam">{{ attempt.examTitle }}</div>
 

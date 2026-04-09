@@ -104,7 +104,7 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
               @if (recentAttempts().length > 0) {
                 <div class="attempts-list">
                   @for (attempt of recentAttempts(); track attempt.id) {
-                    <a class="attempt-item" [routerLink]="['/attempt', attempt.id, 'result']"
+                    <a class="attempt-item" [routerLink]="['/attempt', attempt.id,  attempt.status === 'IN_PROGRESS' ? 'run' : 'result']"
                        aria-label="Ver resultado da tentativa">
                       <div class="attempt-info">
                         <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>

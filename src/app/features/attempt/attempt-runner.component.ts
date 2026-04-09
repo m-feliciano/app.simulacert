@@ -1,4 +1,4 @@
-import {Component, computed, DestroyRef, Inject, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, Inject, OnDestroy, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -29,15 +29,23 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
         </div>
       }
 
-      @if (!loading() && !error() && exam() && questions().length > 0) {
+      @if (isPaused()) {
+        <div class="loading-state">
+          <p>Exame pausado. Retome quando estiver pronto.</p>
+        </div>
+
+      } @else if (!loading() && !error() && exam() && questions().length > 0) {
         <div class="attempt-header">
           <div class="header-left">
             <h2>{{ exam()!.title }}</h2>
           </div>
           <div class="header-right">
             <div class="timer" [class.warning]="timeRemaining() < 300">
-              ⏱️ {{ timeRemaining() | formatTime }}
+              {{ timeRemaining() | formatTime }}
             </div>
+            <button class="btn-pause" (click)="pauseAttempt()" title="Pausar Exame">
+              ⏸ Pausar
+            </button>
             <button class="btn-exit" (click)="confirmExit()" title="Sair do Exame">
               ✕ Sair
             </button>
@@ -130,11 +138,23 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
         <div class="finish-modal" (click)="showExitModal.set(false)">
           <div class="modal-content" (click)="$event.stopPropagation()">
             <h3>⚠️ Sair do Exame?</h3>
-            <p>Seu progresso será perdido se você sair agora.</p>
+            <p>Seu progresso será salvo e você poderá retomar mais tarde.</p>
             <p><strong>Tem certeza que deseja sair?</strong></p>
             <div class="modal-actions">
-              <button class="btn-secondary" (click)="showExitModal.set(false)">Cancelar</button>
-              <button class="btn-primary" (click)="exitAttempt()">Sair</button>
+              <button class="btn-primary" (click)="showExitModal.set(false)">Cancelar</button>
+              <button class="btn-secondary" (click)="exitAttempt()">Sair</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (showPauseModal()) {
+        <div class="finish-modal" (click)="resumeAttempt()">
+          <div class="modal-content" (click)="$event.stopPropagation()">
+            <h3>⏸ Exame Pausado</h3>
+            <p>O cronômetro foi pausado e seu progresso foi salvo.</p>
+            <div class="modal-actions">
+              <button class="btn-primary" (click)="resumeAttempt()">Retomar Exame</button>
             </div>
           </div>
         </div>
@@ -179,7 +199,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
     </div>
   `
 })
-export class AttemptRunnerComponent implements OnInit {
+export class AttemptRunnerComponent implements OnInit, OnDestroy {
   attemptId!: string;
   exam = signal<ExamResponse | null>(null);
   questions = signal<AttemptQuestionResponse[]>([]);
@@ -190,6 +210,8 @@ export class AttemptRunnerComponent implements OnInit {
   finishingAttempt = signal(false);
   showFinishModal = signal(false);
   showExitModal = signal(false);
+  showPauseModal = signal(false);
+  isPaused = signal(false);
   loading = signal(true);
   error = signal('');
   finishError = signal('');
@@ -207,6 +229,10 @@ export class AttemptRunnerComponent implements OnInit {
     private destroyRef: DestroyRef,
     @Inject(LOCAL_STORAGE) private storage: Storage,
   ) {}
+
+  ngOnDestroy(): void {
+    this.timerSubscription?.unsubscribe();
+  }
 
   get currentQuestion(): AttemptQuestionResponse | null {
     return this.questions()[this.currentQuestionIndex()] || null;
@@ -230,9 +256,12 @@ export class AttemptRunnerComponent implements OnInit {
   startTimer(): void {
     let i = 0;
 
+    this.timerSubscription?.unsubscribe();
     this.timerSubscription = interval(1000)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
+        if (this.isPaused()) return;
+
       if (this.timeRemaining() > 0) {
         this.timeRemaining.update(t => t - 1);
 
@@ -244,6 +273,25 @@ export class AttemptRunnerComponent implements OnInit {
         this.finishAttempt();
       }
     });
+  }
+
+  pauseAttempt(): void {
+    if (this.loading() || this.error() || this.finishingAttempt()) return;
+
+    this.submitCurrentAnswer();
+    this.saveLocalProgress();
+
+    this.isPaused.set(true);
+    this.showPauseModal.set(true);
+
+    this.timerSubscription?.unsubscribe();
+  }
+
+  resumeAttempt(): void {
+    this.showPauseModal.set(false);
+    this.isPaused.set(false);
+
+    this.startTimer();
   }
 
   toggleAnswer(optionKey: string): void {
@@ -467,17 +515,19 @@ export class AttemptRunnerComponent implements OnInit {
   }
 
   confirmExit(): void {
+    if (this.showPauseModal()) {
+      this.showPauseModal.set(false);
+      this.isPaused.set(false);
+    }
+
     this.showExitModal.set(true);
   }
 
   exitAttempt(): void {
-    this.clearLocalProgress();
-
-    this.attemptsApi.cancelAttempt(this.attemptId).subscribe({
-      error: (error) => {
-        console.error('Error cancelling attempt:', error);
-      }
-    });
+    // TODO: Avaliar se é necessário cancelar a tentativa no backend ou apenas deixar expirar o tempo
+    // this.clearLocalProgress();
+    // this.timerSubscription?.unsubscribe();
+    // this.attemptsApi.cancelAttempt(this.attemptId).subscribe({});
 
     this.router.navigate(['/dashboard']);
   }
