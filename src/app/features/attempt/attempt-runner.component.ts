@@ -1,4 +1,4 @@
-import {Component, computed, Inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, computed, DestroyRef, Inject, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -6,11 +6,13 @@ import {ExamsApiService} from '../../api/exams.service';
 import {AttemptQuestionResponse, ExamResponse} from '../../api/domain';
 import {interval, Subscription} from 'rxjs';
 import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
 
 @Component({
   selector: 'app-attempt-runner',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormatTimePipe],
   styleUrls: ['./attempt-runner.component.css'],
   template: `
     <div class="attempt-runner">
@@ -34,7 +36,7 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
           </div>
           <div class="header-right">
             <div class="timer" [class.warning]="timeRemaining() < 300">
-              ⏱️ {{ formatTime(timeRemaining()) }}
+              ⏱️ {{ timeRemaining() | formatTime }}
             </div>
             <button class="btn-exit" (click)="confirmExit()" title="Sair do Exame">
               ✕ Sair
@@ -51,8 +53,8 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
             <button
               class="question-nav-btn"
               [class.active]="$index === currentQuestionIndex()"
-              [class.answered]="answeredQuestions.has($index)"
-              [disabled]="!answeredQuestions.has($index) && $index !== currentQuestionIndex()"
+              [class.answered]="answeredQuestions().has($index)"
+              [disabled]="!answeredQuestions().has($index) && $index !== currentQuestionIndex()"
               (click)="goToQuestion($index)">
               {{ $index + 1 }}
             </button>
@@ -73,8 +75,8 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
                 <span class="hint-icon">ℹ️</span>
                 <span>Esta questão permite múltiplas respostas. Selecione {{ getExpectedAnswerCount(currentQuestion) }}
                   opção(ões) correta(s).</span>
-                @if (selectedAnswers[currentQuestionIndex()]) {
-                  <span class="selection-count">({{ selectedAnswers[currentQuestionIndex()].length }}
+                @if (selectedAnswers()[currentQuestionIndex()]) {
+                  <span class="selection-count">({{ selectedAnswers()[currentQuestionIndex()].length }}
                     /{{ getExpectedAnswerCount(currentQuestion) }} selecionadas)</span>
                 }
               </div>
@@ -110,9 +112,8 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
               <button
                 class="btn-secondary"
                 (click)="nextQuestion()"
-                [disabled]="currentQuestionIndex() === questions().length - 1
-                    || !selectedAnswers[currentQuestionIndex()]
-                    || selectedAnswers[currentQuestionIndex()].length !== getExpectedAnswerCount(currentQuestion)">
+                [disabled]="!selectedAnswers()[currentQuestionIndex()] ||
+                             selectedAnswers()[currentQuestionIndex()].length !== getExpectedAnswerCount(currentQuestion)">
                 Próxima →
               </button>
 
@@ -144,7 +145,7 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
         <div class="finish-modal" (click)="showFinishModal.set(false)">
           <div class="modal-content" (click)="$event.stopPropagation()">
             <h3>Finalizar Exame?</h3>
-            <p>Você respondeu {{ answeredQuestions.size }} de {{ questions().length }} questões.</p>
+            <p>Você respondeu {{ answeredQuestions().size }} de {{ questions().length }} questões.</p>
             <p><strong>Tem certeza que deseja finalizar?</strong></p>
             <div class="modal-actions">
               <button class="btn-secondary" (click)="showFinishModal.set(false)">Cancelar</button>
@@ -179,25 +180,22 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
     </div>
   `
 })
-export class AttemptRunnerComponent implements OnInit, OnDestroy {
+export class AttemptRunnerComponent implements OnInit {
   attemptId!: string;
   exam = signal<ExamResponse | null>(null);
   questions = signal<AttemptQuestionResponse[]>([]);
+  selectedAnswers = signal<{ [index: number]: string[] }>({});
+  answeredQuestions = signal(new Set<number>());
   currentQuestionIndex = signal(0);
-
-  selectedAnswers: { [index: number]: string[] } = {};
-  answeredQuestions = new Set<number>();
-
-  duration = computed(() => Math.round(this.questions().length * 2 * 60)); // in seconds
-
   timeRemaining = signal(0);
-
+  finishingAttempt = signal(false);
   showFinishModal = signal(false);
   showExitModal = signal(false);
   loading = signal(true);
   error = signal('');
-  finishingAttempt = signal(false);
   finishError = signal('');
+
+  duration = computed(() => Math.round(this.questions().length * 2 * 60)); // in seconds
 
   private timerSubscription?: Subscription;
   private readonly STORAGE_KEY_PREFIX = 'attempt_progress_';
@@ -207,6 +205,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     private router: Router,
     private attemptsApi: AttemptsApiService,
     private examsApi: ExamsApiService,
+    private destroyRef: DestroyRef,
     @Inject(LOCAL_STORAGE) private storage: Storage,
   ) {}
 
@@ -216,7 +215,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
   get progress(): number {
     const questionsLength = this.questions().length;
-    return questionsLength > 0 ? (this.answeredQuestions.size / questionsLength) * 100 : 0;
+    return questionsLength > 0 ? (this.answeredQuestions().size / questionsLength) * 100 : 0;
   }
 
   ngOnInit(): void {
@@ -225,51 +224,58 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.loadLocalProgress();
   }
 
-  ngOnDestroy(): void {
-    this.timerSubscription?.unsubscribe();
-  }
-
   private getStorageKey(): string {
     return `${this.STORAGE_KEY_PREFIX}${this.attemptId}`;
   }
 
-  private saveLocalProgress(): void {
-    try {
-      const progress = {
-        selectedAnswers: this.selectedAnswers,
-        answeredQuestions: Array.from(this.answeredQuestions),
-        currentQuestionIndex: this.currentQuestionIndex(),
-        timeRemaining: this.timeRemaining(),
-        timestamp: new Date().toISOString()
-      };
+  startTimer(): void {
+    let i = 0;
 
-      this.storage.setItem(this.getStorageKey(), JSON.stringify(progress));
+    this.timerSubscription = interval(1000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+      if (this.timeRemaining() > 0) {
+        this.timeRemaining.update(t => t - 1);
 
-    } catch (error) {
-      console.error('Error saving progress to this.storage:', error);
-    }
+        if (++i % 5 === 0) {
+          this.saveLocalProgress();
+        }
+
+      } else {
+        this.finishAttempt();
+      }
+    });
   }
 
-  private loadLocalProgress(): void {
-    try {
-      const saved = this.storage.getItem(this.getStorageKey());
-      if (saved) {
-        const progress = JSON.parse(saved);
-        this.selectedAnswers = progress.selectedAnswers || {};
-        this.answeredQuestions = new Set(progress.answeredQuestions || []);
+  toggleAnswer(optionKey: string): void {
+    const currentIdx = this.currentQuestionIndex();
 
-        if (progress.currentQuestionIndex !== undefined) {
-          this.currentQuestionIndex.set(progress.currentQuestionIndex);
-        }
+    if (!this.selectedAnswers()[currentIdx]) {
+      this.selectedAnswers()[currentIdx] = [];
+    }
 
-        if (progress.timeRemaining !== undefined) {
-          this.timeRemaining.set(progress.timeRemaining);
+    const currentAnswers = [...this.selectedAnswers()[currentIdx]];
+    const expectedCount = this.getExpectedAnswerCount(this.currentQuestion!);
+
+    if (expectedCount === 1) {
+      if (currentAnswers.length === 1 && currentAnswers[0] === optionKey) {
+        this.selectedAnswers()[currentIdx] = [];
+      } else {
+        this.selectedAnswers()[currentIdx] = [optionKey];
+      }
+    } else {
+      const optionIndex = currentAnswers.indexOf(optionKey);
+      if (optionIndex > -1) {
+        currentAnswers.splice(optionIndex, 1);
+        this.selectedAnswers()[currentIdx] = currentAnswers;
+      } else {
+        if (currentAnswers.length < expectedCount) {
+          this.selectedAnswers()[currentIdx] = [...currentAnswers, optionKey].sort();
         }
       }
-
-    } catch (error) {
-      console.error('Error loading progress from this.storage:', error);
     }
+
+    this.saveLocalProgress();
   }
 
   private clearLocalProgress(): void {
@@ -335,94 +341,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     }
   }
 
-  startTimer(): void {
-    let i = 0;
-
-    this.timerSubscription = interval(1000).subscribe(() => {
-      if (this.timeRemaining() > 0) {
-        this.timeRemaining.update(t => t - 1);
-
-        if (++i % 5 === 0) {
-          this.saveLocalProgress();
-        }
-
-      } else {
-        this.finishAttempt();
-      }
-    });
-  }
-
-  toggleAnswer(optionKey: string): void {
-    const currentIdx = this.currentQuestionIndex();
-
-    if (!this.selectedAnswers[currentIdx]) {
-      this.selectedAnswers[currentIdx] = [];
-    }
-
-    const currentAnswers = [...this.selectedAnswers[currentIdx]];
-    const expectedCount = this.getExpectedAnswerCount(this.currentQuestion!);
-
-    if (expectedCount === 1) {
-      if (currentAnswers.length === 1 && currentAnswers[0] === optionKey) {
-        this.selectedAnswers[currentIdx] = [];
-      } else {
-        this.selectedAnswers[currentIdx] = [optionKey];
-      }
-    } else {
-      const optionIndex = currentAnswers.indexOf(optionKey);
-      if (optionIndex > -1) {
-        currentAnswers.splice(optionIndex, 1);
-        this.selectedAnswers[currentIdx] = currentAnswers;
-      } else {
-        if (currentAnswers.length < expectedCount) {
-          this.selectedAnswers[currentIdx] = [...currentAnswers, optionKey].sort();
-        }
-      }
-    }
-
-    this.saveLocalProgress();
-  }
-
   isOptionSelected(optionKey: string): boolean {
     const currentIdx = this.currentQuestionIndex();
-    const answers = this.selectedAnswers[currentIdx];
+    const answers = this.selectedAnswers()[currentIdx];
     return answers ? answers.includes(optionKey) : false;
-  }
-
-  protected submitCurrentAnswer(): void {
-    if (!this.currentQuestion || !this.selectedAnswers) return;
-
-    const currentIdx = this.currentQuestionIndex();
-    const currentAnswers = this.selectedAnswers[currentIdx];
-    const expectedCount = this.getExpectedAnswerCount(this.currentQuestion);
-    const currentCount = currentAnswers?.length || 0;
-    const questionId = this.currentQuestion.questionId;
-
-    if (currentCount !== expectedCount) return;
-
-    const selectedOption = currentAnswers.join(',');
-
-    this.attemptsApi.submitAnswer(this.attemptId, questionId, {selectedOption})
-      .subscribe({
-        next: () => {
-          this.answeredQuestions.add(currentIdx);
-        },
-        error: (error) => console.error('Error submitting:', error)
-      });
-  }
-
-  isMultipleChoice(question: AttemptQuestionResponse): boolean {
-    const text = question?.text?.toLowerCase();
-    return text?.includes('escolha dois') ||
-      text?.includes('escolha duas') ||
-      text?.includes('escolha três') ||
-      text?.includes('escolha tres') ||
-      text?.includes('selecione dois') ||
-      text?.includes('selecione duas') ||
-      text?.includes('selecione três') ||
-      text?.includes('selecione tres') ||
-      text?.includes('(escolha') ||
-      text?.includes('(selecione');
   }
 
   getExpectedAnswerCount(question: AttemptQuestionResponse): number {
@@ -442,10 +364,80 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
     if (this.isMultipleChoice(question)) {
       const correctCount = question.options.filter(opt => opt.isCorrect).length;
-      return correctCount > 1 ? correctCount : 1;
+      return Math.max(correctCount, 1);
     }
 
     return 1;
+  }
+
+  protected submitCurrentAnswer(): void {
+    if (!this.currentQuestion || !this.selectedAnswers) return;
+
+    const currentIdx = this.currentQuestionIndex();
+    const currentAnswers = this.selectedAnswers()[currentIdx];
+    const expectedCount = this.getExpectedAnswerCount(this.currentQuestion);
+    const currentCount = currentAnswers?.length || 0;
+    const questionId = this.currentQuestion.questionId;
+
+    if (currentCount !== expectedCount) return;
+
+    const selectedOption = currentAnswers.join(',');
+
+    this.attemptsApi.submitAnswer(this.attemptId, questionId, {selectedOption})
+      .subscribe({
+        next: () => {
+          this.answeredQuestions().add(currentIdx);
+        },
+        error: (error) => console.error('Error submitting:', error)
+      });
+  }
+
+  private saveLocalProgress(): void {
+    try {
+      const progress = {
+        selectedAnswers: this.selectedAnswers,
+        answeredQuestions: Array.from(this.answeredQuestions()),
+        currentQuestionIndex: this.currentQuestionIndex(),
+        timeRemaining: this.timeRemaining(),
+        timestamp: new Date().toISOString()
+      };
+
+      this.storage.setItem(this.getStorageKey(), JSON.stringify(progress));
+
+    } catch (error) {
+      console.error('Error saving progress to this.storage:', error);
+    }
+  }
+
+  isMultipleChoice(question: AttemptQuestionResponse): boolean {
+    const text = question?.text?.toLowerCase();
+    return text?.includes('escolha dois') ||
+      text?.includes('escolha duas') ||
+      text?.includes('escolha três') ||
+      text?.includes('escolha tres') ||
+      text?.includes('selecione dois') ||
+      text?.includes('selecione duas') ||
+      text?.includes('selecione três') ||
+      text?.includes('selecione tres') ||
+      text?.includes('(escolha') ||
+      text?.includes('(selecione');
+  }
+
+  private loadLocalProgress(): void {
+    const saved = this.storage.getItem(this.getStorageKey());
+    if (!saved) return;
+
+    const progress = JSON.parse(saved);
+    this.selectedAnswers = progress.selectedAnswers || {};
+    this.answeredQuestions.set(new Set(progress.answeredQuestions || []));
+
+    if (progress.currentQuestionIndex !== undefined) {
+      this.currentQuestionIndex.set(progress.currentQuestionIndex);
+    }
+
+    if (progress.timeRemaining !== undefined) {
+      this.timeRemaining.set(progress.timeRemaining);
+    }
   }
 
   goToQuestion(index: number): void {
@@ -480,7 +472,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.timerSubscription?.unsubscribe();
     this.router.navigate(['/dashboard']);
   }
 
@@ -494,7 +485,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.finishingAttempt.set(true);
     this.finishError.set('');
     this.showFinishModal.set(false);
-    this.timerSubscription?.unsubscribe();
 
     this.attemptsApi.finishAttempt(this.attemptId).subscribe({
       next: () => {
@@ -511,13 +501,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
   retryFinish(): void {
     this.finishAttempt();
-  }
-
-  formatTime(seconds: number): string {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
   goBack(): void {
