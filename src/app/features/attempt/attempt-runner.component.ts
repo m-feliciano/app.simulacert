@@ -267,6 +267,9 @@ export class AttemptRunnerComponent implements OnInit {
         nextAnswers = currentAnswers.filter(a => a !== optionKey);
       } else if (currentAnswers.length < expectedCount) {
         nextAnswers = [...currentAnswers, optionKey].sort();
+      } else {
+        alert(`Você só pode selecionar ${expectedCount} opções para esta questão.`);
+        return;
       }
     }
 
