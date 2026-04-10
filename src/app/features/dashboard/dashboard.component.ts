@@ -202,9 +202,6 @@ export class DashboardComponent implements OnInit {
         }
 
         this.loading.set(false);
-      },
-      error: (error) => {
-        console.error('Error loading stats:', error);
       }
     });
   }
@@ -263,9 +260,6 @@ export class DashboardComponent implements OnInit {
           .slice(0, 5);
         this.recentAttempts.set(sorted);
       },
-      error: (error) => {
-        console.error('Error loading attempts:', error);
-      }
     });
   }
 

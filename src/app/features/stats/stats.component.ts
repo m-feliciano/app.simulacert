@@ -181,10 +181,7 @@ export class StatsComponent implements OnInit {
         this.userStats.set(stats);
         done();
       },
-      error: (error) => {
-        console.error('Error loading user stats:', error);
-        done();
-      }
+      error: () => done()
     });
 
     this.statsApi.getPerformanceByDomain(userId).subscribe({
@@ -192,10 +189,7 @@ export class StatsComponent implements OnInit {
         this.domainStats.set(domains.sort((a, b) => b.accuracyRate - a.accuracyRate));
         done();
       },
-      error: (error) => {
-        console.error('Error loading domain stats:', error);
-        done();
-      }
+      error: () => done()
     });
 
     this.statsApi.getAttemptHistory(userId).subscribe({
@@ -205,10 +199,7 @@ export class StatsComponent implements OnInit {
         ));
         done();
       },
-      error: (error) => {
-        console.error('Error loading attempt history:', error);
-        done();
-      }
+      error: () => done()
     });
   }
 

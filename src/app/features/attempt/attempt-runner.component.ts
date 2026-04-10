@@ -357,7 +357,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         this.checkIfLoaded();
       },
       error: (error) => {
-        console.error(error);
         this.error.set('Erro ao carregar exame.');
         this.loading.set(false);
       }
@@ -370,8 +369,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         this.questions.set(questions);
         this.checkIfLoaded();
       },
-      error: (error) => {
-        console.error(error);
+      error: () => {
         this.error.set('Erro ao carregar questões.');
         this.loading.set(false);
       }
@@ -443,7 +441,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
             return next;
           });
         },
-        error: (error) => console.error(error)
       });
   }
 
@@ -459,8 +456,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
       this.storage.setItem(this.getStorageKey(), JSON.stringify(progress));
 
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
     }
   }
 
@@ -549,8 +545,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         this.clearLocalProgress();
         this.router.navigate(['/attempt', this.attemptId, 'result']);
       },
-      error: (error) => {
-        console.error(error);
+      error: () => {
         this.finishingAttempt.set(false);
         this.finishError.set('Erro ao finalizar o exame. Suas respostas estão salvas. Por favor, tente novamente.');
       }

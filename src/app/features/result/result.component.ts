@@ -291,8 +291,7 @@ export class ResultComponent implements OnInit {
         this.attempt.set(attempt);
         this.loadExam(attempt.examId);
       },
-      error: (error) => {
-        console.error('Error loading attempt:', error);
+      error: () => {
         this.error.set('Erro ao carregar resultado. Por favor, tente novamente.');
         this.loading.set(false);
       }
@@ -305,8 +304,7 @@ export class ResultComponent implements OnInit {
         this.exam.set(exam);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading exam:', error);
+      error: () => {
         this.error.set('Erro ao carregar informações do exame.');
         this.loading.set(false);
       }

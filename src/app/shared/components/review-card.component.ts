@@ -283,8 +283,7 @@ export class ReviewCardComponent implements OnInit {
         this.success.set(true);
         this.submitting.set(false);
       },
-      error: (err) => {
-        console.error('Error submitting review:', err);
+      error: () => {
         this.error.set('Erro ao enviar avaliação. Por favor, tente novamente.');
         this.submitting.set(false);
       }

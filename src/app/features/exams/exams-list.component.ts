@@ -431,8 +431,7 @@ export class ExamsListComponent implements OnInit {
         this.exams.set([...exams, ...this.incomingExams()]);
         this.loading.set(false);
       },
-      error: (error) => {
-        console.error('Error loading exams:', error);
+      error: () => {
         this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
         this.loading.set(false);
       }

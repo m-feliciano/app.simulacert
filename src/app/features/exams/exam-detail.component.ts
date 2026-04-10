@@ -153,7 +153,16 @@ export class ExamDetailComponent implements OnInit {
   showRegisterPrompt = signal(false);
   questionCount = signal(20);
   selectedMode = signal<'practice' | 'exam'>('exam');
+
   duration = computed(() => Math.round(this.questionCount() * 1.5));
+  breadcrumbs = computed(() => {
+    const exam = this.exam();
+    return [
+      {label: 'Home', url: '/'},
+      {label: 'Exames', url: '/exams'},
+      {label: exam?.title || 'Simulado'},
+    ];
+  });
 
   constructor(
     private route: ActivatedRoute,
@@ -245,14 +254,17 @@ export class ExamDetailComponent implements OnInit {
       this.exam.set(resolvedExam);
       this.seoFacade.set(this.seo);
       return;
+
     } else {
-      this.seoFacade.set(this.seoFactory.website({
+      const meta = this.seoFactory.website({
         title: 'Simulado não encontrado | SimulaCert',
         description: 'O simulado solicitado não foi encontrado. Veja a lista de exames disponíveis.',
         canonicalPath: '/exams',
         robots: 'noindex, follow',
         jsonLdId: 'exam-not-found'
-      }));
+      });
+
+      this.seoFacade.set(meta);
     }
 
     if (examId) {
@@ -276,8 +288,7 @@ export class ExamDetailComponent implements OnInit {
           this.loadingExam.set(false);
         }
       },
-      error: (error) => {
-        console.error('Error loading exam:', error);
+      error: () => {
         this.errorMessage.set('Erro ao carregar exame');
         this.loadingExam.set(false);
       }
@@ -329,7 +340,6 @@ export class ExamDetailComponent implements OnInit {
       error: (err) => {
         this.loadingAnonymous.set(false);
         this.errorMessage.set('Erro ao criar usuário anônimo');
-        console.error('Error creating anonymous user', err);
       }
     });
   }
@@ -348,8 +358,7 @@ export class ExamDetailComponent implements OnInit {
         this.applySeo();
         this.loadingExam.set(false);
       },
-      error: (error) => {
-        console.error('Error loading exam by slug:', error);
+      error: () => {
         this.errorMessage.set('Erro ao carregar exame');
         this.loadingExam.set(false);
       }
@@ -378,13 +387,4 @@ export class ExamDetailComponent implements OnInit {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return !uuidRegex.test(slug);
   }
-
-  breadcrumbs = computed(() => {
-    const exam = this.exam();
-    return [
-      {label: 'Home', url: '/'},
-      {label: 'Exames', url: '/exams'},
-      {label: exam?.title || 'Simulado'},
-    ];
-  });
 }
