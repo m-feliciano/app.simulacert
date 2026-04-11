@@ -20,22 +20,24 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       <div class="exams-container">
         @if (loading()) {
           <div class="skeleton-loader">
-            <div class="skeleton-card" *ngFor="let i of [1,2,3]">
-              <div class="skeleton-title"></div>
-              <div class="skeleton-line"></div>
-              <div class="skeleton-line short"></div>
-              <div class="skeleton-btn"></div>
-            </div>
+              @for (i of [1, 2, 3]; track $index) {
+                <div class="skeleton-card">
+                  <div class="skeleton-title"></div>
+                  <div class="skeleton-line"></div>
+                  <div class="skeleton-line short"></div>
+                  <div class="skeleton-btn"></div>
+                </div>
+              }
           </div>
         }
 
-        @if (error()) {
+        @else if (error()) {
           <div class="error-state">
             <p>{{ error() }}</p>
           </div>
         }
 
-        @if (!loading() && !error() && exams().length > 0) {
+        @else if (exams().length > 0) {
           <div class="exams-grid">
             @for (exam of exams(); track exam.id) {
               <div class="exam-card">
@@ -429,10 +431,11 @@ export class ExamsListComponent implements OnInit {
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams.set([...exams, ...this.incomingExams()]);
-        this.loading.set(false);
       },
       error: () => {
         this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
+        this.loading.set(false);
+      }, complete: () => {
         this.loading.set(false);
       }
     });
