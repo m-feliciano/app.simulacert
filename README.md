@@ -1,6 +1,11 @@
 # SimulaCert
 
-Plataforma de simulados para certificações de tecnologia.
+## Documentation language
+
+- 🇺🇸 English: see [README.en.md](./README.en.md)
+- 🇧🇷 Português (este arquivo)
+
+Plataforma gratuita de simulados para certificações de tecnologia (AWS, Azure, Google Cloud, etc).
 
 Descrição
 
@@ -8,8 +13,8 @@ SimulaCert é uma plataforma destinada a apoiar profissionais na preparação pa
 
 Status do projeto
 
-- Framework frontend: Angular 17+
-- Estado: MVP em produção
+- Framework frontend: Angular 21+
+- Estado: Em constante aprimoramento, com diversas funcionalidades implementadas e melhorias contínuas planejadas.
 
 Resumo das funcionalidades
 
@@ -17,6 +22,8 @@ Resumo das funcionalidades
 - Explicações geradas para apoiar o estudo.
 - Estatísticas e análise de desempenho do usuário.
 - Interface responsiva com foco em acessibilidade.
+- Autenticação segura e gerenciamento de sessões.
+- Não é necessário cadastro para acessar simulados, mas funcionalidades avançadas podem exigir login.
 
 Visão geral da estrutura do repositório
 
@@ -59,6 +66,12 @@ npm install
 cp src/environments/environment.ts src/environments/environment.development.ts
 # editar src/environments/environment.development.ts conforme necessário
 ```
+
+> Windows (PowerShell) alternative:
+>
+> ```powershell
+> Copy-Item src\environments\environment.ts src\environments\environment.development.ts
+> ```
 
 4. Executar em modo de desenvolvimento
 
@@ -108,4 +121,4 @@ Proprietary - © 2026 SimulaCert - Marcelo Feliciano
 Website: https://simulacert.com
 API: https://api.simulacert.com
 
-Última atualização: 2026-01-11
+Última atualização: 2026-04-10

@@ -50,8 +50,6 @@ h2 {
   font-size: 18px;
   font-weight: bold;
   padding: 10px 20px;
-  background: var(--color-secondary);
-  color: white;
   border-radius: var(--border-radius-sm);
   transition: var(--transition-fast);
   white-space: nowrap;
@@ -79,6 +77,29 @@ h2 {
   font-weight: 600;
   transition: var(--transition-fast);
   white-space: nowrap;
+}
+
+.btn-pause {
+  background: var(--color-secondary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-pause:hover {
+  background-color: var(--color-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-pause:active {
+  transform: translateY(0);
 }
 
 .btn-exit:hover {

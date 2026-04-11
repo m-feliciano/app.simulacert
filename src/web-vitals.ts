@@ -13,6 +13,5 @@ if (typeof window !== 'undefined' && (process?.env?.NODE_ENV === 'production' ||
 
   reportWebVitals((metric) => {
     // TODO: analytics integration
-    // console.debug('[Core Web Vitals]', metric);
   });
 }

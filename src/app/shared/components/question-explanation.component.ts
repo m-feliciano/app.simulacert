@@ -337,10 +337,9 @@ export class QuestionExplanationComponent {
         this.showExplanation.set(true);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.error.set('Você atingiu o limite de explicações gratuitas por hoje. Tente novamente mais tarde.');
         this.loading.set(false);
-        console.error('Error generating explanation:', err);
       }
     });
   }
@@ -372,16 +371,14 @@ export class QuestionExplanationComponent {
         this.feedbackSubmitted.set(true);
         this.submittingFeedback.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.error.set('Erro ao enviar feedback. Tente novamente.');
         this.submittingFeedback.set(false);
-        console.error('Error submitting feedback:', err);
       }
     });
   }
 
   modelName() {
-    // remove date suffix from model name if present
     return this.explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
   }
 }

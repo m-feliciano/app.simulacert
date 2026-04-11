@@ -279,9 +279,6 @@ export class AdminComponent implements OnInit {
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams.set(exams);
-      },
-      error: (error) => {
-        console.error('Error loading exams:', error);
       }
     });
   }
@@ -295,8 +292,7 @@ export class AdminComponent implements OnInit {
           this.loadExams();
           this.loadingExam.set(false);
         },
-        error: (error) => {
-          console.error('Error creating exam:', error);
+        error: () => {
           this.loadingExam.set(false);
         }
       });
@@ -309,9 +305,6 @@ export class AdminComponent implements OnInit {
         next: () => {
           this.loadExams();
         },
-        error: (error) => {
-          console.error('Error deleting exam:', error);
-        }
       });
     }
   }
@@ -337,7 +330,6 @@ export class AdminComponent implements OnInit {
           this.loadingQuestion.set(false);
         },
         error: (error) => {
-          console.error('Error creating question:', error);
           this.loadingQuestion.set(false);
         }
       });
@@ -362,8 +354,7 @@ export class AdminComponent implements OnInit {
         this.showToast('Importação concluída com sucesso!', 'success');
         this.loadExams();
       },
-      error: (error) => {
-        console.error('Error importing exams:', error);
+      error: () => {
         this.loadingImport.set(false);
         this.showToast('Erro ao importar exames. Verifique o console para mais detalhes.', 'error');
       }
@@ -377,8 +368,7 @@ export class AdminComponent implements OnInit {
         this.users.set(users);
         this.loadingUser.set(false);
       },
-      error: (error) => {
-        console.error('Erro ao buscar usuários:', error);
+      error: () => {
         this.users.set([]);
         this.loadingUser.set(false);
       }
@@ -400,7 +390,6 @@ export class AdminComponent implements OnInit {
         this.loadingUser.set(false);
       },
       error: (error) => {
-        console.error('Error searching user:', error);
         this.foundUser.set(null);
         this.loadingUser.set(false);
         this.showToast('Usuário não encontrado', 'error');
@@ -423,8 +412,7 @@ export class AdminComponent implements OnInit {
       next: () => {
         this.showToast(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`, 'success');
       },
-      error: (error) => {
-        console.error(`Error ${action}ing user:`, error);
+      error: () => {
         this.loadingUser.set(false);
         this.showToast(`Erro ao ${action} usuário`, 'error');
       }

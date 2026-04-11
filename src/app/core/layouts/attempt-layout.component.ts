@@ -1,11 +1,12 @@
-import { Component, Input } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import {Component, Input} from '@angular/core';
+import {RouterOutlet} from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
 
 @Component({
   selector: 'app-attempt-layout',
   standalone: true,
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, FormatTimePipe],
   styleUrls: ['./attempt-layout.component.css'],
   template: `
     <div class="attempt-layout">
@@ -16,13 +17,13 @@ import { CommonModule } from '@angular/common';
         </div>
         <div class="attempt-topbar-right">
           <div class="timer" [class.warning]="timeRemaining < 300">
-            ⏱️ {{ formatTime(timeRemaining) }}
+            ⏱️ {{ timeRemaining | formatTime }}
           </div>
         </div>
       </header>
 
       <main class="attempt-content">
-        <router-outlet />
+        <router-outlet/>
       </main>
     </div>
   `
@@ -30,12 +31,5 @@ import { CommonModule } from '@angular/common';
 export class AttemptLayoutComponent {
   @Input() examTitle = '';
   @Input() timeRemaining = 0;
-
-  formatTime(seconds: number): string {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  }
 }
 

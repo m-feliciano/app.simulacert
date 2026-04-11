@@ -9,11 +9,12 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
+import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe],
   template: `
     <div seoHead>
       <div class="stats-container">
@@ -100,8 +101,8 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
                 <div class="col-score">Pontuação</div>
               </div>
               @for (attempt of attemptHistory(); track attempt.attemptId) {
-                <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, 'result']">
-                  <div class="col-date">{{ formatDate(attempt.startedAt) }}</div>
+                <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, attempt.status === 'IN_PROGRESS' ? 'run' : 'result']">
+                  <div class="col-date">{{ attempt.startedAt | formatDate }}</div>
                   <div class="col-exam">{{ attempt.examTitle }}</div>
 
                   <div class="col-status">
@@ -181,10 +182,7 @@ export class StatsComponent implements OnInit {
         this.userStats.set(stats);
         done();
       },
-      error: (error) => {
-        console.error('Error loading user stats:', error);
-        done();
-      }
+      error: () => done()
     });
 
     this.statsApi.getPerformanceByDomain(userId).subscribe({
@@ -192,10 +190,7 @@ export class StatsComponent implements OnInit {
         this.domainStats.set(domains.sort((a, b) => b.accuracyRate - a.accuracyRate));
         done();
       },
-      error: (error) => {
-        console.error('Error loading domain stats:', error);
-        done();
-      }
+      error: () => done()
     });
 
     this.statsApi.getAttemptHistory(userId).subscribe({
@@ -205,20 +200,7 @@ export class StatsComponent implements OnInit {
         ));
         done();
       },
-      error: (error) => {
-        console.error('Error loading attempt history:', error);
-        done();
-      }
-    });
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+      error: () => done()
     });
   }
 

@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { ReviewsApiService } from '../../api/reviews.service';
 import { ReviewResponse } from '../../api/domain';
 import { StarRatingComponent } from './star-rating.component';
+import {FormatDatePipe} from '../pipes/format-date.pipe';
 
 @Component({
   selector: 'app-review-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, StarRatingComponent],
+  imports: [CommonModule, FormsModule, StarRatingComponent, FormatDatePipe],
   template: `
     <div class="review-card">
       @if (!finalized) {
@@ -28,7 +29,7 @@ import { StarRatingComponent } from './star-rating.component';
             @if (existingReview()!.comment) {
               <p class="comment-readonly">{{ existingReview()!.comment }}</p>
             }
-            <p class="review-date">Avaliado em {{ formatDate(existingReview()!.createdAt) }}</p>
+            <p class="review-date">Avaliado em {{ existingReview()!.createdAt | formatDate }}</p>
           </div>
         } @else {
           <div class="review-form">
@@ -283,21 +284,10 @@ export class ReviewCardComponent implements OnInit {
         this.success.set(true);
         this.submitting.set(false);
       },
-      error: (err) => {
-        console.error('Error submitting review:', err);
+      error: () => {
         this.error.set('Erro ao enviar avaliação. Por favor, tente novamente.');
         this.submitting.set(false);
       }
-    });
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   }
 }
