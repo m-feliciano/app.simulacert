@@ -11,7 +11,7 @@ export class FormatTimePipe implements PipeTransform {
     return this.formatTime(value);
   }
 
-  formatTime(seconds: number): string {
+  private formatTime(seconds: number): string {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;

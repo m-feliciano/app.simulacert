@@ -8,11 +8,12 @@ import {ReviewCardComponent} from '../../shared/components/review-card.component
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
+import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 
 @Component({
   selector: 'app-result',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReviewCardComponent, SeoHeadDirective],
+  imports: [CommonModule, RouterLink, ReviewCardComponent, SeoHeadDirective, FormatDatePipe],
   template: `
     <div seoHead>
       <div class="result-container">
@@ -52,12 +53,12 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
           <div class="attempt-details">
             <div class="detail-card">
               <div class="detail-label">Data de Início</div>
-              <div class="detail-value">{{ formatDate(attempt()!.startedAt) }}</div>
+              <div class="detail-value">{{ attempt()!.startedAt | formatDate }}</div>
             </div>
 
             <div class="detail-card">
               <div class="detail-label">Data de Conclusão</div>
-              <div class="detail-value">{{ formatDate(attempt()!.finishedAt!) }}</div>
+              <div class="detail-value">{{ attempt()!.finishedAt! | formatDate }}</div>
             </div>
 
             <div class="detail-card">
@@ -308,16 +309,6 @@ export class ResultComponent implements OnInit {
         this.error.set('Erro ao carregar informações do exame.');
         this.loading.set(false);
       }
-    });
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   }
 

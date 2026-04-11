@@ -9,13 +9,13 @@ import {ScoreStatusComponent} from '../../shared/components/score-status/score-s
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
-import {SeoMeta} from '../../core/seo/seo.model';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
+import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe],
   template: `
     <div seoHead>
       <div class="dashboard">
@@ -104,10 +104,11 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
               @if (recentAttempts().length > 0) {
                 <div class="attempts-list">
                   @for (attempt of recentAttempts(); track attempt.id) {
-                    <a class="attempt-item" [routerLink]="['/attempt', attempt.id,  attempt.status === 'IN_PROGRESS' ? 'run' : 'result']"
-                       aria-label="Ver resultado da tentativa">
+                    <a class="attempt-item"
+                       [routerLink]="['/attempt', attempt.id,  attempt.status === 'IN_PROGRESS' ? 'run' : 'result']"
+                       aria-label="Ver detalhes da tentativa iniciada em {{ attempt.startedAt | formatDate }}">
                       <div class="attempt-info">
-                        <div class="attempt-date">{{ formatDate(attempt.startedAt) }}</div>
+                        <div class="attempt-date">{{ attempt.startedAt | formatDate }}</div>
                         <div class="attempt-status" [class]="attempt.status.toLowerCase()">
                           {{ formatStatus(attempt.status) }}
                         </div>
@@ -139,8 +140,6 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
   styleUrls: [`./dashboard.component.css`]
 })
 export class DashboardComponent implements OnInit {
-
-  seo!: SeoMeta;
 
   stats = signal<UserStatsDto | null>(null);
   recentAttempts = signal<AttemptResponse[]>([]);
@@ -192,6 +191,7 @@ export class DashboardComponent implements OnInit {
 
   loadStats(userId: string): void {
     this.loading.set(true);
+
     this.statsApi.getUserStatistics(userId).subscribe({
       next: (stats) => {
         this.stats.set(stats);
@@ -200,7 +200,10 @@ export class DashboardComponent implements OnInit {
         if (!this.isFirstAccess()) {
           this.generateRecommendations(stats);
         }
-
+      }, error: () => {
+        this.stats.set(null);
+        this.loading.set(false);
+      }, complete: () => {
         this.loading.set(false);
       }
     });
@@ -260,16 +263,6 @@ export class DashboardComponent implements OnInit {
           .slice(0, 5);
         this.recentAttempts.set(sorted);
       },
-    });
-  }
-
-  formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
     });
   }
 
