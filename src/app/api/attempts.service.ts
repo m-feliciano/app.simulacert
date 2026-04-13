@@ -1,8 +1,9 @@
 import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {HttpClient, HttpResponse} from '@angular/common/http';
+import {Observable, throwError} from 'rxjs';
 import { AttemptResponse, StartAttemptRequest, AttemptQuestionResponse, SubmitAnswerRequest } from './domain';
 import { API_CONFIG, ApiConfig } from './config/api.config';
+import {catchError} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -17,8 +18,13 @@ export class AttemptsApiService {
     this.baseUrl = `${this.config.baseUrl}/api/v1/attempts`;
   }
 
-  startAttempt(request: StartAttemptRequest): Observable<AttemptResponse> {
-    return this.http.post<AttemptResponse>(this.baseUrl, request);
+  startAttempt(request: StartAttemptRequest): Observable<HttpResponse<void>> {
+    return this.http.post<void>(this.baseUrl, request, { observe: 'response' })
+      .pipe(
+        catchError(error => {
+          return throwError(() => error);
+        })
+      );
   }
 
   getAttempt(attemptId: string): Observable<AttemptResponse> {

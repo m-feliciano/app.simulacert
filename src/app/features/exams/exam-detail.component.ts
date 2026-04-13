@@ -316,8 +316,11 @@ export class ExamDetailComponent implements OnInit {
       userId: this.authFacade.currentUser()!.id,
       questionCount: this.questionCount()
     }).subscribe({
-      next: (attempt) => {
-        this.router.navigate(['/attempt', attempt.id, 'run']);
+      next: (response) => {
+        const location = response.headers.get('Location');
+        const attemptId = location!.split('/').pop();
+
+        this.router.navigate(['/attempt', attemptId, 'run']);
       },
       error: (error) => {
         this.loading.set(false);
