@@ -24,7 +24,8 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
       @if (error()) {
         <div class="error-state">
           <p>{{ error() }}</p>
-          <button class="btn-secondary" (click)="goBack()">Voltar</button>
+          <p>Tente recarregar a página ou verifique sua conexão.</p>
+          <button class="btn-primary" (click)="loadAttempt()">Recarregar</button>
         </div>
       }
 
@@ -307,21 +308,18 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.heartbeatSubscription = interval(this.HEARTBEAT_EVERY_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        if (this.isPaused() || this.loading() || this.error() || this.finishingAttempt()) return;
+        if (this.isPaused() || this.loading() || this.finishingAttempt()) return;
 
         this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
           next: (timing) => {
             this.setTimingFromServer(timing);
-          },
-          error: () => {
-            this.finishError.set('Conexão instável. Não foi possível sincronizar o tempo do exame.');
           }
         });
       });
   }
 
   pauseAttempt(): void {
-    if (this.loading() || this.error() || this.finishingAttempt()) return;
+    if (this.loading() || this.finishingAttempt()) return;
 
     this.attemptsApi.pauseAttempt(this.attemptId).subscribe({
       next: (timing) => {
@@ -330,7 +328,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         this.unsubscribe();
       },
       error: () => {
-        this.finishError.set('Não foi possível pausar o exame. Verifique sua conexão e tente novamente.');
+        this.error.set('Não foi possível pausar o exame. Verifique sua conexão e tente novamente.');
       }
     });
   }
@@ -341,7 +339,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   resumeAttempt(): void {
-    if (this.loading() || this.error() || this.finishingAttempt()) return;
+    if (this.loading() || this.finishingAttempt()) return;
 
     this.attemptsApi.resumeAttempt(this.attemptId).subscribe({
       next: (timing) => {
@@ -357,7 +355,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        this.finishError.set('Não foi possível retomar o exame. Verifique sua conexão e tente novamente.');
+        this.error.set('Não foi possível retomar o exame. Verifique sua conexão e tente novamente.');
       }
     });
   }
