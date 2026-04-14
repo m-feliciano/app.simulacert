@@ -1,8 +1,15 @@
-import { Injectable, Inject } from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Observable, throwError} from 'rxjs';
-import { AttemptResponse, StartAttemptRequest, AttemptQuestionResponse, SubmitAnswerRequest } from './domain';
-import { API_CONFIG, ApiConfig } from './config/api.config';
+import {
+  AnswerResponse,
+  AttemptQuestionResponse,
+  AttemptResponse,
+  StartAttemptRequest,
+  SubmitAnswerRequest
+} from './domain';
+import {AttemptTimingResponse} from './domain/attempt.model';
+import {API_CONFIG, ApiConfig} from './config/api.config';
 import {catchError} from 'rxjs/operators';
 
 @Injectable({
@@ -47,8 +54,24 @@ export class AttemptsApiService {
     return this.http.delete<void>(`${this.baseUrl}/${attemptId}/answers/${questionId}`);
   }
 
+  getAnswers(attemptId: string): Observable<AnswerResponse[]> {
+    return this.http.get<AnswerResponse[]>(`${this.baseUrl}/${attemptId}/answers`);
+  }
+
   finishAttempt(attemptId: string): Observable<AttemptResponse> {
     return this.http.post<AttemptResponse>(`${this.baseUrl}/${attemptId}/finish`, {});
+  }
+
+  pauseAttempt(attemptId: string): Observable<AttemptTimingResponse> {
+    return this.http.post<AttemptTimingResponse>(`${this.baseUrl}/${attemptId}/pause`, {});
+  }
+
+  resumeAttempt(attemptId: string): Observable<AttemptTimingResponse> {
+    return this.http.post<AttemptTimingResponse>(`${this.baseUrl}/${attemptId}/resume`, {});
+  }
+
+  heartbeatAttempt(attemptId: string): Observable<AttemptTimingResponse> {
+    return this.http.post<AttemptTimingResponse>(`${this.baseUrl}/${attemptId}/heartbeat`, {});
   }
 
   cancelAttempt(attemptId: string): Observable<void> {

@@ -1,4 +1,4 @@
-import { QuestionOption } from './question.model';
+import {QuestionOption} from './question.model';
 
 export enum AttemptStatus {
   IN_PROGRESS = 'IN_PROGRESS',
@@ -8,6 +8,9 @@ export enum AttemptStatus {
 
 export interface AttemptResponse {
   examId: string;
+  endsAt: string;
+  paused?: boolean;
+  pausedAt?: string;
   finishedAt?: string;
   id: string;
   questionIds: string[];
@@ -18,10 +21,18 @@ export interface AttemptResponse {
   userId: string;
 }
 
+export interface AttemptTimingResponse {
+  endsAt: string;
+  remainingSeconds: number;
+  paused: boolean;
+  pausedAt?: string;
+}
+
 export interface StartAttemptRequest {
   examId: string;
   questionCount: number;
   userId: string;
+  limitSeconds: number;
 }
 
 export interface AttemptQuestionResponse {
@@ -46,3 +57,8 @@ export interface AttemptHistoryItemDto {
   status: string;
 }
 
+export interface AnswerResponse {
+  questionId: string;
+  selectedOption?: string;
+  answeredAt?: string;
+}

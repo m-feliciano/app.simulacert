@@ -16,7 +16,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
           <span class="exam-title">{{ examTitle }}</span>
         </div>
         <div class="attempt-topbar-right">
-          <div class="timer" [class.warning]="timeRemaining < 300">
+          <div class="timer" title="Tempo restante">
             ⏱️ {{ timeRemaining | formatTime }}
           </div>
         </div>

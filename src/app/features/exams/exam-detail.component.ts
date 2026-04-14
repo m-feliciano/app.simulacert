@@ -314,11 +314,18 @@ export class ExamDetailComponent implements OnInit {
     this.attemptsApi.startAttempt({
       examId: exam.id,
       userId: this.authFacade.currentUser()!.id,
-      questionCount: this.questionCount()
+      questionCount: this.questionCount(),
+      limitSeconds: Math.min(this.duration() * 60, 3600 * 4), // máximo de 4 horas
     }).subscribe({
       next: (response) => {
-        const location = response.headers.get('Location');
-        const attemptId = location!.split('/').pop();
+        const location = response.headers.get('Location') || response.headers.get('location');
+        const attemptId = location ? location?.split('/').pop() : null;
+
+        if (!attemptId) {
+          this.loading.set(false);
+          this.errorMessage.set('Não foi possível iniciar o exame. Tente novamente.');
+          return;
+        }
 
         this.router.navigate(['/attempt', attemptId, 'run']);
       },
