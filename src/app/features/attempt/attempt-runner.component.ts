@@ -565,7 +565,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
           this.selectedAnswers.set(selectedMap);
           this.answeredQuestions.set(answeredSet);
 
-          this.goToLastAnsweredQuestion();
+          this.goToNextAnswerPending();
         }
       }
     });
@@ -649,9 +649,15 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.router.navigate(['/exams']);
   }
 
-  private goToLastAnsweredQuestion() {
-    const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), 0);
-    this.currentQuestionIndex.set(lastAnsweredIndex);
+  private goToNextAnswerPending() {
+    const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), -1);
+    const nextPendingIndex = this.questions().findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
+
+    if (nextPendingIndex !== -1) {
+      this.currentQuestionIndex.set(nextPendingIndex);
+    } else {
+      this.currentQuestionIndex.set(this.questions().length - 1);
+    }
   }
 }
 
