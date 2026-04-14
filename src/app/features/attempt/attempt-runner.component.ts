@@ -391,8 +391,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       ...currentMap,
       [currentIdx]: nextAnswers,
     });
-
-    this.submitCurrentAnswer();
   }
 
   loadAttempt(): void {
