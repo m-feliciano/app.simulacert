@@ -146,9 +146,9 @@ export class LoginComponent {
           this.loading.set(false);
           this.router.navigate(['/exams']);
         },
-        error: (error) => {
+        error: () => {
           this.loading.set(false);
-          this.errorMessage.set(error.error?.message || 'Erro ao fazer login');
+          this.errorMessage.set('Erro ao fazer login');
         }
       });
     }

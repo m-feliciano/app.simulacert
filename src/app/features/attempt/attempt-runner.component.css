@@ -124,9 +124,7 @@ h2 {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .timer.warning {
-    animation: none;
-  }
+  .timer.warning,.question-nav-btn:hover,.option:hover,.btn-secondary:hover:not(:disabled),.btn-finish:hover,.btn-primary:hover{animation:none;transform:none}
 }
 
 .progress-bar {
@@ -183,12 +181,6 @@ h2 {
 .question-nav-btn:hover {
   border-color: var(--color-primary);
   transform: scale(1.05);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .question-nav-btn:hover {
-    transform: none;
-  }
 }
 
 .question-nav-btn.active {
@@ -313,12 +305,6 @@ h2 {
   transform: translateX(4px);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .option:hover {
-    transform: none;
-  }
-}
-
 .option.selected {
   border-color: var(--color-primary);
   background: #fff8f0;
@@ -411,9 +397,7 @@ h2 {
   transform: translateY(-2px);
 }
 
-.btn-secondary:active:not(:disabled) {
-  transform: translateY(0);
-}
+.btn-secondary:active:not(:disabled),.btn-finish:active,.btn-primary:active{transform:translateY(0)}
 
 .btn-secondary:disabled {
   opacity: 0.5;
@@ -426,24 +410,11 @@ h2 {
   }
 }
 
-.btn-finish {
-  background: var(--color-success);
-  color: white;
-}
+.btn-finish{background:var(--color-success);color:white}
 
 .btn-finish:hover {
   background: #218838;
   transform: translateY(-2px);
-}
-
-.btn-finish:active {
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn-finish:hover {
-    transform: none;
-  }
 }
 
 .finish-modal {
@@ -533,15 +504,6 @@ h2 {
   transform: translateY(-2px);
 }
 
-.btn-primary:active {
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn-primary:hover {
-    transform: none;
-  }
-}
 
 .loading-state, .error-state {
   background: var(--color-bg-secondary);

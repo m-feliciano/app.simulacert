@@ -140,9 +140,9 @@ export class RegisterComponent {
             this.loading.set(false);
             this.router.navigate(['/login']);
           },
-          error: (error) => {
+          error: () => {
             this.loading.set(false);
-            this.errorMessage.set(error.error?.message || 'Erro ao registrar');
+            this.errorMessage.set('Erro ao registrar');
           }
         });
     }

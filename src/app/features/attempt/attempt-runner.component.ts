@@ -3,7 +3,7 @@ import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
-import {AttemptQuestionResponse, ExamResponse} from '../../api/domain';
+import {AttemptQuestionResponse, AttemptResponse, ExamResponse} from '../../api/domain';
 import {interval, Subscription} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
@@ -33,7 +33,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
           <p>Exame pausado. Retome quando estiver pronto.</p>
         </div>
 
-      } @else if (!loading() && !error() && exam() && questions().length > 0) {
+      } @else if (!loading() && !error() && exam() && questionsLoaded()) {
         <div class="attempt-header">
           <div class="header-left">
             <h2>{{ exam()!.title }}</h2>
@@ -56,7 +56,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
         </div>
 
         <div class="question-navigation">
-          @for (q of questions(); track $index) {
+          @for (_ of questions(); track $index) {
             <button
               class="question-nav-btn"
               [class.active]="$index === currentQuestionIndex()"
@@ -206,13 +206,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   answeredQuestions = signal(new Set<number>());
   currentQuestionIndex = signal(0);
   timeRemaining = signal(0);
-  attemptLoaded = signal(false);
   finishingAttempt = signal(false);
   showFinishModal = signal(false);
   showExitModal = signal(false);
   showPauseModal = signal(false);
   isPaused = signal(false);
-  loading = signal(true);
   error = signal('');
   finishError = signal('');
 
@@ -223,6 +221,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   private heartbeatSubscription?: Subscription;
   private timerSubscription?: Subscription;
 
+  loading = signal(true);
+  attemptLoaded = signal(false);
+  examLoaded = signal(false);
+  questionsLoaded = signal(false);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -230,11 +233,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     private examsApi: ExamsApiService,
     private destroyRef: DestroyRef
   ) {}
-
-  ngOnDestroy(): void {
-    this.timerSubscription?.unsubscribe();
-    this.heartbeatSubscription?.unsubscribe();
-  }
 
   get currentQuestion(): AttemptQuestionResponse | null {
     return this.questions()[this.currentQuestionIndex()] || null;
@@ -250,27 +248,39 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.loadAttempt();
   }
 
+  ngOnDestroy(): void {
+    this.unsubscribe();
+  }
+
   private updateRemainingFromEndsAt(): void {
     const endsAt = this.endsAtMs();
-    if (!endsAt) return;
-
-    const remainingSec = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
-    this.timeRemaining.set(remainingSec);
+    if (endsAt) {
+      const remainingSec = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      this.timeRemaining.set(remainingSec);
+    }
   }
 
   private setTimingFromServer(payload: { endsAt?: string; remainingSeconds?: number; paused: boolean }): void {
-    if (payload.endsAt) {
-      const ms = Date.parse(payload.endsAt);
-      if (!Number.isNaN(ms)) {
-        this.endsAtMs.set(ms);
+    if (payload.paused) {
+      if (payload.remainingSeconds !== undefined && payload.remainingSeconds !== null) {
+        this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
+
+      } else if (payload.endsAt) {
+        const ms = Date.parse(payload.endsAt);
+        if (!Number.isNaN(ms)) this.endsAtMs.set(ms);
       }
 
-    } else if (payload.remainingSeconds) {
-      this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
+    } else {
+      if (payload.endsAt) {
+        const ms = Date.parse(payload.endsAt);
+        if (!Number.isNaN(ms)) this.endsAtMs.set(ms);
+
+      } else if (payload.remainingSeconds !== undefined && payload.remainingSeconds !== null) {
+        this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
+      }
     }
 
     this.isPaused.set(payload.paused);
-
     this.updateRemainingFromEndsAt();
   }
 
@@ -285,6 +295,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         this.updateRemainingFromEndsAt();
 
         if (this.timeRemaining() <= 0 && this.attemptLoaded()) {
+          this.unsubscribe();
           this.finishAttempt();
         }
     });
@@ -301,6 +312,9 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
           next: (timing) => {
             this.setTimingFromServer(timing);
+          },
+          error: () => {
+            this.finishError.set('Conexão instável. Não foi possível sincronizar o tempo do exame.');
           }
         });
       });
@@ -309,11 +323,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   pauseAttempt(): void {
     if (this.loading() || this.error() || this.finishingAttempt()) return;
 
-    this.submitCurrentAnswer();
-
     this.attemptsApi.pauseAttempt(this.attemptId).subscribe({
       next: (timing) => {
         this.setTimingFromServer(timing);
+        this.showPauseModal.set(true);
+        this.unsubscribe();
       },
       error: () => {
         this.finishError.set('Não foi possível pausar o exame. Verifique sua conexão e tente novamente.');
@@ -321,7 +335,14 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     });
   }
 
+  private unsubscribe() {
+    this.timerSubscription?.unsubscribe();
+    this.heartbeatSubscription?.unsubscribe();
+  }
+
   resumeAttempt(): void {
+    if (this.loading() || this.error() || this.finishingAttempt()) return;
+
     this.attemptsApi.resumeAttempt(this.attemptId).subscribe({
       next: (timing) => {
         this.setTimingFromServer(timing);
@@ -381,13 +402,30 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       next: (attempt) => {
         this.loadExam(attempt.examId);
         this.loadQuestions();
-        this.setTimingFromServer({ endsAt: attempt.endsAt, paused: attempt.paused ?? false });
+        this.startFirstHeartbeat(attempt);
         this.attemptLoaded.set(true);
       },
-      error: (error) => {
-        console.error(error);
+      error: () => {
         this.error.set('Erro ao carregar tentativa. Por favor, tente novamente.');
         this.loading.set(false);
+      },
+      complete: () => this.checkIfLoaded()
+    });
+  }
+
+  private startFirstHeartbeat(attempt: AttemptResponse) {
+    this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
+      next: (timing) => {
+        this.setTimingFromServer(timing);
+        this.showPauseModal.set(timing.paused);
+      },
+      error: () => {
+        this.setTimingFromServer({
+          endsAt: attempt.endsAt,
+          paused: attempt.paused ?? false
+        });
+
+        if (attempt.paused) this.showPauseModal.set(true);
       }
     });
   }
@@ -396,6 +434,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
         this.exam.set(exam);
+        this.examLoaded.set(true);
         this.checkIfLoaded();
       },
       error: () => {
@@ -409,6 +448,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.attemptsApi.getAttemptQuestions(this.attemptId).subscribe({
       next: (questions) => {
         this.questions.set(questions);
+        this.questionsLoaded.set(true);
         this.checkIfLoaded();
         this.loadAnswers();
       },
@@ -420,10 +460,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   checkIfLoaded(): void {
-    if (this.exam() && this.questions().length > 0) {
+    if (this.examLoaded() && this.questionsLoaded()) {
       this.loading.set(false);
 
-      if (!this.endsAtMs()) {
+      if (this.endsAtMs()) {
         this.updateRemainingFromEndsAt();
       }
 
@@ -524,6 +564,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
           this.selectedAnswers.set(selectedMap);
           this.answeredQuestions.set(answeredSet);
+
+          this.goToLastAnsweredQuestion();
         }
       }
     });
@@ -549,20 +591,30 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   confirmExit(): void {
-    if (this.showPauseModal()) {
-      this.showPauseModal.set(false);
-      this.isPaused.set(false);
-    }
-
     this.showExitModal.set(true);
   }
 
   exitAttempt(): void {
-    // TODO: Avaliar se é necessário cancelar a tentativa no backend ou apenas deixar expirar o tempo
-    // this.clearLocalProgress();
-    // this.timerSubscription?.unsubscribe();
-    // this.attemptsApi.cancelAttempt(this.attemptId).subscribe({});
+    if (this.loading() || this.finishingAttempt()) {
+      this.navigateToDashboard();
+      return;
+    }
 
+    this.attemptsApi.pauseAttempt(this.attemptId).subscribe({
+      next: (timing) => {
+        this.setTimingFromServer(timing);
+        this.isPaused.set(true);
+        this.showExitModal.set(false);
+        this.unsubscribe();
+        this.navigateToDashboard();
+      },
+      error: () => {
+        this.finishError.set('Não foi possível salvar e sair do exame. Verifique sua conexão e tente novamente.');
+      }
+    });
+  }
+
+  private navigateToDashboard() {
     this.router.navigate(['/dashboard']);
   }
 
@@ -584,6 +636,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.finishError.set('Erro ao finalizar o exame. Suas respostas estão salvas. Por favor, tente novamente.');
+        this.finishingAttempt.set(false);
       }
     });
   }
@@ -594,6 +647,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/exams']);
+  }
+
+  private goToLastAnsweredQuestion() {
+    const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), 0);
+    this.currentQuestionIndex.set(lastAnsweredIndex);
   }
 }
 

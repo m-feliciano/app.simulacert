@@ -329,9 +329,9 @@ export class ExamDetailComponent implements OnInit {
 
         this.router.navigate(['/attempt', attemptId, 'run']);
       },
-      error: (error) => {
+      error: () => {
         this.loading.set(false);
-        this.errorMessage.set(error.error?.message || 'Erro ao iniciar exame');
+        this.errorMessage.set('Erro ao iniciar exame');
       }
     });
   }
