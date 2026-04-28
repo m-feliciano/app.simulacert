@@ -295,7 +295,7 @@ h2 {
 }
 
 .attempt-item:hover {
-  background: var(--color-bg-secondary);
+  background: var(--surface-3);
   transform: translateX(4px);
 }
 
@@ -449,12 +449,12 @@ h2 {
   z-index: 1000;
   text-align: center;
   font-size: 18px;
-  color: var(--color-primary);
+  color: var(--text);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
-  background: rgba(255,255,255,0.95);
+  background: var(--surface-2);
   border-radius: 8px;
   box-shadow: 0 2px 16px rgba(0,0,0,0.08);
   padding: 32px 40px;
