@@ -27,6 +27,21 @@
   margin-bottom: var(--spacing-lg);
 }
 
+.exam-header-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.exam-header-logo {
+  flex-shrink: 0; /** Prevents the logo from shrinking when the container is too small. */
+}
+
+.exam-header-text {
+  display: flex;
+  flex-direction: column;
+}
+
 h1 {
   margin: 0 0 var(--spacing-md);
   color: var(--text);

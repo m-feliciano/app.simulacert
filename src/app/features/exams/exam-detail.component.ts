@@ -1,5 +1,5 @@
 import {Component, computed, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -20,7 +20,7 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
-  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent, LucideAngularModule],
+  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent, LucideAngularModule, NgOptimizedImage],
   template: `
     <div seoHead>
       @if (showRegisterPrompt()) {
@@ -47,10 +47,20 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
 
           @if (!loadingExam() && exam()) {
           <section class="exam-header sc-card sc-card--padded">
-            <h1>{{ exam()!.title }}</h1>
-            @if (exam()!.description) {
-              <p class="exam-description">{{ exam()!.description }}</p>
-            }
+            <div class="exam-header-content">
+              <div class="exam-header-logo">
+                <img class="exam-icon"
+                     [ngSrc]="exam()?.slug + '.png'"
+                     [alt]="exam()?.title + ' ícone'"
+                     width="150" height="150"
+                     priority />
+              </div>
+
+              <div class="exam-header-text">
+                <h1>{{ exam()!.title }}</h1>
+                <p class="exam-description">{{ exam()!.description }}</p>
+              </div>
+            </div>
           </section>
 
           <section class="mode-selection">
