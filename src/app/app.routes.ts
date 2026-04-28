@@ -54,7 +54,7 @@ export const routes: Routes = [
     children: [
       { path: 'attempt/:id/result', loadComponent: () => import('./features/result/result.component').then(m => m.ResultComponent) },
       { path: 'attempt/:id/questions', loadComponent: () => import('./features/attempt-result/attempt-questions-result.component').then(m => m.AttemptQuestionsResultComponent) },
-      { path: 'admin', loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent), canActivate: [adminGuard] },
+      { path: 'admin', loadComponent: () => import('./features/admin/admin.component').then(m => m.AdminComponent) },
     ]
   },
 

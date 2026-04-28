@@ -229,7 +229,7 @@ export class ExamDetailComponent implements OnInit {
     settings: Settings2,
   };
 
-  questionCountOptions = [10, 20, 30, 40, 50, 100];
+  questionCountOptions = [10, 20, 30, 40, 50, 65];
   private lastSelectedQuestionCountOption = signal<number | 'custom'>(20);
 
   customQuestionCount = signal<number>(20);
@@ -337,7 +337,6 @@ export class ExamDetailComponent implements OnInit {
 
   ngOnInit(): void {
     const resolvedExam = this.route.snapshot.data['exam'] as ExamResponse | null | undefined;
-    const examId = this.route.snapshot.paramMap.get('id');
     const slug = this.route.snapshot.paramMap.get('slug');
 
     if (resolvedExam) {
@@ -358,6 +357,7 @@ export class ExamDetailComponent implements OnInit {
       this.seoFacade.set(meta);
     }
 
+    const examId = this.route.snapshot.paramMap.get('id');
     if (examId) {
       this.loadExam(examId, true);
     } else if (slug) {
