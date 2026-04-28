@@ -2,12 +2,24 @@ import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {StatsApiService} from '../../api/stats.service';
+import {
+  Award,
+  BarChart3,
+  BookOpen,
+  Cloud,
+  Flame,
+  Globe,
+  LucideAngularModule,
+  Medal,
+  Target,
+  Trophy,
+} from 'lucide-angular';
 
 interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe';
   unlocked: boolean;
   progress: number;
   target: number;
@@ -16,235 +28,326 @@ interface Achievement {
 @Component({
   selector: 'app-achievements',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   template: `
-    <div class="achievements-container">
-      <div class="header">
-        <h1>Conquistas</h1>
-        <div class="progress-summary">
-          <div class="level-badge">
-            <span class="level-icon">⭐</span>
-            <span class="level-text">Nível {{ level() }}</span>
+    <div class="sc-page">
+      <div class="sc-container achievements">
+        <header class="header">
+          <div class="title">
+            <h1>Conquistas</h1>
+            <p class="subtitle">Acompanhe seu progresso e desbloqueie marcos de estudo.</p>
           </div>
-          <div class="points-badge">
-            <span class="points">{{ totalPoints() }}</span>
-            <span class="label">pontos</span>
+
+          <div class="summary" role="group" aria-label="Resumo de progresso">
+            <div class="pill">
+              <lucide-icon class="pill-icon" [img]="icons.level" aria-hidden="true"></lucide-icon>
+              <span class="pill-strong">Nível {{ level() }}</span>
+            </div>
+            <div class="pill">
+              <lucide-icon class="pill-icon" [img]="icons.points" aria-hidden="true"></lucide-icon>
+              <span class="pill-strong">{{ totalPoints() }}</span>
+              <span class="pill-muted">pontos</span>
+            </div>
           </div>
-        </div>
-      </div>
+        </header>
 
-      <div class="streak-section">
-        <div class="streak-card">
-          <span class="streak-icon">🔥</span>
-          <div class="streak-content">
-            <div class="streak-number">{{ streakDays() }}</div>
-            <div class="streak-label">dias de sequência</div>
+        <section class="streak sc-card" aria-label="Sequência de estudo">
+          <div class="streak-left">
+            <div class="streak-badge" aria-hidden="true">
+              <lucide-icon [img]="icons.streak" class="streak-icon"></lucide-icon>
+            </div>
+            <div>
+              <div class="streak-number">{{ streakDays() }}</div>
+              <div class="streak-label">dias de sequência</div>
+            </div>
           </div>
-          <p class="streak-message">Continue assim!</p>
-        </div>
-      </div>
+          <div class="streak-right">
+            <p class="streak-message">Consistência vence intensidade. Continue assim.</p>
+          </div>
+        </section>
 
-      <div class="achievements-grid">
-        @for (achievement of achievements(); track achievement.id) {
-          <div class="achievement-card" [class.unlocked]="achievement.unlocked">
-            <div class="achievement-icon">{{ achievement.icon }}</div>
-            <h3>{{ achievement.title }}</h3>
-            <p>{{ achievement.description }}</p>
-
-            @if (!achievement.unlocked) {
-              <div class="progress-bar">
-                <div class="progress-fill" [style.width.%]="(achievement.progress / achievement.target) * 100"></div>
+        <section class="grid" aria-label="Lista de conquistas">
+          @for (achievement of achievements(); track achievement.id) {
+            <article class="card sc-card" [class.unlocked]="achievement.unlocked">
+              <div class="card-top">
+                <div class="icon" aria-hidden="true">
+                  <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
+                </div>
+                @if (achievement.unlocked) {
+                  <span class="state state--unlocked">Conquistado</span>
+                } @else {
+                  <span class="state state--locked">Em progresso</span>
+                }
               </div>
-              <div class="progress-text">{{ achievement.progress }} / {{ achievement.target }}</div>
-            } @else {
-              <div class="unlocked-badge">✓ Conquistado</div>
-            }
-          </div>
-        }
+
+              <h3>{{ achievement.title }}</h3>
+              <p>{{ achievement.description }}</p>
+
+              @if (!achievement.unlocked) {
+                <div class="progress" role="progressbar"
+                     [attr.aria-valuenow]="achievement.progress"
+                     [attr.aria-valuemin]="0"
+                     [attr.aria-valuemax]="achievement.target"
+                     [attr.aria-label]="'Progresso: ' + achievement.progress + ' de ' + achievement.target">
+                  <div class="progress-track">
+                    <div class="progress-fill" [style.width.%]="(achievement.progress / achievement.target) * 100"></div>
+                  </div>
+                  <div class="progress-text">{{ achievement.progress }} / {{ achievement.target }}</div>
+                </div>
+              }
+            </article>
+          }
+        </section>
       </div>
     </div>
   `,
   styles: [`
-    .achievements-container {
-      max-width: 1200px;
-      margin: 0 auto;
+    .achievements {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-lg);
     }
 
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      margin-bottom: var(--spacing-xl);
+      align-items: flex-start;
+      gap: var(--spacing-lg);
       flex-wrap: wrap;
-      gap: var(--spacing-md);
     }
 
-    h1 {
+    .title h1 {
       margin: 0;
-      color: var(--color-dark);
-      font-size: 28px;
+      font-size: clamp(1.6rem, 2.4vw, 2rem);
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text);
     }
 
-    @media (min-width: 768px) {
-      h1 {
-        font-size: 32px;
-      }
+    .subtitle {
+      margin-top: var(--spacing-xs);
+      color: var(--muted);
+      max-width: 60ch;
+      line-height: 1.6;
     }
 
-    .progress-summary {
+    .summary {
       display: flex;
-      gap: var(--spacing-md);
+      gap: var(--spacing-xs);
+      flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
-    .level-badge, .points-badge {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      display: flex;
+    .pill {
+      display: inline-flex;
       align-items: center;
-      gap: var(--spacing-sm);
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-xs);
     }
 
-    .level-icon {
-      font-size: 24px;
+    .pill-icon {
+      width: 18px;
+      height: 18px;
+      color: var(--brand-secondary);
     }
 
-    .level-text {
-      font-weight: 600;
-      color: var(--color-dark);
+    .pill-strong {
+      font-weight: 700;
+      color: var(--text);
     }
 
-    .points {
-      font-size: 24px;
-      font-weight: bold;
-      color: var(--color-primary);
-    }
-
-    .label {
+    .pill-muted {
       font-size: 12px;
-      color: var(--color-text-secondary);
+      color: var(--muted);
     }
 
-    .streak-section {
-      margin-bottom: var(--spacing-xl);
-    }
-
-    .streak-card {
-      background: linear-gradient(135deg, #ff9900 0%, #ec7211 100%);
-      padding: var(--spacing-xl);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-md);
-      color: white;
+    .streak {
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 153, 0, 0.24);
+      background:
+        radial-gradient(1200px 300px at 0% 0%, rgba(255, 153, 0, 0.22), transparent 55%),
+        radial-gradient(900px 240px at 100% 0%, rgba(236, 114, 17, 0.18), transparent 55%),
+        var(--surface);
       display: flex;
       align-items: center;
+      justify-content: space-between;
       gap: var(--spacing-lg);
     }
 
-    .streak-icon {
-      font-size: 48px;
+    .streak-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
     }
 
-    .streak-content {
-      flex: 1;
+    .streak-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(255, 153, 0, 0.14);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand-primary-600);
+      border: 1px solid rgba(255, 153, 0, 0.22);
+    }
+
+    .streak-icon {
+      width: 20px;
+      height: 20px;
     }
 
     .streak-number {
-      font-size: 42px;
-      font-weight: bold;
+      font-size: 32px;
+      font-weight: 800;
       line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text);
     }
 
     .streak-label {
-      font-size: 14px;
-      opacity: 0.9;
+      margin-top: 4px;
+      font-size: 13px;
+      color: var(--muted);
     }
 
     .streak-message {
       margin: 0;
-      font-weight: 500;
-      opacity: 0.95;
+      color: var(--text-2);
     }
 
-    .achievements-grid {
+    .grid {
       display: grid;
-      gap: var(--spacing-lg);
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: var(--spacing-md);
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     }
 
-    .achievement-card {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-xl);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-      transition: var(--transition-fast);
-      opacity: 0.6;
+    .card {
+      padding: var(--spacing-lg);
+      border-radius: var(--radius-lg);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
     }
 
-    .achievement-card.unlocked {
-      opacity: 1;
-      border: 2px solid var(--color-primary);
-    }
-
-    .achievement-card:hover {
+    .card:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
+      border-color: var(--border-strong);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .achievement-card:hover {
+      .card:hover {
         transform: none;
       }
     }
 
-    .achievement-icon {
-      font-size: 64px;
+    .card.unlocked {
+      border-color: rgba(22, 163, 74, 0.28);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-sm);
       margin-bottom: var(--spacing-md);
     }
 
-    .achievement-card h3 {
-      margin: 0 0 var(--spacing-sm);
-      color: var(--color-dark);
-      font-size: 18px;
+    .icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(17, 24, 39, 0.04);
+      border: 1px solid var(--border);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand-secondary);
     }
 
-    .achievement-card p {
-      margin: 0 0 var(--spacing-md);
-      color: var(--color-text-secondary);
+    .card.unlocked .icon {
+      background: rgba(22, 163, 74, 0.08);
+      border-color: rgba(22, 163, 74, 0.18);
+      color: var(--success);
+    }
+
+    .icon-svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 16px;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin: var(--spacing-xs) 0 0;
+      color: var(--muted);
       font-size: 14px;
-      line-height: 1.5;
+      line-height: 1.55;
     }
 
-    .progress-bar {
+    .state {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-2);
+      white-space: nowrap;
+    }
+
+    .state--unlocked {
+      border-color: rgba(22, 163, 74, 0.22);
+      background: rgba(22, 163, 74, 0.08);
+      color: var(--success);
+    }
+
+    .state--locked {
+      border-color: rgba(255, 153, 0, 0.20);
+      background: rgba(255, 153, 0, 0.08);
+      color: var(--brand-primary-600);
+    }
+
+    .progress {
+      margin-top: var(--spacing-md);
+    }
+
+    .progress-track {
       width: 100%;
-      height: 8px;
-      background: #e0e0e0;
-      border-radius: 4px;
+      height: 10px;
+      background: rgba(17, 24, 39, 0.08);
+      border-radius: 999px;
       overflow: hidden;
-      margin-bottom: var(--spacing-xs);
     }
 
     .progress-fill {
       height: 100%;
-      background: var(--color-primary);
-      transition: width 0.3s ease;
+      background: linear-gradient(90deg, var(--brand-primary), var(--brand-primary-600));
+      transition: width var(--transition-normal);
     }
 
     .progress-text {
+      margin-top: 8px;
       font-size: 12px;
-      color: var(--color-text-secondary);
-      font-weight: 500;
+      color: var(--muted);
+      font-weight: 600;
     }
 
-    .unlocked-badge {
-      background: var(--color-primary);
-      color: white;
-      padding: 6px 16px;
-      border-radius: var(--border-radius-lg);
-      font-size: 12px;
-      font-weight: 600;
-      display: inline-block;
+    @media (max-width: 520px) {
+      .streak {
+        flex-direction: column;
+        align-items: flex-start;
+      }
     }
   `]
 })
@@ -257,7 +360,7 @@ export class AchievementsComponent implements OnInit {
       id: '1',
       title: 'Primeiro Passo',
       description: 'Complete seu primeiro simulado',
-      icon: '🎯',
+      icon: 'target',
       unlocked: true,
       progress: 1,
       target: 1
@@ -266,7 +369,7 @@ export class AchievementsComponent implements OnInit {
       id: '2',
       title: 'Persistente',
       description: 'Complete 10 simulados',
-      icon: '💪',
+      icon: 'strength',
       unlocked: true,
       progress: 10,
       target: 10
@@ -275,7 +378,7 @@ export class AchievementsComponent implements OnInit {
       id: '3',
       title: 'Estudioso',
       description: 'Complete 50 simulados',
-      icon: '📚',
+      icon: 'book',
       unlocked: false,
       progress: 32,
       target: 50
@@ -284,7 +387,7 @@ export class AchievementsComponent implements OnInit {
       id: '4',
       title: 'Aprovado',
       description: 'Obtenha 70% ou mais em um simulado',
-      icon: '✅',
+      icon: 'award',
       unlocked: true,
       progress: 1,
       target: 1
@@ -293,7 +396,7 @@ export class AchievementsComponent implements OnInit {
       id: '5',
       title: 'Perfeccionista',
       description: 'Obtenha 90% ou mais em um simulado',
-      icon: '🏆',
+      icon: 'trophy',
       unlocked: false,
       progress: 0,
       target: 1
@@ -302,7 +405,7 @@ export class AchievementsComponent implements OnInit {
       id: '6',
       title: 'Sequência de Fogo',
       description: 'Estude por 7 dias seguidos',
-      icon: '🔥',
+      icon: 'flame',
       unlocked: true,
       progress: 7,
       target: 7
@@ -311,7 +414,7 @@ export class AchievementsComponent implements OnInit {
       id: '7',
       title: 'Maratonista',
       description: 'Estude por 30 dias seguidos',
-      icon: '🏃',
+      icon: 'medal',
       unlocked: false,
       progress: 7,
       target: 30
@@ -320,7 +423,7 @@ export class AchievementsComponent implements OnInit {
       id: '8',
       title: 'Especialista AWS',
       description: 'Complete todos os exames AWS',
-      icon: '☁️',
+      icon: 'cloud',
       unlocked: false,
       progress: 2,
       target: 5
@@ -329,12 +432,30 @@ export class AchievementsComponent implements OnInit {
       id: '9',
       title: 'Multi-Cloud',
       description: 'Complete exames de AWS, Azure e GCP',
-      icon: '🌐',
+      icon: 'globe',
       unlocked: false,
       progress: 1,
       target: 3
     }
   ]);
+
+  readonly icons = {
+    level: Trophy,
+    points: BarChart3,
+    streak: Flame,
+  };
+
+  readonly iconsByAchievement = {
+    target: Target,
+    strength: Medal,
+    book: BookOpen,
+    award: Award,
+    trophy: Trophy,
+    flame: Flame,
+    medal: Medal,
+    cloud: Cloud,
+    globe: Globe,
+  } as const;
 
   constructor(
     private authFacade: AuthFacade,

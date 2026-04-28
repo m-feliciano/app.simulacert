@@ -1,4 +1,4 @@
-import {Component, Input, OnInit, signal} from '@angular/core';
+import {Component, Input, makeStateKey, OnInit, signal, TransferState} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
@@ -90,31 +90,41 @@ export class RelatedExamsComponent implements OnInit {
   @Input({required: true}) currentExam!: ExamResponse;
 
   related = signal<ExamResponse[]>([]);
+  private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
-  constructor(private examsApi: ExamsApiService) {}
+  constructor(private examsApi: ExamsApiService,
+              private transferState: TransferState
+  ) {
+  }
 
   ngOnInit(): void {
-    // Note: we keep this simple (client-side fetch). If you want these links present in SSR HTML,
-    // we can extend this with TransferState like the slug resolver.
-    this.examsApi.getAllExams().subscribe({
-      next: (all) => {
-        const currentId = this.currentExam?.id;
-        const currentSlug = this.currentExam?.slug;
 
-        const filtered = (all || []).filter(e => e && e.id !== currentId && e.slug !== currentSlug);
+    if (this.transferState.hasKey(this.examsKey)) {
+      const exams = this.transferState.get<ExamResponse[]>(this.examsKey, []);
+      this.setRelatedExams(exams);
+      this.transferState.remove(this.examsKey);
 
-        const scored = filtered
-          .map(e => ({ exam: e, score: this.score(e) }))
-          .sort((a, b) => b.score - a.score)
-          .slice(0, 6)
-          .map(x => x.exam);
+    } else {
+      this.examsApi.getAllExams().subscribe({
+        next: (all) => this.setRelatedExams(all),
+        error: () => this.related.set([])
+      });
+    }
+  }
 
-        this.related.set(scored);
-      },
-      error: () => {
-        this.related.set([]);
-      }
-    });
+  private setRelatedExams(all: ExamResponse[]) {
+    const currentId = this.currentExam?.id;
+    const currentSlug = this.currentExam?.slug;
+
+    const filtered = (all || []).filter(e => e && e.id !== currentId && e.slug !== currentSlug);
+
+    const scored = filtered
+      .map(e => ({exam: e, score: this.score(e)}))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 6)
+      .map(x => x.exam);
+
+    this.related.set(scored);
   }
 
   private score(exam: ExamResponse): number {
@@ -123,7 +133,6 @@ export class RelatedExamsComponent implements OnInit {
     const currentTitle = (this.currentExam?.title || '').toLowerCase();
     const currentSlug = (this.currentExam?.slug || '').toLowerCase();
 
-    // Heurística simples: provider match (aws/azure/gcp) + overlap de tokens.
     const keywordBoost = (kw: string) => (title.includes(kw) || slug.includes(kw) ? 20 : 0);
 
     let s = 0;

@@ -156,7 +156,7 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
     }
 
     .question-box {
-      background: #f8f9fa;
+      background: var(--color-bg-secondary);
       padding: 16px;
       border-radius: 10px;
       border: 1px solid rgba(0,0,0,0.06);

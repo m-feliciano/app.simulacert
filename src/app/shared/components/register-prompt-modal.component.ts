@@ -4,21 +4,21 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
   selector: 'app-register-prompt-modal',
   standalone: true,
   template: `
-    <div class="finish-modal" (click)="onClose()">
-      <div class="modal-content" (click)="$event.stopPropagation()">
-        <h3>Quer se registrar?</h3>
-        <p>
+    <div class="sc-modal-overlay" (click)="onClose()">
+      <div class="sc-modal-container sc-card sc-card--premium" style="transform: none" (click)="$event.stopPropagation()">
+        <h3 class="modal-title">Quer se registrar?</h3>
+        <p class="modal-text">
           Crie uma conta para salvar seu progresso e acessar recursos exclusivos.
         </p>
 
         <div class="modal-actions">
-          <button class="btn-primary" (click)="onRegister()" [disabled]="loading">
+          <button class="sc-btn sc-btn--primary" (click)="onRegister()" [disabled]="loading">
             Sim, quero me registrar
           </button>
 
-          <button class="btn-secondary" (click)="onAnonymous()" [disabled]="loading">
+          <button class="sc-btn sc-btn--outline" (click)="onAnonymous()" [disabled]="loading">
             @if (loading) {
-                <span class="spinner"></span>
+                <span class="sc-spinner"></span>
             } @else {
                 <span>Não, continuar sem conta</span>
             }
@@ -26,8 +26,8 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
         </div>
 
         <div class="modal-benefits">
-          <h4>Benefícios de se registrar</h4>
-          <ul>
+          <h4 class="benefits-title">Benefícios de se registrar</h4>
+          <ul class="benefits-list">
             <li>Salvar seu progresso automaticamente</li>
             <li>Acesso a exames exclusivos</li>
             <li>Receber novidades e atualizações</li>
@@ -37,124 +37,102 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
     </div>
   `,
   styles: [`
-    .finish-modal {
+    .sc-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(4px);
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 1100;
       padding: var(--spacing-lg);
       animation: fadeIn 0.2s ease-out;
     }
 
-    .modal-content {
-      background: var(--color-surface);
-      padding: var(--spacing-xl);
-      border-radius: var(--border-radius-lg);
-      box-shadow: var(--shadow-lg);
-      max-width: 520px;
+    .sc-modal-container {
+      max-width: 480px;
       width: 100%;
+      padding: var(--spacing-xl);
       text-align: center;
-      animation: slideIn 0.25s ease-out;
+      animation: slideIn 0.3s var(--ease-out);
+      background: var(--surface);
     }
 
-    h3 {
-      margin-bottom: var(--spacing-sm);
+    .modal-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: var(--spacing-xs);
+      letter-spacing: var(--letter-tight);
     }
 
-    p {
-      color: var(--color-text-muted);
-      margin-bottom: var(--spacing-lg);
+    .modal-text {
+      color: var(--muted);
+      margin-bottom: var(--spacing-xl);
+      font-size: 1rem;
+      line-height: 1.5;
     }
 
     .modal-actions {
       display: flex;
       flex-direction: column;
-      gap: var(--spacing-md);
-      margin-bottom: var(--spacing-lg);
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-xl);
     }
 
-    .btn-primary {
-      background: var(--color-primary-green);
-      color: #fff;
-      padding: 14px;
-      border: none;
-      border-radius: var(--border-radius-md);
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-      transition: background 0.2s ease, transform 0.1s ease;
-    }
-
-    .btn-primary:hover {
-      background: var(--color-primary-green-dark);
-      transform: translateY(-1px);
-    }
-
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    .btn-secondary {
-      background: transparent;
-      color: var(--color-text-muted);
-      padding: 14px;
-      border: 1px solid var(--color-border);
-      border-radius: var(--border-radius-md);
-      cursor: pointer;
-      font-size: 0.95rem;
-      transition: border-color 0.2s ease, color 0.2s ease;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--color-primary-green);
-      color: var(--color-primary-green);
-    }
-
-    button:focus-visible {
-      outline: 2px solid var(--color-primary-green);
-      outline-offset: 2px;
+    .sc-btn {
+      width: 100%;
+      height: 48px;
     }
 
     .modal-benefits {
       text-align: left;
-      border-top: 1px solid var(--color-border);
-      padding-top: var(--spacing-md);
+      border-top: 1px solid var(--border);
+      padding-top: var(--spacing-lg);
     }
 
-    .modal-benefits h4 {
-      font-size: 0.95rem;
+    .benefits-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       margin-bottom: var(--spacing-sm);
     }
 
-    .modal-benefits ul {
-      padding-left: 18px;
-      color: var(--color-text-muted);
-      font-size: 0.9rem;
+    .benefits-list {
+      padding-left: 20px;
+      color: var(--text-2);
+      font-size: 0.95rem;
+      list-style-type: none;
     }
 
-    .modal-benefits li {
-      margin-bottom: 6px;
+    .benefits-list li {
+      margin-bottom: var(--spacing-xs);
+      position: relative;
     }
 
-    .spinner {
+    .benefits-list li::before {
+      content: "✓";
+      position: absolute;
+      left: -20px;
+      color: var(--brand-primary);
+      font-weight: 800;
+    }
+
+    .sc-spinner {
       display: inline-block;
       width: 18px;
       height: 18px;
-      border: 2px solid #fff;
-      border-top: 2px solid var(--color-primary-green,#28a745);
+      border: 2px solid currentColor;
+      border-top-color: transparent;
       border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      margin-right: 8px;
-      vertical-align: middle;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      to { transform: rotate(360deg); }
     }
 
     @keyframes fadeIn {
@@ -163,13 +141,12 @@ import { Component, Output, EventEmitter, Input } from '@angular/core';
     }
 
     @keyframes slideIn {
-      from { transform: translateY(-16px); opacity: 0; }
+      from { transform: translateY(20px); opacity: 0; }
       to { transform: translateY(0); opacity: 1; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .finish-modal,
-      .modal-content {
+      .sc-modal-overlay, .sc-modal-container {
         animation: none;
       }
     }

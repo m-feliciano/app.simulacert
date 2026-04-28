@@ -15,7 +15,7 @@ import { ExplanationResponse } from '../../api/domain';
           class="btn-explain"
           (click)="requestExplanation()"
           [disabled]="loading()">
-          {{ loading() ? 'Gerando explicação...' : 'Explicar questão' }}
+          {{ loading() ? 'Carregando...' : 'Comentários' }}
         </button>
       }
 
@@ -87,22 +87,21 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .btn-explain {
-      background: var(--color-primary);
-      color: #fff;
-      border: none;
+      color: var(--text);
+      border: 1px solid transparent;
+      background: var(--surface-2);
       padding: 10px 20px;
-      border-radius: var(--border-radius-sm);
+      border-radius: var(--radius-sm);
       font-weight: 500;
       cursor: pointer;
       transition: var(--transition-fast);
-      font-size: 14px;
       font-family: inherit;
     }
 
     .btn-explain:hover:not(:disabled) {
-      background: var(--color-primary-dark);
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
+      border-color: var(--surface-3);
     }
 
     .btn-explain:active:not(:disabled) {
@@ -115,15 +114,16 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .error-message {
-      background: var(--color-bg-danger);
-      color: var(--color-danger);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
       padding: var(--spacing-sm);
-      border-radius: var(--border-radius-sm);
+      border-radius: var(--radius-sm);
       margin-top: var(--spacing-sm);
       font-size: 14px;
       display: flex;
       align-items: center;
       gap: 4px;
+      border-left: 3px solid var(--danger);
     }
 
     .error-message::before {
@@ -132,9 +132,9 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .explanation-card {
-      background: var(--color-bg-secondary);
-      border: 1px solid var(--color-border-light);
-      border-radius: var(--border-radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: var(--spacing-lg);
       margin-top: var(--spacing-md);
       box-shadow: var(--shadow-sm);

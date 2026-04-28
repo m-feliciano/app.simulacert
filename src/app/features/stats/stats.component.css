@@ -118,7 +118,6 @@ h2 {
 }
 
 .domain-item:hover {
-  background: #ececec;
   transform: translateX(4px);
 }
 

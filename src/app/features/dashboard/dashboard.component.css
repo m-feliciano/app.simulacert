@@ -116,7 +116,7 @@ h1 {
 }
 
 .recommendation-card {
-  background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+  background: var(--sc-premium-gradient, linear-gradient(135deg, #4a90e2 0%, #357abd 100%));
   padding: var(--spacing-xl);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-md);
@@ -127,8 +127,16 @@ h1 {
 }
 
 .recommendation-icon {
-  font-size: 48px;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-premium {
+  width: 48px;
+  height: 48px;
+  stroke-width: 1.5;
 }
 
 .recommendation-content {
@@ -151,8 +159,8 @@ h1 {
 .btn-recommendation {
   display: inline-block;
   padding: 10px 20px;
-  background: white;
-  color: #357abd;
+  background: var(--surface-2);
+  color: var(--text);
   text-decoration: none;
   border-radius: var(--border-radius-sm);
   font-weight: 600;
@@ -481,7 +489,7 @@ h2 {
   align-items: center;
   gap: 10px;
   font-size: 0.95rem;
-  color: #374151;
+  color: var(--color-text-secondary);
 }
 
 .welcome-benefits li::before {

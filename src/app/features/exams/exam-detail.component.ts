@@ -13,11 +13,14 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 import {SeoRichTemplateComponent} from '../../shared/components/seo-rich-template.component';
 import {RelatedExamsComponent} from './related-exams.component';
 import {getExamSeoContent} from './exam-seo-content.registry';
+import {AttemptDifficulty, AttemptSetup, DEFAULT_ATTEMPT_SETUP} from './exam-attempt-setup.model';
+import {ExamAttemptSetupPreferencesService} from './exam-attempt-setup-preferences.service';
+import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angular';
 
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
-  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent],
+  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent, LucideAngularModule],
   template: `
     <div seoHead>
       @if (showRegisterPrompt()) {
@@ -28,74 +31,88 @@ import {getExamSeoContent} from './exam-seo-content.registry';
         </app-register-prompt-modal>
       }
 
-      <div class="exam-detail">
-        <app-breadcrumbs [items]="breadcrumbs()" />
+      <div class="exam-detail sc-page">
+        <div class="sc-container">
+          <app-breadcrumbs [items]="breadcrumbs()" />
 
-        <div class="breadcrumb" style="display:none">
-          <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
-        </div>
-
-        @if (loadingExam()) {
-          <div class="loading-state">
-            <p>Carregando detalhes do exame...</p>
+          <div class="breadcrumb" style="display:none">
+            <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
           </div>
-        }
 
-        @if (!loadingExam() && exam()) {
-          <div class="exam-header">
+          @if (loadingExam()) {
+            <div class="loading-state sc-card">
+              <p>Carregando detalhes do exame...</p>
+            </div>
+          }
+
+          @if (!loadingExam() && exam()) {
+          <section class="exam-header sc-card sc-card--padded">
             <h1>{{ exam()!.title }}</h1>
             @if (exam()!.description) {
               <p class="exam-description">{{ exam()!.description }}</p>
             }
-          </div>
+          </section>
 
-          <div class="mode-selection">
-            <h2>Escolha o modo de estudo</h2>
+          <section class="mode-selection">
+            <h2>Modo de estudo</h2>
             <div class="mode-cards">
-              <div class="mode-card"
-                   [class.selected]="selectedMode() === 'practice'"
-                   style="background: #ccc; cursor: not-allowed;">
 
-                <div class="mode-icon">📖</div>
-                <h3>Modo Prática</h3>
-                <ul class="mode-features">
-                  <li>✓ Veja explicações durante o simulado</li>
-                  <li>✓ Sem limite de tempo</li>
-                  <li>✓ Ideal para aprender</li>
-                  <li>✓ Feedback imediato</li>
-                </ul>
+              <div type="button"
+                      class="mode-card"
+                      [class.selected]="selectedMode() === 'practice'"
+                      disabled
+                      aria-disabled="true"
+                      aria-label="Modo prática (em breve)">
+                <div class="mode-icon" aria-hidden="true">
+                  <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
+                </div>
+                <div>
+                  <h3>Modo Prática</h3>
+                  <p class="mode-caption">Em breve</p>
+                  <ul class="mode-features">
+                    <li>Veja explicações durante o simulado</li>
+                    <li>Sem limite de tempo</li>
+                    <li>Ideal para aprender</li>
+                  </ul>
+                </div>
               </div>
 
-              <div class="mode-card"
-                   [class.selected]="selectedMode() === 'exam'"
-                   (click)="selectMode('exam')">
-                <div class="mode-icon">⏱️</div>
-                <h3>Modo Exame</h3>
-                <ul class="mode-features">
-                  <li>✓ Simula o exame real</li>
-                  <li>✓ Tempo cronometrado</li>
-                  <li>✓ Sem explicações durante</li>
-                  <li>✓ Resultados ao final</li>
-                </ul>
+              <div type="button"
+                      class="mode-card"
+                      [class.selected]="selectedMode() === 'exam'"
+                      (click)="selectMode('exam')"
+                      aria-label="Selecionar modo exame">
+                <div class="mode-icon" aria-hidden="true">
+                  <lucide-icon [img]="icons.exam" class="mode-icon-svg"></lucide-icon>
+                </div>
+                <div>
+                  <h3>Modo Exame</h3>
+                  <p class="mode-caption">Simulação fiel, resultado ao final</p>
+                  <ul class="mode-features">
+                    <li>Simula o exame real</li>
+                    <li>Tempo cronometrado</li>
+                    <li>Sem explicações durante</li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
+          </section>
 
           <div class="exam-info">
-            <div class="info-card">
+            <div class="info-card sc-card sc-card--padded">
               <h3>Informações do Exame</h3>
               <ul>
                 <li><strong>Tipo:</strong> Simulado AWS</li>
-                <li><strong>Duração:</strong> {{ duration() }} minutos</li>
+                <li><strong>Duração:</strong> {{ setup().durationMinutes }} minutos</li>
                 <li><strong>Questões:</strong> {{ questionCount() }}</li>
                 <li><strong>Pontuação mínima:</strong> 72%</li>
               </ul>
             </div>
 
-            <div class="info-card">
+            <div class="info-card sc-card sc-card--padded">
               <h3>Regras</h3>
               <ul>
-                <li>Você terá {{ duration() }} minutos para completar o exame</li>
+                <li>Você terá {{ setup().durationMinutes }} minutos para completar o exame</li>
                 <li>São {{ questionCount() }} questões de múltipla escolha</li>
                 <li>Você pode pausar e retomar o exame a qualquer momento</li>
                 <li>Você pode revisar suas respostas antes de finalizar</li>
@@ -103,28 +120,89 @@ import {getExamSeoContent} from './exam-seo-content.registry';
             </div>
           </div>
 
-          <div class="question-selector">
-            <h3>Quantidade de Questões</h3>
-            <div class="question-options">
-              @for (count of questionCountOptions; track count) {
-                <button
-                  class="question-option"
-                  [class.selected]="questionCount() === count"
-                  (click)="selectQuestionCount(count)"
-                  type="button">
-                  {{ count }} questões
-                </button>
-              }
+          <div class="question-selector sc-card sc-card--padded">
+            <h3>Personalize seu simulado</h3>
+
+            <div class="setup-row">
+              <div class="setup-field">
+                <label class="setup-label">Quantidade de questões</label>
+                <div class="question-options">
+
+                  @if (isCustomQuestionCountSelected()) {
+                    <div style="margin-top: 5px">Personalizado</div>
+
+                  } @else {
+                    <select class="setup-select"
+                            [value]="questionCount()"
+                            (change)="selectQuestionCount($any($event.target).value)">
+
+                      @for (count of questionCountOptions; track count) {
+                        <option [value]="count">{{ count }}</option>
+                      }
+                      <option value="custom" selected>Personalizado</option>
+                    </select>
+                  }
+
+                  @if (isCustomQuestionCountSelected()) {
+                    <input
+                      type="number"
+                      min="10"
+                      max="100"
+                      step="5"
+                      class="setup-input"
+                      [value]="customQuestionCount()"
+                      (blur)="$any($event.target).value < 10 ? setCustomQuestionCount( 10) : void 0"
+                      (input)="setCustomQuestionCount($any($event.target).value)"
+                      aria-label="Quantidade de questões personalizada" />
+                  }
+                </div>
+              </div>
+
+              <div class="setup-field">
+                <label class="setup-label" for="durationMinutes">Tempo (minutos)</label>
+                <input
+                  id="durationMinutes"
+                  type="number"
+                  min="5"
+                  max="240"
+                  step="5"
+                  [value]="setup().durationMinutes"
+                  (input)="setDurationMinutes(($any($event.target).value))"
+                  class="setup-input" />
+<!--                <div class="setup-hint">Sugestão: {{ recommendedMinutes() }} min para {{ questionCount() }} questões</div>-->
+              </div>
+
+              <div class="setup-field">
+                <label class="setup-label" for="difficulty">Dificuldade</label>
+                <select id="difficulty" class="setup-select"
+                        [value]="setup().difficulty"
+                        (change)="setDifficulty($any($event.target).value)">
+                  <option value="any">Todas</option>
+                  <option value="easy">Fácil</option>
+                  <option value="medium">Média</option>
+                  <option value="hard">Difícil</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="setup-actions">
+              <button type="button" class="sc-btn sc-btn--ghost" (click)="applyRecommendedTime()">
+                Usar tempo recomendado
+              </button>
+              <button type="button" class="sc-btn sc-btn--ghost" (click)="resetSetup()">
+                Resetar
+              </button>
             </div>
           </div>
 
           <div class="actions">
-            <button class="btn-primary" (click)="startExam()" [disabled]="loading()" aria-label="Iniciar simulado">
+            <button class="sc-btn sc-btn--primary" (click)="startExam()" [disabled]="loading()" aria-label="Iniciar simulado">
+              <lucide-icon [img]="icons.play" class="sc-icon" aria-hidden="true"></lucide-icon>
               {{ loading() ? 'Iniciando...' : 'Iniciar com ' + questionCount() + ' questões' }}
             </button>
           </div>
           <div class="actions">
-            <button class="btn-secondary" disabled type="button" aria-label="Imprimir simulado (em breve)">
+            <button class="sc-btn sc-btn--ghost" disabled type="button" aria-label="Imprimir simulado (em breve)">
               Imprimir (em breve)
             </button>
           </div>
@@ -133,9 +211,10 @@ import {getExamSeoContent} from './exam-seo-content.registry';
           <app-related-exams [currentExam]="exam()!" />
         }
 
-        @if (errorMessage()) {
-          <div class="error">{{ errorMessage() }}</div>
-        }
+          @if (errorMessage()) {
+            <div class="error sc-card">{{ errorMessage() }}</div>
+          }
+        </div>
       </div>
     </div>
   `,
@@ -143,18 +222,28 @@ import {getExamSeoContent} from './exam-seo-content.registry';
 })
 export class ExamDetailComponent implements OnInit {
 
-  questionCountOptions = [10, 20, 30, 40, 50, 100];
+  readonly icons = {
+    practice: BookOpen,
+    exam: Clock,
+    play: Play,
+    settings: Settings2,
+  };
 
+  questionCountOptions = [10, 20, 30, 40, 50, 100];
+  private lastSelectedQuestionCountOption = signal<number | 'custom'>(20);
+
+  customQuestionCount = signal<number>(20);
   exam = signal<ExamResponse | null>(null);
   loading = signal(false);
   loadingExam = signal(false);
   errorMessage = signal('');
   loadingAnonymous = signal(false);
   showRegisterPrompt = signal(false);
-  questionCount = signal(20);
+  setup = signal<AttemptSetup>(DEFAULT_ATTEMPT_SETUP);
   selectedMode = signal<'practice' | 'exam'>('exam');
 
-  duration = computed(() => Math.round(this.questionCount() * 1.5));
+  questionCount = computed(() => this.setup().questionCount);
+  recommendedMinutes = computed(() => Math.round(this.questionCount() * 1.5));
   breadcrumbs = computed(() => {
     const exam = this.exam();
     return [
@@ -172,6 +261,7 @@ export class ExamDetailComponent implements OnInit {
     private authFacade: AuthFacade,
     private seoFactory: SeoFactoryService,
     private seoFacade: SeoFacadeService,
+    private setupPrefs: ExamAttemptSetupPreferencesService,
   ) {
   }
 
@@ -252,6 +342,7 @@ export class ExamDetailComponent implements OnInit {
 
     if (resolvedExam) {
       this.exam.set(resolvedExam);
+      this.restoreSetupForExam(resolvedExam.id);
       this.seoFacade.set(this.seo);
       return;
 
@@ -284,6 +375,7 @@ export class ExamDetailComponent implements OnInit {
           this.router.navigate(['/exams', exam.slug]);
         } else {
           this.exam.set(exam);
+          this.restoreSetupForExam(exam.id);
           this.applySeo();
           this.loadingExam.set(false);
         }
@@ -311,11 +403,19 @@ export class ExamDetailComponent implements OnInit {
     this.loading.set(true);
     this.errorMessage.set('');
 
+    this.setupPrefs.saveForExam(exam.id, this.setup());
+    this.setupPrefs.saveGlobal(this.setup());
+
+    const setup = this.setup();
+    const limitSeconds = Math.min(setup.durationMinutes * 60, 3600 * 4);
+
     this.attemptsApi.startAttempt({
       examId: exam.id,
       userId: this.authFacade.currentUser()!.id,
-      questionCount: this.questionCount(),
-      limitSeconds: Math.min(this.duration() * 60, 3600 * 4), // máximo de 4 horas
+      questionCount: setup.questionCount,
+      limitSeconds,
+      durationMinutes: setup.durationMinutes,
+      difficulty: setup.difficulty,
     }).subscribe({
       next: (response) => {
         const location = response.headers.get('Location') || response.headers.get('location');
@@ -347,7 +447,7 @@ export class ExamDetailComponent implements OnInit {
           this.doStartAttempt(currentExam);
         }
       },
-      error: (err) => {
+      error: () => {
         this.loadingAnonymous.set(false);
         this.errorMessage.set('Erro ao criar usuário anônimo');
       }
@@ -380,7 +480,59 @@ export class ExamDetailComponent implements OnInit {
   }
 
   selectQuestionCount(count: number): void {
-    this.questionCount.set(count);
+    const raw = count as unknown;
+    const value = raw === 'custom' ? 'custom' : this.clampInt(raw, 1, 300, this.setup().questionCount);
+
+    if (value === 'custom') {
+      this.lastSelectedQuestionCountOption.set('custom');
+      const nextCustom = this.clampInt(this.customQuestionCount(), 1, 300, this.setup().questionCount);
+      this.applyQuestionCount(nextCustom);
+      return;
+    }
+
+    this.lastSelectedQuestionCountOption.set(value);
+    const nextCount = value;
+    const nextDuration = this.setup().durationMinutes;
+    this.applyQuestionCount(nextCount, nextDuration);
+  }
+
+  isCustomQuestionCountSelected(): boolean {
+    return this.lastSelectedQuestionCountOption() === 'custom';
+  }
+
+  setCustomQuestionCount(rawValue: unknown): void {
+    const next = this.clampInt(rawValue, 10, 100, this.customQuestionCount());
+    this.customQuestionCount.set(next);
+    this.applyQuestionCount(next);
+  }
+
+  private applyQuestionCount(nextCount: number, previousDurationMinutes?: number): void {
+    const prevDuration = previousDurationMinutes ?? this.setup().durationMinutes;
+    this.setup.set({...this.setup(), questionCount: nextCount});
+
+    if (prevDuration === this.recommendedMinutes()) {
+      this.setup.set({...this.setup(), questionCount: nextCount, durationMinutes: this.recommendedMinutes()});
+    }
+  }
+
+  setDurationMinutes(rawValue: unknown): void {
+    const next = this.clampInt(rawValue, 5, 240, this.setup().durationMinutes);
+    this.setup.set({...this.setup(), durationMinutes: next});
+  }
+
+  setDifficulty(raw: AttemptDifficulty | string): void {
+    const allowed: AttemptDifficulty[] = ['any', 'easy', 'medium', 'hard'];
+    const next = allowed.includes(raw as AttemptDifficulty) ? (raw as AttemptDifficulty) : 'any';
+    this.setup.set({...this.setup(), difficulty: next});
+  }
+
+  applyRecommendedTime(): void {
+    this.setup.set({...this.setup(), durationMinutes: this.recommendedMinutes()});
+  }
+
+  resetSetup(): void {
+    const global = this.setupPrefs.loadGlobal();
+    this.setup.set({...DEFAULT_ATTEMPT_SETUP, ...global});
   }
 
   selectMode(mode: 'practice' | 'exam'): void {
@@ -396,5 +548,25 @@ export class ExamDetailComponent implements OnInit {
 
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     return !uuidRegex.test(slug);
+  }
+
+  private restoreSetupForExam(examId: string): void {
+    const stored = this.setupPrefs.loadForExam(examId);
+
+    this.setup.set({...DEFAULT_ATTEMPT_SETUP, ...stored});
+
+    const initialCount = this.setup().questionCount;
+    this.customQuestionCount.set(initialCount);
+
+    const isPreset = this.questionCountOptions.includes(initialCount);
+    this.lastSelectedQuestionCountOption.set(isPreset ? initialCount : 'custom');
+  }
+
+  private clampInt(value: unknown, min: number, max: number, fallback: number): number {
+    const n = typeof value === 'number' ? value : Number(value);
+    if (!Number.isFinite(n))
+      return fallback;
+
+    return Math.min(max, Math.max(min, Math.round(n)));
   }
 }

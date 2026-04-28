@@ -1,1 +1,40 @@
 <router-outlet />
+
+<div class="floating-theme-controls">
+  @if (showThemeMenu()) {
+    <div class="theme-dropdown sc-card sc-glass">
+      <div class="dropdown-section">
+        <label>Modo</label>
+        <div class="options-grid">
+          <button (click)="themeService.setTheme('light')" [class.active]="themeService.themeMode() === 'light'">Luz</button>
+          <button (click)="themeService.setTheme('dark')" [class.active]="themeService.themeMode() === 'dark'">Trevas</button>
+          <button (click)="themeService.setTheme('warm')" [class.active]="themeService.themeMode() === 'warm'">Leitura</button>
+        </div>
+      </div>
+      <div class="dropdown-section">
+        <label>Tamanho da Fonte</label>
+        <div class="options-grid">
+          <button (click)="themeService.setFontSize('extra-small')" [class.active]="themeService.fontSize() === 'extra-small'">PP</button>
+          <button (click)="themeService.setFontSize('small')" [class.active]="themeService.fontSize() === 'small'">P</button>
+          <button (click)="themeService.setFontSize('medium')" [class.active]="themeService.fontSize() === 'medium'">M</button>
+          <button (click)="themeService.setFontSize('large')" [class.active]="themeService.fontSize() === 'large'">G</button>
+          <button (click)="themeService.setFontSize('xlarge')" [class.active]="themeService.fontSize() === 'xlarge'">GG</button>
+        </div>
+      </div>
+      <div class="dropdown-section">
+        <label>Tipo de Fonte</label>
+        <div class="options-grid">
+          <button (click)="themeService.setFontFamily('sans')" [class.active]="themeService.fontFamily() === 'sans'" style="font-family: var(--font-sans)">Sans</button>
+          <button (click)="themeService.setFontFamily('serif')" [class.active]="themeService.fontFamily() === 'serif'" style="font-family: var(--font-serif)">Serif</button>
+          <button (click)="themeService.setFontFamily('mono')" [class.active]="themeService.fontFamily() === 'mono'" style="font-family: var(--font-mono)">Mono</button>
+          <button (click)="themeService.setFontFamily('fantasy')" [class.active]="themeService.fontFamily() === 'fantasy'" style="font-family: var(--font-fantasy)">Fantasy</button>
+          <button (click)="themeService.setFontFamily('monospace')" [class.active]="themeService.fontFamily() === 'monospace'" style="font-family: var(--font-monospace)">Monospace</button>
+          <button (click)="themeService.setFontFamily('system')" [class.active]="themeService.fontFamily() === 'system'" style="font-family: var(--font-system)">System</button>
+        </div>
+      </div>
+    </div>
+  }
+  <button class="floating-btn sc-glass" (click)="toggleThemeMenu()" title="Personalizar tema">
+    <lucide-icon [img]="icons.palette" class="icon"></lucide-icon>
+  </button>
+</div>

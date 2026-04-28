@@ -1,5 +1,5 @@
 .attempt-runner {
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -36,18 +36,11 @@
 
 h2 {
   margin: 0;
-  color: var(--color-dark);
-  font-size: 20px;
-}
-
-@media (min-width: 768px) {
-  h2 {
-    font-size: 24px;
-  }
+  color: var(--text);
 }
 
 .timer {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: bold;
   padding: 10px 20px;
   border-radius: var(--border-radius-sm);
@@ -57,7 +50,7 @@ h2 {
 
 @media (min-width: 768px) {
   .timer {
-    font-size: 20px;
+    font-size: 1.25rem;
   }
 }
 
@@ -73,29 +66,23 @@ h2 {
   padding: 10px 20px;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   transition: var(--transition-fast);
   white-space: nowrap;
 }
 
 .btn-pause {
-  background: var(--color-secondary);
-  color: white;
+  background: none;
+  color: var(--text);
   border: none;
   padding: 10px 20px;
   border-radius: var(--border-radius-sm);
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 600;
   transition: var(--transition-fast);
   white-space: nowrap;
-}
-
-.btn-pause:hover {
-  background-color: var(--color-dark);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .btn-pause:active {
@@ -167,14 +154,14 @@ h2 {
   cursor: pointer;
   font-weight: 500;
   transition: var(--transition-fast);
-  font-size: 13px;
+  /*font-size: 0.8125rem;*/
 }
 
 @media (min-width: 768px) {
   .question-nav-btn {
     width: 40px;
     height: 40px;
-    font-size: 14px;
+    /*font-size: 0.875rem;*/
   }
 }
 
@@ -225,28 +212,28 @@ h2 {
 .question-number {
   font-weight: bold;
   color: var(--color-dark);
-  font-size: 14px;
+  /*font-size: 0.875rem;*/
 }
 
 @media (min-width: 768px) {
   .question-number {
-    font-size: 16px;
+    font-size: 1rem;
   }
 }
 
 .question-meta {
   color: var(--color-text-secondary);
-  font-size: 13px;
+  /*font-size: 0.8125rem;*/
 }
 
 @media (min-width: 768px) {
   .question-meta {
-    font-size: 14px;
+    /*font-size: 0.875rem;*/
   }
 }
 
 .question-text {
-  font-size: 15px;
+  /*font-size: 0.9375rem;*/
   line-height: 1.6;
   margin-bottom: var(--spacing-xl);
   color: var(--color-text-primary);
@@ -254,7 +241,7 @@ h2 {
 
 @media (min-width: 768px) {
   .question-text {
-    font-size: 16px;
+    /*font-size: 1rem;*/
   }
 }
 
@@ -267,13 +254,13 @@ h2 {
   border-left: 4px solid #2196f3;
   border-radius: var(--border-radius-sm);
   margin-bottom: var(--spacing-lg);
-  font-size: 14px;
+  /*font-size: 0.875rem;*/
   color: #1565c0;
   flex-wrap: wrap;
 }
 
 .hint-icon {
-  font-size: 18px;
+  font-size: 1.125rem;
 }
 
 .selection-count {
@@ -301,13 +288,11 @@ h2 {
 
 .option:hover {
   border-color: var(--color-primary);
-  background: #fff8f0;
   transform: translateX(4px);
 }
 
 .option.selected {
   border-color: var(--color-primary);
-  background: #fff8f0;
   box-shadow: var(--shadow-sm);
 }
 
@@ -320,9 +305,9 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
+  background: var(--surface);
   transition: var(--transition-fast);
-  font-size: 16px;
+  /*font-size: 1rem;*/
   color: white;
 }
 
@@ -360,13 +345,6 @@ h2 {
   flex: 1;
   line-height: 1.6;
   color: var(--color-text-primary);
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  .option-text {
-    font-size: 15px;
-  }
 }
 
 .question-actions {
@@ -382,7 +360,7 @@ h2 {
   border-radius: var(--border-radius-sm);
   font-weight: 500;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.875rem;
   transition: var(--transition-fast);
   font-family: inherit;
 }
@@ -471,13 +449,13 @@ h2 {
 .modal-content h3 {
   margin: 0 0 var(--spacing-md);
   color: var(--color-dark);
-  font-size: 20px;
+  font-size: 1.25rem;
 }
 
 .modal-content p {
   margin: 0 0 var(--spacing-sm);
   color: var(--color-text-secondary);
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .modal-actions {
@@ -517,7 +495,7 @@ h2 {
 
 .loading-state p {
   color: var(--color-text-secondary);
-  font-size: 16px;
+  font-size: 1rem;
   margin: 0;
 }
 
@@ -527,7 +505,7 @@ h2 {
 
 .error-state p {
   color: #721c24;
-  font-size: 15px;
+  font-size: 0.9375rem;
   margin: 0 0 var(--spacing-lg);
   font-weight: 500;
 }

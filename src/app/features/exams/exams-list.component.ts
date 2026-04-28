@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, makeStateKey, OnInit, signal, TransferState} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
@@ -107,7 +107,6 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
         margin: 32px 0 24px 0;
         font-size: 2.2rem;
         font-weight: 700;
-        color: var(--color-dark);
       }
 
       .skeleton-loader {
@@ -120,7 +119,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       }
 
       .skeleton-card {
-        background: #fff;
+        background: var(--color-bg-secondary);
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         width: 260px;
@@ -236,7 +235,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 
     h3 {
       margin: 0;
-      color: var(--color-dark);
+      color: var(--text);
       font-size: 18px;
       flex: 1;
     }
@@ -389,12 +388,14 @@ export class ExamsListComponent implements OnInit {
   exams = signal<ExamResponse[]>([]);
   loading = signal(false);
   error = signal('');
+  private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
   constructor(
     private examsApi: ExamsApiService,
     private router: Router,
     private seoFactory: SeoFactoryService,
     private seoFacade: SeoFacadeService,
+    private transferState: TransferState,
   ) {
   }
 
@@ -431,6 +432,7 @@ export class ExamsListComponent implements OnInit {
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams.set([...exams, ...this.incomingExams()]);
+        this.transferState.set(this.examsKey, exams);
       },
       error: () => {
         this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
@@ -477,6 +479,15 @@ export class ExamsListComponent implements OnInit {
         slug: 'aws-certified-developer-dva-c02'
       },
       {
+        id: '4d3f6a89-4b2c-5e7d-9f8a-7c9d0e1f2a3b',
+        title: 'AWS Certified AI Practitioner',
+        description: 'Exame prático focado em inteligência artificial e machine learning na AWS, com questões alinhadas ao conteúdo da certificação AWS Certified AI Practitioner, ideal para quem busca se aprofundar nessa área.',
+        difficulty: 'EASY',
+        totalQuestions: 150,
+        incoming: true,
+        slug: 'aws-certified-ai-practitioner'
+      },
+      {
         id: '2a1bdc34-2d4f-4c3b-9f7e-5b1e6d9f7c9f',
         title: 'Microsoft Certified Azure Fundamentals (AZ-900)',
         description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
@@ -484,6 +495,15 @@ export class ExamsListComponent implements OnInit {
         totalQuestions: 174,
         incoming: true,
         slug: 'azure-certified-fundamentals-az-900'
+      },
+      {
+        id: '3c5e7a89-4b2c-5e7d-9f8a-7c9d0e1f2a3c',
+        title: 'Microsoft Certified Azure AI Fundamentals (AI-900)',
+        description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais de inteligência artificial e machine learning no Microsoft Azure, conforme os tópicos cobrados na certificação.',
+        difficulty: 'EASY',
+        totalQuestions: 120,
+        incoming: true,
+        slug: 'azure-certified-fundamentals-ai-900'
       }
     ];
   }

@@ -32,9 +32,9 @@ import { CommonModule } from '@angular/common';
     .star {
       background: none;
       border: none;
-      font-size: 32px;
+      font-size: 2rem;
       cursor: pointer;
-      color: #ddd;
+      color: var(--border-strong);
       padding: 0;
       transition: color 0.2s, transform 0.1s;
     }

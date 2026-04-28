@@ -124,7 +124,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
                 </button>
               }
 
-              @if (currentQuestionIndex() === questions().length - 1) {
+              @if (currentQuestionIndex() === questions().length - 1 && hasAtLeastOneAnswer()) {
                 <button class="btn-finish" (click)="submitCurrentAnswer(); confirmFinish()">
                   Finalizar Exame
                 </button>
@@ -641,10 +641,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.finishAttempt();
   }
 
-  goBack(): void {
-    this.router.navigate(['/exams']);
-  }
-
   private goToNextAnswerPending() {
     const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), -1);
     const nextPendingIndex = this.questions().findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
@@ -654,6 +650,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     } else {
       this.currentQuestionIndex.set(this.questions().length - 1);
     }
+  }
+
+  hasAtLeastOneAnswer() {
+    return this.answeredQuestions().size > 0;
   }
 }
 

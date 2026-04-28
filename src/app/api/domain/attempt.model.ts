@@ -33,6 +33,8 @@ export interface StartAttemptRequest {
   questionCount: number;
   userId: string;
   limitSeconds: number;
+  durationMinutes?: number;
+  difficulty?: 'any' | 'easy' | 'medium' | 'hard';
 }
 
 export interface AttemptQuestionResponse {
