@@ -134,14 +134,14 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       .skeleton-title {
         height: 22px;
         width: 70%;
-        background: #ececec;
+        background: var(--color-bg-secondary);
         border-radius: 4px;
       }
 
       .skeleton-line {
         height: 14px;
         width: 100%;
-        background: #ececec;
+        background: var(--color-bg-secondary);
         border-radius: 4px;
       }
 
@@ -152,7 +152,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       .skeleton-btn {
         height: 32px;
         width: 90px;
-        background: #e0e0e0;
+        background: var(--color-bg-secondary);
         border-radius: 6px;
         margin-top: 12px;
       }
