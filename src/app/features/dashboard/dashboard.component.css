@@ -295,7 +295,7 @@ h2 {
 }
 
 .attempt-item:hover {
-  background: #ececec;
+  background: var(--color-bg-secondary);
   transform: translateX(4px);
 }
 
