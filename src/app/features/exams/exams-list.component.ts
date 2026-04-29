@@ -51,8 +51,11 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                 </div>
 
                 @if (exam.slug) {
-                  <img class="exam-icon" [ngSrc]="exam.slug + '.png'" [alt]="exam.title + ' ícone'" width="150"
-                       height="150" priority/>
+                  <img class="exam-icon"
+                       [ngSrc]="exam.slug + '.png'"
+                       [alt]="exam.title + ' ícone'"
+                       width="120"
+                       height="120" [priority]="$index < 2"/>
                 }
 
                 @if (exam.description) {
@@ -99,8 +102,9 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       .exam-icon {
         display: block;
         margin: 16px auto;
-        max-width: 100%;
-        height: auto;
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
       }
       .page-title {
         text-align: center;
@@ -122,12 +126,12 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
         background: var(--color-bg-secondary);
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        width: 260px;
+        width: 300px;
         padding: 24px 18px 18px 18px;
         display: flex;
         flex-direction: column;
         gap: 16px;
-        min-height: 180px;
+        min-height: 380px;
         animation: skeleton-pulse 1.2s infinite ease-in-out;
       }
 
