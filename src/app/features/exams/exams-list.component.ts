@@ -55,7 +55,10 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                        [ngSrc]="exam.slug + '.png'"
                        [alt]="exam.title + ' ícone'"
                        width="120"
-                       height="120" [priority]="$index < 2"/>
+                       height="120"
+                       loading="eager"
+                       fetchpriority="high" decoding="sync"
+                       [priority]="$index < 2"/>
                 }
 
                 @if (exam.description) {
