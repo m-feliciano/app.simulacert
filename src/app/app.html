@@ -24,12 +24,18 @@
       <div class="dropdown-section">
         <label>Tipo de Fonte</label>
         <div class="options-grid">
-          <button (click)="themeService.setFontFamily('sans')" [class.active]="themeService.fontFamily() === 'sans'" style="font-family: var(--font-sans)">Sans</button>
-          <button (click)="themeService.setFontFamily('serif')" [class.active]="themeService.fontFamily() === 'serif'" style="font-family: var(--font-serif)">Serif</button>
-          <button (click)="themeService.setFontFamily('mono')" [class.active]="themeService.fontFamily() === 'mono'" style="font-family: var(--font-mono)">Mono</button>
-          <button (click)="themeService.setFontFamily('fantasy')" [class.active]="themeService.fontFamily() === 'fantasy'" style="font-family: var(--font-fantasy)">Fantasy</button>
-          <button (click)="themeService.setFontFamily('monospace')" [class.active]="themeService.fontFamily() === 'monospace'" style="font-family: var(--font-monospace)">Monospace</button>
-          <button (click)="themeService.setFontFamily('system')" [class.active]="themeService.fontFamily() === 'system'" style="font-family: var(--font-system)">System</button>
+          <button (click)="themeService.setFontFamily('sans')" [class.active]="themeService.fontFamily() === 'sans'"
+                  style="font-family: var(--font-sans)">Sans</button>
+          <button (click)="themeService.setFontFamily('serif')" [class.active]="themeService.fontFamily() === 'serif'"
+                  style="font-family: var(--font-serif)">Serif</button>
+          <button (click)="themeService.setFontFamily('mono')" [class.active]="themeService.fontFamily() === 'mono'"
+                  style="font-family: var(--font-mono)">Mono</button>
+          <button (click)="themeService.setFontFamily('fantasy')" [class.active]="themeService.fontFamily() === 'fantasy'"
+                  style="font-family: var(--font-fantasy)">Fantasy</button>
+          <button (click)="themeService.setFontFamily('slab')" [class.active]="themeService.fontFamily() === 'slab'"
+                  style="font-family: var(--font-slab)">Slab</button>
+          <button (click)="themeService.setFontFamily('system')" [class.active]="themeService.fontFamily() === 'system'"
+                  style="font-family: var(--font-system)">System</button>
         </div>
       </div>
     </div>

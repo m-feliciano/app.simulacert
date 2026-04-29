@@ -4,7 +4,7 @@ import {LOCAL_STORAGE} from '../storage/local-storage.token';
 
 export type ThemeMode = 'light' | 'dark' | 'warm' | 'high-contrast';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge' | 'extra-small';
-export type FontFamily = 'sans' | 'serif' | 'mono' | 'fantasy' | 'monospace' | 'system';
+export type FontFamily = 'sans' | 'serif' | 'mono' | 'fantasy' | 'slab' | 'system';
 
 @Injectable({
   providedIn: 'root'
@@ -102,7 +102,7 @@ export class ThemeService {
       'font-family-serif',
       'font-family-mono',
       'font-family-fantasy',
-      'font-family-monospace',
+      'font-family-slab',
       'font-family-system'
     );
     root.classList.add(`font-family-${family}`);
@@ -128,8 +128,8 @@ export class ThemeService {
   }
 
   private getStoredFontFamily(): FontFamily {
-    if (!this.isBrowser || !this.storage) return 'sans';
+    if (!this.isBrowser || !this.storage) return 'serif';
 
-    return (this.storage.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'sans';
+    return (this.storage.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
   }
 }

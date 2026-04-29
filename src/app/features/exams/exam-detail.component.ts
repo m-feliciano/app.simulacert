@@ -69,6 +69,7 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
 
               <div type="button"
                       class="mode-card"
+                      style="cursor: not-allowed"
                       [class.selected]="selectedMode() === 'practice'"
                       disabled
                       aria-disabled="true"
