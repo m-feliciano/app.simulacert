@@ -15,7 +15,7 @@ export class ThemeService {
   private readonly FONT_FAMILY_KEY = 'sc_font_family';
 
   themeMode = signal<ThemeMode>('dark');
-  fontSize = signal<FontSize>('small');
+  fontSize = signal<FontSize>('medium');
   fontFamily = signal<FontFamily>('serif');
 
   private readonly isBrowser: boolean;
@@ -122,9 +122,9 @@ export class ThemeService {
   }
 
   private getStoredFontSize(): FontSize {
-    if (!this.isBrowser || !this.storage) return 'small';
+    if (!this.isBrowser || !this.storage) return 'medium';
 
-    return (this.storage.getItem(this.FONT_SIZE_KEY) as FontSize) || 'small';
+    return (this.storage.getItem(this.FONT_SIZE_KEY) as FontSize) || 'medium';
   }
 
   private getStoredFontFamily(): FontFamily {

@@ -133,6 +133,7 @@ h2 {
   flex-wrap: wrap;
   gap: 8px;
   background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
   padding: var(--spacing-md);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-sm);
@@ -154,7 +155,7 @@ h2 {
   cursor: pointer;
   font-weight: 500;
   transition: var(--transition-fast);
-  /*font-size: 0.8125rem;*/
+  color: var(--color-text-secondary);
 }
 
 @media (min-width: 768px) {
@@ -366,12 +367,12 @@ h2 {
 }
 
 .btn-secondary {
-  background: var(--color-secondary);
-  color: white;
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: var(--color-dark);
+  background: var(--surface-3);
   transform: translateY(-2px);
 }
 
