@@ -217,14 +217,17 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
               Imprimir (em breve)
             </button>
           </div>
+        }
 
+        @if (errorMessage()) {
+          <div class="error sc-card">{{ errorMessage() }}</div>
+        }
+
+        @if (!loadingExam() && exam()) {
           <app-seo-rich-template [exam]="exam()!" />
           <app-related-exams [currentExam]="exam()!" />
         }
 
-          @if (errorMessage()) {
-            <div class="error sc-card">{{ errorMessage() }}</div>
-          }
         </div>
       </div>
     </div>
@@ -580,4 +583,6 @@ export class ExamDetailComponent implements OnInit {
 
     return Math.min(max, Math.max(min, Math.round(n)));
   }
+
+  protected readonly getExamSeoContent = getExamSeoContent;
 }
