@@ -40,8 +40,8 @@ export class ExamAttemptSetupPreferencesService {
         const parsed = JSON.parse(raw) as Partial<AttemptSetup> | null;
         if (parsed) {
           return {
-            questionCount: this.clampInt(parsed.questionCount, 1, 300, fallback.questionCount),
-            durationMinutes: this.clampInt(parsed.durationMinutes, 1, 24 * 60, fallback.durationMinutes),
+            questionCount: this.clampInt(parsed.questionCount, 10, 65, fallback.questionCount),
+            durationMinutes: this.clampInt(parsed.durationMinutes, 5, 3 * 60, fallback.durationMinutes),
             difficulty: (parsed.difficulty as any) ?? fallback.difficulty,
           };
         }
