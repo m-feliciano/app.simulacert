@@ -101,7 +101,6 @@ import { ExplanationResponse } from '../../api/domain';
     .btn-explain:hover:not(:disabled) {
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
-      border-color: var(--surface-3);
     }
 
     .btn-explain:active:not(:disabled) {
@@ -265,8 +264,8 @@ import { ExplanationResponse } from '../../api/domain';
 
     .btn-submit-feedback {
       align-self: flex-start;
-      background: var(--color-secondary);
-      color: #fff;
+      background: var(--surface-2);
+      color: var(--text);;
       border: none;
       padding: 8px 16px;
       border-radius: var(--border-radius-sm);
@@ -278,7 +277,7 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .btn-submit-feedback:hover:not(:disabled) {
-      background: var(--color-dark);
+      background: var(--surface-3);
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
     }

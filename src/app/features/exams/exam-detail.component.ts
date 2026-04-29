@@ -158,7 +158,7 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
                     <input
                       type="number"
                       min="10"
-                      max="100"
+                      max="65"
                       step="5"
                       class="setup-input"
                       [value]="customQuestionCount()"
@@ -175,7 +175,7 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
                   id="durationMinutes"
                   type="number"
                   min="5"
-                  max="240"
+                  max="150"
                   step="5"
                   [value]="setup().durationMinutes"
                   (input)="setDurationMinutes(($any($event.target).value))"
@@ -515,7 +515,7 @@ export class ExamDetailComponent implements OnInit {
   }
 
   setCustomQuestionCount(rawValue: unknown): void {
-    const next = this.clampInt(rawValue, 10, 100, this.customQuestionCount());
+    const next = this.clampInt(rawValue, 10, 65, this.customQuestionCount());
     this.customQuestionCount.set(next);
     this.applyQuestionCount(next);
   }
@@ -530,7 +530,7 @@ export class ExamDetailComponent implements OnInit {
   }
 
   setDurationMinutes(rawValue: unknown): void {
-    const next = this.clampInt(rawValue, 5, 240, this.setup().durationMinutes);
+    const next = this.clampInt(rawValue, 5, 230, this.setup().durationMinutes);
     this.setup.set({...this.setup(), durationMinutes: next});
   }
 
@@ -583,6 +583,4 @@ export class ExamDetailComponent implements OnInit {
 
     return Math.min(max, Math.max(min, Math.round(n)));
   }
-
-  protected readonly getExamSeoContent = getExamSeoContent;
 }

@@ -43,6 +43,7 @@ export interface AttemptQuestionResponse {
   options: QuestionOption[];
   questionId: string;
   text: string;
+  questionCode?: string;
 }
 
 export interface SubmitAnswerRequest {

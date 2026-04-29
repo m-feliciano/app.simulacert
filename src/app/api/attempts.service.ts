@@ -77,5 +77,9 @@ export class AttemptsApiService {
   cancelAttempt(attemptId: string): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${attemptId}/cancel`, {});
   }
+
+  retakeAttempt(id: string): Observable<AttemptResponse> {
+    return this.http.post<AttemptResponse>(`${this.baseUrl}/${id}/retake`, {});
+  }
 }
 

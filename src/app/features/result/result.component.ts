@@ -1,6 +1,6 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptResponse, AttemptStatus, ExamResponse} from '../../api/domain';
@@ -73,12 +73,10 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
           </div>
 
           <div class="actions">
-            <a routerLink="/exams" class="btn-secondary">Ver Exames</a>
-            <a routerLink="/stats" class="btn-secondary">Ver Estatísticas</a>
-            <a routerLink="/dashboard" class="btn-secondary">Dashboard</a>
 
             @if (attempt()?.status == AttemptStatus.COMPLETED) {
-              <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-secondary">Ver Questões</a>
+              <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-secondary">Questões</a>
+              <a (click)="retakeExam()" class="btn-secondary">Refazer Exame</a>
             }
 
           </div>
@@ -239,6 +237,7 @@ export class ResultComponent implements OnInit {
     private examsApi: ExamsApiService,
     private seoFactory: SeoFactoryService,
     private seoFacade: SeoFacadeService,
+    private router: Router,
   ) {
     this.seoFacade.set(this.seoFactory.website({
       title: 'Resultado do Exame | SimulaCert',
@@ -333,5 +332,22 @@ export class ResultComponent implements OnInit {
 
     const correctAnswers = Math.round((score! / 100) * questions);
     return `${correctAnswers} de ${questions} corretas`;
+  }
+
+  retakeExam() {
+      const attemptId = this.attempt()!.id;
+      if (!attemptId) {
+        this.error.set('ID da tentativa não encontrado. Não é possível retomar o exame.');
+        return;
+      }
+
+      this.attemptsApi.retakeAttempt(attemptId).subscribe({
+        next: (newAttempt) => {
+          this.router.navigate(['/attempt', newAttempt.id, 'run']);
+        },
+        error: () => {
+          this.error.set('Erro ao iniciar nova tentativa. Por favor, tente novamente.');
+        }
+      });
   }
 }

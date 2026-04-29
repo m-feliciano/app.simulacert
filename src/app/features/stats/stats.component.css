@@ -341,7 +341,7 @@ h2 {
 
 .btn-primary {
   background: var(--color-primary);
-  color: white;
+  color: #fff;
 }
 
 .btn-primary:hover {
@@ -351,12 +351,12 @@ h2 {
 }
 
 .btn-secondary {
-  background: var(--color-secondary);
-  color: white;
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .btn-secondary:hover {
-  background: var(--color-dark);
+  background: var(--surface-3);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }

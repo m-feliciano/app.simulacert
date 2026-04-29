@@ -38,7 +38,7 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
           @for (q of filteredQuestions(); track q.questionId; let i = $index) {
             <div class="question-card" [class.correct]="isCorrect(q)" [class.incorrect]="!isCorrect(q)">
               <div class="question-header">
-                <span class="question-index">Questão {{ i + 1 }}</span>
+                <span class="question-index">Questão {{ q.questionCode }}</span>
               </div>
               <div class="question-text">{{ q.text }}</div>
 

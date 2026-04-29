@@ -56,8 +56,8 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                        [alt]="exam.title + ' ícone'"
                        width="120"
                        height="120"
-                       loading="eager"
-                       fetchpriority="high" decoding="sync"
+                       fetchpriority="high"
+                       decoding="sync"
                        [priority]="$index < 2"/>
                 }
 

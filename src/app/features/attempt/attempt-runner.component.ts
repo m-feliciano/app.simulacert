@@ -71,7 +71,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
         @if (currentQuestion) {
           <div class="question-content">
             <div class="question-header">
-              <span class="question-number">Questão {{ currentQuestionIndex() + 1 }} de {{ questions().length }}</span>
+              <span class="question-number">Questão {{ currentQuestion.questionCode }}</span>
               <span class="question-meta">{{ currentQuestion.domain }} | {{ currentQuestion.difficulty }}</span>
             </div>
 
