@@ -160,7 +160,7 @@ import {FormsModule} from '@angular/forms';
                       <input
                         type="number"
                         min="10"
-                        max="65"
+                        max="100"
                         step="5"
                         class="setup-input"
                         [value]="customQuestionCount()"
@@ -177,7 +177,7 @@ import {FormsModule} from '@angular/forms';
                     id="durationMinutes"
                     type="number"
                     min="5"
-                    max="150"
+                    max="240"
                     step="5"
                     [value]="setup().durationMinutes"
                     (input)="setDurationMinutes(($any($event.target).value))"
@@ -424,7 +424,7 @@ export class ExamDetailComponent implements OnInit {
     this.setupPrefs.saveGlobal(this.setup());
 
     const setup = this.setup();
-    const limitSeconds = Math.min(setup.durationMinutes * 60, 3600 * 3);
+    const limitSeconds = Math.min(setup.durationMinutes * 60, 3600 * 4);
 
     this.attemptsApi.startAttempt({
       examId: exam.id,
@@ -498,11 +498,11 @@ export class ExamDetailComponent implements OnInit {
 
   selectQuestionCount(count: number): void {
     const raw = count as unknown;
-    const value = raw === 'custom' ? 'custom' : this.clampInt(raw, 1, 300, this.setup().questionCount);
+    const value = raw === 'custom' ? 'custom' : this.clampInt(raw, 1, 100, this.setup().questionCount);
 
     if (value === 'custom') {
       this.lastSelectedQuestionCountOption.set('custom');
-      const nextCustom = this.clampInt(this.customQuestionCount(), 1, 300, this.setup().questionCount);
+      const nextCustom = this.clampInt(this.customQuestionCount(), 1, 100, this.setup().questionCount);
       this.applyQuestionCount(nextCustom);
       return;
     }
@@ -518,7 +518,7 @@ export class ExamDetailComponent implements OnInit {
   }
 
   setCustomQuestionCount(rawValue: unknown): void {
-    const next = this.clampInt(rawValue, 10, 65, this.customQuestionCount());
+    const next = this.clampInt(rawValue, 10, 100, this.customQuestionCount());
     this.customQuestionCount.set(next);
     this.applyQuestionCount(next);
   }
@@ -533,7 +533,7 @@ export class ExamDetailComponent implements OnInit {
   }
 
   setDurationMinutes(rawValue: unknown): void {
-    const next = this.clampInt(rawValue, 5, 230, this.setup().durationMinutes);
+    const next = this.clampInt(rawValue, 5, 240, this.setup().durationMinutes);
     this.setup.set({...this.setup(), durationMinutes: next});
   }
 
