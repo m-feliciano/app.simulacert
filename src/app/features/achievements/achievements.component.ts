@@ -11,6 +11,7 @@ import {
   BarChart3,
   BookOpen,
   Cloud,
+  Crown,
   Flame,
   Globe,
   LucideAngularModule,
@@ -23,7 +24,7 @@ interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe';
+  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe' | 'crown';
   unlocked?: boolean;
   progress?: number;
   target: number;
@@ -453,7 +454,7 @@ export class AchievementsComponent implements OnInit {
       id: '10',
       title: 'Veterano',
       description: 'Complete 100 simulados',
-      icon: 'book',
+      icon: 'crown',
       progress: 0,
       target: 100
     },
@@ -473,6 +474,7 @@ export class AchievementsComponent implements OnInit {
     trophy: Trophy,
     flame: Flame,
     medal: Medal,
+    crown: Crown,
     cloud: Cloud,
     globe: Globe,
   } as const;
