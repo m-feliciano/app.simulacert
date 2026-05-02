@@ -382,6 +382,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Primeiro Passo',
       description: 'Complete seu primeiro simulado',
       icon: 'target',
+      progress: 0,
       target: 1
     },
     {
@@ -389,6 +390,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Persistente',
       description: 'Complete 10 simulados',
       icon: 'strength',
+      progress: 0,
       target: 10
     },
     {
@@ -396,6 +398,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Estudioso',
       description: 'Complete 50 simulados',
       icon: 'book',
+      progress: 0,
       target: 50
     },
     {
@@ -403,6 +406,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Aprovado',
       description: 'Obtenha 70% ou mais em um simulado',
       icon: 'award',
+      progress: 0,
       target: 1
     },
     {
@@ -410,6 +414,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Perfeccionista',
       description: 'Obtenha 90% ou mais em um simulado',
       icon: 'trophy',
+      progress: 0,
       target: 1
     },
     {
@@ -417,6 +422,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Sequência de Fogo',
       description: 'Estude por 7 dias seguidos',
       icon: 'flame',
+      progress: 0,
       target: 7
     },
     {
@@ -424,6 +430,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Maratonista',
       description: 'Estude por 30 dias seguidos',
       icon: 'medal',
+      progress: 0,
       target: 30
     },
     {
@@ -431,6 +438,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Especialista AWS',
       description: 'Complete todos os exames AWS',
       icon: 'cloud',
+      progress: 0,
       target: 4
     },
     {
@@ -438,6 +446,7 @@ export class AchievementsComponent implements OnInit {
       title: 'Multi-Cloud',
       description: 'Complete exames de AWS, Azure e GCP',
       icon: 'globe',
+      progress: 0,
       target: 3
     }
   ]);
