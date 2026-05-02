@@ -393,7 +393,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 })
 export class ExamsListComponent implements OnInit {
   exams = signal<ExamResponse[]>([]);
-  loading = signal(false);
+  loading = signal(true);
   error = signal('');
   private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
@@ -433,9 +433,6 @@ export class ExamsListComponent implements OnInit {
   }
 
   loadExams(): void {
-    this.loading.set(true);
-    this.error.set('');
-
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams.set([...exams, ...this.incomingExams()]);

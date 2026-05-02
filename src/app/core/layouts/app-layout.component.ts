@@ -5,7 +5,7 @@ import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
 import {SupportModalComponent} from '../../shared/components/support-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
-import {LucideAngularModule, BarChart3, NotebookPen, TrendingUp, Newspaper, Settings, HeartHandshake, Menu, Palette, Type} from 'lucide-angular';
+import {LucideAngularModule, BarChart3, NotebookPen, TrendingUp, Newspaper, Settings, HeartHandshake, Menu, Palette, Type, Trophy} from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
 
 @Component({
@@ -29,6 +29,7 @@ import {ThemeService} from '../theme/theme.service';
             <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
             <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
             <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
+            <a routerLink="/achievements" routerLinkActive="active" class="nav-item">Conquistas</a>
 
             @if (authFacade.isAdmin()) {
               <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
@@ -68,6 +69,10 @@ import {ThemeService} from '../theme/theme.service';
               <a routerLink="/stats" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
                 <lucide-icon [img]="icons.stats" class="nav-icon" aria-hidden="true"></lucide-icon>
                 <span class="nav-label">Estatísticas</span>
+              </a>
+              <a routerLink="/achievements" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+                <lucide-icon [img]="icons.achievements" class="nav-icon" aria-hidden="true"></lucide-icon>
+                <span class="nav-label">Conquistas</span>
               </a>
               <a routerLink="/news" routerLinkActive="false" class="nav-item muted" (click)="onNavItemClick()">
                 <lucide-icon [img]="icons.news" class="nav-icon" aria-hidden="true"></lucide-icon>
@@ -429,6 +434,7 @@ export class AppLayoutComponent {
     dashboard: BarChart3,
     exams: NotebookPen,
     stats: TrendingUp,
+    achievements: Trophy,
     news: Newspaper,
     admin: Settings,
     support: HeartHandshake,

@@ -1,7 +1,11 @@
 import {Component, OnInit, signal} from '@angular/core';
+import {forkJoin} from 'rxjs';
 import {CommonModule} from '@angular/common';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {StatsApiService} from '../../api/stats.service';
+import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {SeoFactoryService} from '../../core/seo/seo-factory.service';
+import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 import {
   Award,
   BarChart3,
@@ -20,17 +24,17 @@ interface Achievement {
   title: string;
   description: string;
   icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe';
-  unlocked: boolean;
-  progress: number;
+  unlocked?: boolean;
+  progress?: number;
   target: number;
 }
 
 @Component({
   selector: 'app-achievements',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, SeoHeadDirective],
   template: `
-    <div class="sc-page">
+    <div seoHead>
       <div class="sc-container achievements">
         <header class="header">
           <div class="title">
@@ -66,38 +70,43 @@ interface Achievement {
           </div>
         </section>
 
-        <section class="grid" aria-label="Lista de conquistas">
-          @for (achievement of achievements(); track achievement.id) {
-            <article class="card sc-card" [class.unlocked]="achievement.unlocked">
-              <div class="card-top">
-                <div class="icon" aria-hidden="true">
-                  <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
-                </div>
-                @if (achievement.unlocked) {
-                  <span class="state state--unlocked">Conquistado</span>
-                } @else {
-                  <span class="state state--locked">Em progresso</span>
-                }
-              </div>
-
-              <h3>{{ achievement.title }}</h3>
-              <p>{{ achievement.description }}</p>
-
-              @if (!achievement.unlocked) {
-                <div class="progress" role="progressbar"
-                     [attr.aria-valuenow]="achievement.progress"
-                     [attr.aria-valuemin]="0"
-                     [attr.aria-valuemax]="achievement.target"
-                     [attr.aria-label]="'Progresso: ' + achievement.progress + ' de ' + achievement.target">
-                  <div class="progress-track">
-                    <div class="progress-fill" [style.width.%]="(achievement.progress / achievement.target) * 100"></div>
+        @if (loading()) {
+          <div class="sc-card achievements-loading">Carregando conquistas...</div>
+        } @else {
+          <section class="grid" aria-label="Lista de conquistas">
+            @for (achievement of achievements(); track achievement.id) {
+              <article class="card sc-card" [class.unlocked]="achievement.unlocked">
+                <div class="card-top">
+                  <div class="icon" aria-hidden="true">
+                    <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
                   </div>
-                  <div class="progress-text">{{ achievement.progress }} / {{ achievement.target }}</div>
+                  @if (achievement.unlocked) {
+                    <span class="state state--unlocked">Conquistado</span>
+                  } @else {
+                    <span class="state state--locked">Em progresso</span>
+                  }
                 </div>
-              }
-            </article>
-          }
-        </section>
+
+                <h3>{{ achievement.title }}</h3>
+                <p>{{ achievement.description }}</p>
+
+                @if (!achievement.unlocked) {
+                  <div class="progress" role="progressbar"
+                       [attr.aria-valuenow]="achievement.progress"
+                       [attr.aria-valuemin]="0"
+                       [attr.aria-valuemax]="achievement.target"
+                       [attr.aria-label]="'Progresso: ' + achievement.progress + ' de ' + achievement.target">
+                    <div class="progress-track">
+                      <div class="progress-fill"
+                           [style.width.%]="((achievement!.progress || 0) / achievement.target) * 100"></div>
+                    </div>
+                    <div class="progress-text">{{ achievement.progress }} / {{ achievement.target }}</div>
+                  </div>
+                }
+              </article>
+            }
+          </section>
+        }
       </div>
     </div>
   `,
@@ -158,6 +167,7 @@ interface Achievement {
     .pill-strong {
       font-weight: 700;
       color: var(--text);
+      margin-top: 5px;
     }
 
     .pill-muted {
@@ -349,20 +359,29 @@ interface Achievement {
         align-items: flex-start;
       }
     }
+
+    .achievements-loading {
+      text-align: center;
+      color: var(--muted);
+      padding: 20px;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      height: 200px;
+      align-content: center;
+    }
   `]
 })
 export class AchievementsComponent implements OnInit {
-  level = signal(5);
-  totalPoints = signal(1250);
-  streakDays = signal(7);
+  level = signal(0);
+  totalPoints = signal(0);
+  streakDays = signal(0);
+  loading = signal(true);
   achievements = signal<Achievement[]>([
     {
       id: '1',
       title: 'Primeiro Passo',
       description: 'Complete seu primeiro simulado',
       icon: 'target',
-      unlocked: true,
-      progress: 1,
       target: 1
     },
     {
@@ -370,8 +389,6 @@ export class AchievementsComponent implements OnInit {
       title: 'Persistente',
       description: 'Complete 10 simulados',
       icon: 'strength',
-      unlocked: true,
-      progress: 10,
       target: 10
     },
     {
@@ -379,8 +396,6 @@ export class AchievementsComponent implements OnInit {
       title: 'Estudioso',
       description: 'Complete 50 simulados',
       icon: 'book',
-      unlocked: false,
-      progress: 32,
       target: 50
     },
     {
@@ -388,8 +403,6 @@ export class AchievementsComponent implements OnInit {
       title: 'Aprovado',
       description: 'Obtenha 70% ou mais em um simulado',
       icon: 'award',
-      unlocked: true,
-      progress: 1,
       target: 1
     },
     {
@@ -397,8 +410,6 @@ export class AchievementsComponent implements OnInit {
       title: 'Perfeccionista',
       description: 'Obtenha 90% ou mais em um simulado',
       icon: 'trophy',
-      unlocked: false,
-      progress: 0,
       target: 1
     },
     {
@@ -406,8 +417,6 @@ export class AchievementsComponent implements OnInit {
       title: 'Sequência de Fogo',
       description: 'Estude por 7 dias seguidos',
       icon: 'flame',
-      unlocked: true,
-      progress: 7,
       target: 7
     },
     {
@@ -415,8 +424,6 @@ export class AchievementsComponent implements OnInit {
       title: 'Maratonista',
       description: 'Estude por 30 dias seguidos',
       icon: 'medal',
-      unlocked: false,
-      progress: 7,
       target: 30
     },
     {
@@ -424,17 +431,13 @@ export class AchievementsComponent implements OnInit {
       title: 'Especialista AWS',
       description: 'Complete todos os exames AWS',
       icon: 'cloud',
-      unlocked: false,
-      progress: 2,
-      target: 5
+      target: 4
     },
     {
       id: '9',
       title: 'Multi-Cloud',
       description: 'Complete exames de AWS, Azure e GCP',
       icon: 'globe',
-      unlocked: false,
-      progress: 1,
       target: 3
     }
   ]);
@@ -457,17 +460,183 @@ export class AchievementsComponent implements OnInit {
     globe: Globe,
   } as const;
 
+
   constructor(
     private authFacade: AuthFacade,
-    private statsApi: StatsApiService
+    private statsApi: StatsApiService,
+    private seoFactory: SeoFactoryService,
+    private seoFacade: SeoFacadeService,
   ) {
+    const seo = this.seoFactory.website({
+      title: 'Conquistas | SimulaCert',
+      description: 'Acompanhe suas conquistas e marcos de estudo na SimulaCert.',
+      canonicalPath: '/achievements',
+      robots: 'index, follow',
+      jsonLdId: 'achievements',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: 'Conquistas',
+        description: 'Acompanhe suas conquistas e marcos de estudo na SimulaCert.',
+        url: this.seoFactory.canonicalFromPath('/achievements'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      }
+    });
+
+    this.seoFacade.set(seo);
   }
 
   ngOnInit(): void {
-    // TODO: Carregar achievements reais da API
-    // const userId = this.authFacade.currentUser()?.id;
-    // if (userId) {
-    // }
+    const user = this.authFacade.currentUser();
+    const userId = user?.id;
+    if (!userId) {
+      this.loading.set(false);
+      return;
+    }
+
+    forkJoin({
+      stats: this.statsApi.getUserStatistics(userId),
+      history: this.statsApi.getAttemptHistory(userId),
+      domains: this.statsApi.getPerformanceByDomain(userId)
+    }).subscribe({
+      next: ({stats, history, domains}) => {
+        const level = Math.floor((stats.completedAttempts ?? 0) / 10);
+        this.level.set(Math.max(1, level + 1));
+
+        const totalPoints = (stats.completedAttempts ?? 0) * (stats.averageScore ?? 0);
+        this.totalPoints.set(totalPoints);
+
+        const streak = this.calculateStreak(history || []);
+        this.streakDays.set(streak);
+
+        const awsProviders = new Set<string>();
+        domains?.forEach(d => {
+          const name = d.awsDomain?.toLowerCase();
+          if (!name) return;
+
+          if (name.includes('aws'))
+            awsProviders.add('aws');
+
+          if (name.includes('azure'))
+            awsProviders.add('azure');
+
+          if (name.includes('gcp') || name.includes('google'))
+            awsProviders.add('gcp');
+        });
+
+        const completed = stats.completedAttempts ?? 0;
+        const bestScore = stats.bestScore ?? 0;
+
+        const updated = this.achievements().map(a => {
+          const copy = {...a} as Achievement;
+          switch (copy.id) {
+            case '1':
+              copy.progress = Math.min(completed, copy.target);
+              copy.unlocked = completed >= 1;
+              break;
+            case '2':
+              copy.progress = Math.min(completed, copy.target);
+              copy.unlocked = completed >= 10;
+              break;
+            case '3':
+              copy.progress = Math.min(completed, copy.target);
+              copy.unlocked = completed >= 50;
+              break;
+            case '4':
+              copy.progress = bestScore >= 70 ? copy.target : 0;
+              copy.unlocked = bestScore >= 70;
+              break;
+            case '5':
+              copy.progress = bestScore >= 90 ? copy.target : 0;
+              copy.unlocked = bestScore >= 90;
+              break;
+            case '6':
+              copy.progress = Math.min(streak, copy.target);
+              copy.unlocked = streak >= 7;
+              break;
+            case '7':
+              copy.progress = Math.min(streak, copy.target);
+              copy.unlocked = streak >= 30;
+              break;
+            case '8':
+              copy.progress = Math.min(domains?.length || 0, copy.target);
+              copy.unlocked = (domains?.length || 0) >= copy.target;
+              break;
+            case '9':
+              copy.progress = Math.min(awsProviders.size, copy.target);
+              copy.unlocked = awsProviders.size >= copy.target;
+              break;
+          }
+          return copy;
+        });
+
+        this.achievements.set(updated);
+        this.seoFacade.set(this.buildSeoMeta(updated));
+
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+
+      }
+    });
+  }
+
+  private buildSeoMeta(updated: { unlocked?: boolean }[]) {
+    const unlockedCount = updated.filter(a => a.unlocked).length;
+    return this.seoFactory.website({
+      title: `Conquistas (${unlockedCount}) | SimulaCert`,
+      description: `Você desbloqueou ${unlockedCount} de ${updated.length} conquistas na SimulaCert. Acompanhe seu progresso e desbloqueie novos marcos.`,
+      canonicalPath: '/achievements',
+      robots: 'index, follow',
+      jsonLdId: 'achievements',
+      jsonLd: {
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        name: `Conquistas (${unlockedCount})`,
+        description: `Você desbloqueou ${unlockedCount} de ${updated.length} conquistas na SimulaCert.`,
+        url: this.seoFactory.canonicalFromPath('/achievements'),
+        isPartOf: {
+          '@type': 'WebSite',
+          name: 'SimulaCert',
+          url: this.seoFactory.origin(),
+        },
+      }
+    });
+  }
+
+  private calculateStreak(history: { finishedAt?: string }[]): number {
+    if (!history?.length) return 0;
+
+    const daySet = new Set<string>();
+    history.forEach(h => {
+      if (!h.finishedAt) return;
+
+      const d = new Date(h.finishedAt);
+      if (!isNaN(d.getTime())) {
+        const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
+        daySet.add(key);
+      }
+    });
+
+    let streak = 0;
+    let cur = new Date();
+
+    while (true) {
+      const key = cur.toISOString().slice(0, 10);
+      if (daySet.has(key)) {
+        streak++;
+        cur.setDate(cur.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    return streak;
   }
 }
 

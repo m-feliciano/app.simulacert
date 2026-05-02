@@ -40,7 +40,8 @@ export const routes: Routes = [
     path: '',
     component: AppLayoutComponent,
     children: [
-      { path: 'dashboard', component: DashboardComponent },
+      { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
+      { path: 'achievements', loadComponent: () => import('./features/achievements/achievements.component').then(m => m.AchievementsComponent) },
       { path: 'exams', component: ExamsListComponent },
       { path: 'stats', loadComponent: () => import('./features/stats/stats.component').then(m => m.StatsComponent) },
       { matcher: examsIdMatcher, loadComponent: () => import('./features/exams/exam-detail.component').then(m => m.ExamDetailComponent) },
