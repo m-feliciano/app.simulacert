@@ -448,7 +448,15 @@ export class AchievementsComponent implements OnInit {
       icon: 'globe',
       progress: 0,
       target: 3
-    }
+    },
+    {
+      id: '10',
+      title: 'Veterano',
+      description: 'Complete 100 simulados',
+      icon: 'book',
+      progress: 0,
+      target: 100
+    },
   ]);
 
   readonly icons = {
@@ -578,6 +586,10 @@ export class AchievementsComponent implements OnInit {
             case '9':
               copy.progress = Math.min(awsProviders.size, copy.target);
               copy.unlocked = awsProviders.size >= copy.target;
+              break;
+            case '10':
+              copy.progress = Math.min(completed, copy.target);
+              copy.unlocked = completed >= 100;
               break;
           }
           return copy;
