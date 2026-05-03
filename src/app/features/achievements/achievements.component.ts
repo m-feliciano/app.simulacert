@@ -576,8 +576,6 @@ export class AchievementsComponent implements OnInit {
       feedbacks: this.reviewsService.getReviesSummary(userId)
     }).subscribe({
       next: ({stats, history, domains, feedbacks}) => {
-        // We'll compute level and totalPoints after we know which achievements are unlocked
-
         const streak = this.calculateStreak(history || []);
         this.streakDays.set(streak);
 
