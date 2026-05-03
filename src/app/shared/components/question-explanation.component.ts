@@ -1,13 +1,16 @@
-import { Component, Input, signal } from '@angular/core';
+import {Component, Input, signal, ViewEncapsulation} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExplanationsApiService } from '../../api/explanations.service';
 import { ExplanationResponse } from '../../api/domain';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 
 @Component({
   selector: 'app-question-explanation',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="explanation-container">
       @if (!showExplanation()) {
@@ -32,9 +35,7 @@ import { ExplanationResponse } from '../../api/domain';
             <button class="btn-close" (click)="closeExplanation()">✕</button>
           </div>
 
-          <div class="explanation-content">
-            {{ explanation()!.content }}
-          </div>
+          <div class="explanation-content" [innerHTML]="safeHtml"></div>
 
           <div class="explanation-footer">
             <span class="ai-disclaimer">Explicação gerada com assistência de IA</span>
@@ -172,13 +173,6 @@ import { ExplanationResponse } from '../../api/domain';
       color: var(--color-dark);
     }
 
-    .explanation-content {
-      line-height: 1.6;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-md);
-      white-space: pre-wrap;
-    }
-
     .explanation-footer {
       display: flex;
       justify-content: space-between;
@@ -300,6 +294,62 @@ import { ExplanationResponse } from '../../api/domain';
       text-align: center;
       font-weight: 500;
     }
+
+    .explanation-content {
+      line-height: 1.6;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .explanation-content .option {
+      margin-bottom: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border-light);
+      display: block;
+    }
+
+    .explanation-content .option.correct {
+      border-left: 2px solid #22c55e;
+      background: rgba(34, 197, 94, 0.04);
+    }
+
+    .explanation-content .option.incorrect {
+      border-left: 2px solid #ef4444;
+      background: transparent;
+    }
+
+    .explanation-content p {
+      margin: 4px 0 0 0;
+      line-height: 1.5;
+    }
+
+    .explanation-content .resource {
+      margin-top: 8px;
+    }
+
+    .explanation-content .resource a {
+      color: #1a73e8;
+      text-decoration: none;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .explanation-content .resource a:hover {
+      text-decoration: underline;
+    }
+
+    .explanation-content h4 {
+      opacity: 0.85;
+      margin: 0 0 4px 0;
+      font-weight: 600;
+    }
+
+    .option.correct h4::after {
+      content: " ✓";
+      color: #22c55e;
+      font-weight: bold;
+    }
   `]
 })
 export class QuestionExplanationComponent {
@@ -312,12 +362,16 @@ export class QuestionExplanationComponent {
   error = signal<string | null>(null);
   explanation = signal<ExplanationResponse | null>(null);
 
+  safeHtml: SafeHtml = signal(null as SafeHtml | null);
   rating = signal(0);
-  comment = '';
   submittingFeedback = signal(false);
   feedbackSubmitted = signal(false);
 
-  constructor(private explanationsApi: ExplanationsApiService) {}
+  comment = '';
+
+  constructor(private explanationsApi: ExplanationsApiService,
+              private sanitizer: DomSanitizer,
+  ) {}
 
   requestExplanation(): void {
     this.loading.set(true);
@@ -335,6 +389,7 @@ export class QuestionExplanationComponent {
         this.explanation.set(response);
         this.showExplanation.set(true);
         this.loading.set(false);
+        this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(response.content));
       },
       error: () => {
         this.error.set('Você atingiu o limite de explicações gratuitas por hoje. Tente novamente mais tarde.');

@@ -1,5 +1,5 @@
 .attempt-questions-result {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 32px 0;
 }
@@ -20,7 +20,7 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin-bottom: 32px;
   padding: 24px;
-  border-left: 8px solid #ccc;
+  border-left: 4px solid #ccc;
   transition: border-color 0.2s;
 }
 
@@ -37,22 +37,6 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
-}
-
-.result-chip {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  color: var(--color-bg-secondary);
-  font-weight: 500;
-}
-
-.correct-chip {
-  background: #4caf50;
-}
-
-.incorrect-chip {
-  background: #f44336;
 }
 
 .question-text {

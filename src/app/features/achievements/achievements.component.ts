@@ -17,14 +17,20 @@ import {
   LucideAngularModule,
   Medal,
   Target,
+  MessageCircle,
+  Search,
+  CheckSquare,
+  ThumbsUp,
+  Users,
   Trophy,
 } from 'lucide-angular';
+import {ReviewsApiService} from '../../api/reviews.service';
 
 interface Achievement {
   id: string;
   title: string;
   description: string;
-  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe' | 'crown';
+  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe' | 'crown' | 'message-circle' | 'search' | 'check-square' | 'thumbs-up' | 'users';
   unlocked?: boolean;
   progress?: number;
   target: number;
@@ -458,6 +464,46 @@ export class AchievementsComponent implements OnInit {
       progress: 0,
       target: 100
     },
+    {
+      id: '11',
+      title: 'Primeira Impressão',
+      description: 'Envie seu primeiro feedback útil sobre um simulado',
+      icon: 'message-circle',
+      progress: 0,
+      target: 1
+    },
+    {
+      id: '12',
+      title: 'Analista',
+      description: 'Envie 10 feedbacks relevantes sobre simulados',
+      icon: 'search',
+      progress: 0,
+      target: 10
+    },
+    {
+      id: '13',
+      title: 'Revisor Técnico',
+      description: 'Envie 25 feedbacks detalhados e consistentes',
+      icon: 'check-square',
+      progress: 0,
+      target: 25
+    },
+    {
+      id: '14',
+      title: 'Especialista em Qualidade',
+      description: 'Tenha 10 feedbacks marcados como úteis por outros usuários',
+      icon: 'thumbs-up',
+      progress: 0,
+      target: 10
+    },
+    {
+      id: '15',
+      title: 'Influenciador de Conteúdo',
+      description: 'Tenha 25 feedbacks aprovados pela comunidade',
+      icon: 'users',
+      progress: 0,
+      target: 25
+    }
   ]);
 
   readonly icons = {
@@ -477,12 +523,18 @@ export class AchievementsComponent implements OnInit {
     crown: Crown,
     cloud: Cloud,
     globe: Globe,
+    'message-circle': MessageCircle,
+    search: Search,
+    'check-square': CheckSquare,
+    'thumbs-up': ThumbsUp,
+    users: Users,
   } as const;
 
 
   constructor(
     private authFacade: AuthFacade,
     private statsApi: StatsApiService,
+    private reviewsService: ReviewsApiService,
     private seoFactory: SeoFactoryService,
     private seoFacade: SeoFacadeService,
   ) {
@@ -520,14 +572,11 @@ export class AchievementsComponent implements OnInit {
     forkJoin({
       stats: this.statsApi.getUserStatistics(userId),
       history: this.statsApi.getAttemptHistory(userId),
-      domains: this.statsApi.getPerformanceByDomain(userId)
+      domains: this.statsApi.getPerformanceByDomain(userId),
+      feedbacks: this.reviewsService.getReviesSummary(userId)
     }).subscribe({
-      next: ({stats, history, domains}) => {
-        const level = Math.floor((stats.completedAttempts ?? 0) / 10);
-        this.level.set(Math.max(1, level + 1));
-
-        const totalPoints = (stats.completedAttempts ?? 0) * (stats.averageScore ?? 0);
-        this.totalPoints.set(totalPoints);
+      next: ({stats, history, domains, feedbacks}) => {
+        // We'll compute level and totalPoints after we know which achievements are unlocked
 
         const streak = this.calculateStreak(history || []);
         this.streakDays.set(streak);
@@ -593,18 +642,48 @@ export class AchievementsComponent implements OnInit {
               copy.progress = Math.min(completed, copy.target);
               copy.unlocked = completed >= 100;
               break;
+            case '11':
+              copy.progress = Math.min((feedbacks?.submitted ?? 0), copy.target);
+              copy.unlocked = (feedbacks?.submitted ?? 0) >= copy.target;
+              break;
+            case '12':
+              copy.progress = Math.min((feedbacks?.submitted ?? 0), copy.target);
+              copy.unlocked = (feedbacks?.submitted ?? 0) >= copy.target;
+              break;
+            case '13':
+              copy.progress = Math.min((feedbacks?.detailed ?? 0), copy.target);
+              copy.unlocked = (feedbacks?.detailed ?? 0) >= copy.target;
+              break;
+            case '14':
+              copy.progress = Math.min((feedbacks?.useful ?? 0), copy.target);
+              copy.unlocked = (feedbacks?.useful ?? 0) >= copy.target;
+              break;
+            case '15':
+              copy.progress = Math.min((feedbacks?.approved ?? 0), copy.target);
+              copy.unlocked = (feedbacks?.approved ?? 0) >= copy.target;
+              break;
           }
           return copy;
         });
 
         this.achievements.set(updated);
+
+        const unlockedCount = updated.filter(a => a.unlocked).length;
+
+        const levelBase = Math.floor((stats.completedAttempts ?? 0) / 10);
+        const levelBonus = Math.floor(unlockedCount / 5);
+        this.level.set(Math.max(1, levelBase + levelBonus + 1));
+
+        const basePoints = (stats.completedAttempts ?? 0) * (stats.averageScore ?? 0);
+        const pointsPerAchievement = 50;
+        this.totalPoints.set(basePoints + (unlockedCount * pointsPerAchievement));
+
         this.seoFacade.set(this.buildSeoMeta(updated));
 
         this.loading.set(false);
       },
       error: () => {
         this.loading.set(false);
-
       }
     });
   }

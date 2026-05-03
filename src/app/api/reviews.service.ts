@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ReviewResponse, CreateReviewRequest } from './domain';
+import { ReviewResponse, CreateReviewRequest, ReviewSummary } from './domain';
 import { API_CONFIG, ApiConfig } from './config/api.config';
 
 @Injectable({
@@ -23,6 +23,10 @@ export class ReviewsApiService {
 
   getReviewByAttempt(attemptId: string): Observable<ReviewResponse> {
     return this.http.get<ReviewResponse>(`${this.baseUrl}/by-attempt/${attemptId}`);
+  }
+
+  getReviesSummary(userId: string): Observable<ReviewSummary> {
+    return this.http.get<ReviewSummary>(`${this.baseUrl}/summary/user/${userId}`);
   }
 }
 
