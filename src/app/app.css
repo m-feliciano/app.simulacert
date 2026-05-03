@@ -4,3 +4,105 @@
   height: 100%;
 }
 
+.floating-theme-controls {
+  position: fixed;
+  bottom: var(--spacing-xl);
+  right: var(--spacing-xl);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-md);
+}
+
+.floating-btn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--border-strong);
+  color: var(--brand-primary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  transition: all var(--transition-normal);
+  background: var(--surface);
+}
+
+.floating-btn:hover {
+  transform: scale(1.05);
+  background: var(--surface-2);
+  box-shadow: var(--shadow-xl);
+}
+
+.floating-btn .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.theme-dropdown {
+  width: 350px;
+  padding: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  box-shadow: var(--shadow-xl);
+  border: 1px solid var(--border-strong);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-section label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: var(--spacing-xs);
+  letter-spacing: 0.05em;
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+  gap: 6px;
+}
+
+.options-grid button {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-2);
+  padding: 8px 4px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 13px;
+  transition: all var(--transition-fast);
+}
+
+.options-grid button:hover {
+  border-color: var(--brand-primary);
+  background: var(--surface);
+}
+
+.options-grid button.active {
+  background: var(--brand-primary);
+  color: white;
+  border-color: var(--brand-primary);
+}
+
+@media (max-width: 768px) {
+  .floating-theme-controls {
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+  }
+  .floating-btn {
+    width: 48px;
+    height: 48px;
+  }
+}
+

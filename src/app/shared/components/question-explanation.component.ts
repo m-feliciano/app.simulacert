@@ -1,13 +1,16 @@
-import { Component, Input, signal } from '@angular/core';
+import {Component, Input, signal, ViewEncapsulation} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ExplanationsApiService } from '../../api/explanations.service';
 import { ExplanationResponse } from '../../api/domain';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import DOMPurify from 'dompurify';
 
 @Component({
   selector: 'app-question-explanation',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  encapsulation: ViewEncapsulation.None,
   template: `
     <div class="explanation-container">
       @if (!showExplanation()) {
@@ -15,7 +18,7 @@ import { ExplanationResponse } from '../../api/domain';
           class="btn-explain"
           (click)="requestExplanation()"
           [disabled]="loading()">
-          {{ loading() ? 'Gerando explicação...' : 'Explicar questão' }}
+          {{ loading() ? 'Carregando...' : 'Comentários' }}
         </button>
       }
 
@@ -32,9 +35,7 @@ import { ExplanationResponse } from '../../api/domain';
             <button class="btn-close" (click)="closeExplanation()">✕</button>
           </div>
 
-          <div class="explanation-content">
-            {{ explanation()!.content }}
-          </div>
+          <div class="explanation-content" [innerHTML]="safeHtml"></div>
 
           <div class="explanation-footer">
             <span class="ai-disclaimer">Explicação gerada com assistência de IA</span>
@@ -87,20 +88,18 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .btn-explain {
-      background: var(--color-primary);
-      color: #fff;
-      border: none;
+      color: var(--text);
+      border: 1px solid transparent;
+      background: var(--surface-2);
       padding: 10px 20px;
-      border-radius: var(--border-radius-sm);
+      border-radius: var(--radius-sm);
       font-weight: 500;
       cursor: pointer;
       transition: var(--transition-fast);
-      font-size: 14px;
       font-family: inherit;
     }
 
     .btn-explain:hover:not(:disabled) {
-      background: var(--color-primary-dark);
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
     }
@@ -115,15 +114,16 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .error-message {
-      background: var(--color-bg-danger);
-      color: var(--color-danger);
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
       padding: var(--spacing-sm);
-      border-radius: var(--border-radius-sm);
+      border-radius: var(--radius-sm);
       margin-top: var(--spacing-sm);
       font-size: 14px;
       display: flex;
       align-items: center;
       gap: 4px;
+      border-left: 3px solid var(--danger);
     }
 
     .error-message::before {
@@ -132,9 +132,9 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .explanation-card {
-      background: var(--color-bg-secondary);
-      border: 1px solid var(--color-border-light);
-      border-radius: var(--border-radius-md);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
       padding: var(--spacing-lg);
       margin-top: var(--spacing-md);
       box-shadow: var(--shadow-sm);
@@ -171,13 +171,6 @@ import { ExplanationResponse } from '../../api/domain';
 
     .btn-close:hover {
       color: var(--color-dark);
-    }
-
-    .explanation-content {
-      line-height: 1.6;
-      color: var(--color-text-primary);
-      margin-bottom: var(--spacing-md);
-      white-space: pre-wrap;
     }
 
     .explanation-footer {
@@ -265,8 +258,8 @@ import { ExplanationResponse } from '../../api/domain';
 
     .btn-submit-feedback {
       align-self: flex-start;
-      background: var(--color-secondary);
-      color: #fff;
+      background: var(--surface-2);
+      color: var(--text);;
       border: none;
       padding: 8px 16px;
       border-radius: var(--border-radius-sm);
@@ -278,7 +271,7 @@ import { ExplanationResponse } from '../../api/domain';
     }
 
     .btn-submit-feedback:hover:not(:disabled) {
-      background: var(--color-dark);
+      background: var(--surface-3);
       transform: translateY(-1px);
       box-shadow: var(--shadow-sm);
     }
@@ -301,6 +294,62 @@ import { ExplanationResponse } from '../../api/domain';
       text-align: center;
       font-weight: 500;
     }
+
+    .explanation-content {
+      line-height: 1.6;
+      color: var(--color-text-primary);
+      margin-bottom: var(--spacing-md);
+    }
+
+    .explanation-content .option {
+      margin-bottom: 12px;
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--color-border-light);
+      display: block;
+    }
+
+    .explanation-content .option.correct {
+      border-left: 2px solid #22c55e;
+      background: rgba(34, 197, 94, 0.04);
+    }
+
+    .explanation-content .option.incorrect {
+      border-left: 2px solid #ef4444;
+      background: transparent;
+    }
+
+    .explanation-content p {
+      margin: 4px 0 0 0;
+      line-height: 1.5;
+    }
+
+    .explanation-content .resource {
+      margin-top: 8px;
+    }
+
+    .explanation-content .resource a {
+      color: #1a73e8;
+      text-decoration: none;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .explanation-content .resource a:hover {
+      text-decoration: underline;
+    }
+
+    .explanation-content h4 {
+      opacity: 0.85;
+      margin: 0 0 4px 0;
+      font-weight: 600;
+    }
+
+    .option.correct h4::after {
+      content: " ✓";
+      color: #22c55e;
+      font-weight: bold;
+    }
   `]
 })
 export class QuestionExplanationComponent {
@@ -313,12 +362,16 @@ export class QuestionExplanationComponent {
   error = signal<string | null>(null);
   explanation = signal<ExplanationResponse | null>(null);
 
+  safeHtml: SafeHtml = signal(null as SafeHtml | null);
   rating = signal(0);
-  comment = '';
   submittingFeedback = signal(false);
   feedbackSubmitted = signal(false);
 
-  constructor(private explanationsApi: ExplanationsApiService) {}
+  comment = '';
+
+  constructor(private explanationsApi: ExplanationsApiService,
+              private sanitizer: DomSanitizer,
+  ) {}
 
   requestExplanation(): void {
     this.loading.set(true);
@@ -336,6 +389,7 @@ export class QuestionExplanationComponent {
         this.explanation.set(response);
         this.showExplanation.set(true);
         this.loading.set(false);
+        this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(response.content));
       },
       error: () => {
         this.error.set('Você atingiu o limite de explicações gratuitas por hoje. Tente novamente mais tarde.');

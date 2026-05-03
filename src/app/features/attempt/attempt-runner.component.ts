@@ -1,11 +1,10 @@
-import {Component, computed, DestroyRef, Inject, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, OnDestroy, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
-import {AttemptQuestionResponse, ExamResponse} from '../../api/domain';
+import {AttemptQuestionResponse, AttemptResponse, ExamResponse} from '../../api/domain';
 import {interval, Subscription} from 'rxjs';
-import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
 
@@ -25,7 +24,8 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
       @if (error()) {
         <div class="error-state">
           <p>{{ error() }}</p>
-          <button class="btn-secondary" (click)="goBack()">Voltar</button>
+          <p>Tente recarregar a página ou verifique sua conexão.</p>
+          <button class="btn-primary" (click)="loadAttempt()">Recarregar</button>
         </div>
       }
 
@@ -34,13 +34,13 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
           <p>Exame pausado. Retome quando estiver pronto.</p>
         </div>
 
-      } @else if (!loading() && !error() && exam() && questions().length > 0) {
+      } @else if (!loading() && !error() && exam() && questionsLoaded()) {
         <div class="attempt-header">
           <div class="header-left">
             <h2>{{ exam()!.title }}</h2>
           </div>
           <div class="header-right">
-            <div class="timer" [class.warning]="timeRemaining() < 300">
+            <div class="timer" title="Tempo restante">
               {{ timeRemaining() | formatTime }}
             </div>
             <button class="btn-pause" (click)="pauseAttempt()" title="Pausar Exame">
@@ -57,7 +57,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
         </div>
 
         <div class="question-navigation">
-          @for (q of questions(); track $index) {
+          @for (_ of questions(); track $index) {
             <button
               class="question-nav-btn"
               [class.active]="$index === currentQuestionIndex()"
@@ -71,7 +71,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
         @if (currentQuestion) {
           <div class="question-content">
             <div class="question-header">
-              <span class="question-number">Questão {{ currentQuestionIndex() + 1 }} de {{ questions().length }}</span>
+              <span class="question-number">Questão {{ currentQuestion.questionCode }}</span>
               <span class="question-meta">{{ currentQuestion.domain }} | {{ currentQuestion.difficulty }}</span>
             </div>
 
@@ -124,7 +124,7 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
                 </button>
               }
 
-              @if (currentQuestionIndex() === questions().length - 1) {
+              @if (currentQuestionIndex() === questions().length - 1 && hasAtLeastOneAnswer()) {
                 <button class="btn-finish" (click)="submitCurrentAnswer(); confirmFinish()">
                   Finalizar Exame
                 </button>
@@ -212,27 +212,28 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   showExitModal = signal(false);
   showPauseModal = signal(false);
   isPaused = signal(false);
-  loading = signal(true);
   error = signal('');
   finishError = signal('');
 
-  duration = computed(() => Math.round(this.questions().length * 2 * 60)); // in seconds
+  private endsAtMs = signal<number | null>(null);
+  private readonly TIMER_TICK_MS = 1000;
+  private readonly HEARTBEAT_EVERY_MS = 10_000;
 
+  private heartbeatSubscription?: Subscription;
   private timerSubscription?: Subscription;
-  private readonly STORAGE_KEY_PREFIX = 'attempt_progress_';
+
+  loading = signal(true);
+  attemptLoaded = signal(false);
+  examLoaded = signal(false);
+  questionsLoaded = signal(false);
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private attemptsApi: AttemptsApiService,
     private examsApi: ExamsApiService,
-    private destroyRef: DestroyRef,
-    @Inject(LOCAL_STORAGE) private storage: Storage,
+    private destroyRef: DestroyRef
   ) {}
-
-  ngOnDestroy(): void {
-    this.timerSubscription?.unsubscribe();
-  }
 
   get currentQuestion(): AttemptQuestionResponse | null {
     return this.questions()[this.currentQuestionIndex()] || null;
@@ -246,52 +247,117 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.attemptId = this.route.snapshot.paramMap.get('id')!;
     this.loadAttempt();
-    this.loadLocalProgress();
   }
 
-  private getStorageKey(): string {
-    return `${this.STORAGE_KEY_PREFIX}${this.attemptId}`;
+  ngOnDestroy(): void {
+    this.unsubscribe();
+  }
+
+  private updateRemainingFromEndsAt(): void {
+    const endsAt = this.endsAtMs();
+    if (endsAt) {
+      const remainingSec = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      this.timeRemaining.set(remainingSec);
+    }
+  }
+
+  private setTimingFromServer(payload: { endsAt?: string; remainingSeconds?: number; paused: boolean }): void {
+    if (payload.paused) {
+      if (payload.remainingSeconds !== undefined && payload.remainingSeconds !== null) {
+        this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
+
+      } else if (payload.endsAt) {
+        const ms = Date.parse(payload.endsAt);
+        if (!Number.isNaN(ms)) this.endsAtMs.set(ms);
+      }
+
+    } else {
+      if (payload.endsAt) {
+        const ms = Date.parse(payload.endsAt);
+        if (!Number.isNaN(ms)) this.endsAtMs.set(ms);
+
+      } else if (payload.remainingSeconds !== undefined && payload.remainingSeconds !== null) {
+        this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
+      }
+    }
+
+    this.isPaused.set(payload.paused);
+    this.updateRemainingFromEndsAt();
   }
 
   startTimer(): void {
-    let i = 0;
-
     this.timerSubscription?.unsubscribe();
-    this.timerSubscription = interval(1000)
+
+    this.timerSubscription = interval(this.TIMER_TICK_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         if (this.isPaused()) return;
 
-      if (this.timeRemaining() > 0) {
-        this.timeRemaining.update(t => t - 1);
+        this.updateRemainingFromEndsAt();
 
-        if (++i % 5 === 0) {
-          this.saveLocalProgress();
+        if (this.timeRemaining() <= 0 && this.attemptLoaded()) {
+          this.unsubscribe();
+          this.finishAttempt();
         }
+    });
+  }
 
-      } else {
-        this.finishAttempt();
+  private startHeartbeat(): void {
+    this.heartbeatSubscription?.unsubscribe();
+
+    this.heartbeatSubscription = interval(this.HEARTBEAT_EVERY_MS)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.isPaused() || this.loading() || this.finishingAttempt()) return;
+
+        this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
+          next: (timing) => {
+            this.setTimingFromServer(timing);
+          }
+        });
+      });
+  }
+
+  pauseAttempt(): void {
+    if (this.loading() || this.finishingAttempt()) return;
+
+    this.attemptsApi.pauseAttempt(this.attemptId).subscribe({
+      next: (timing) => {
+        this.setTimingFromServer(timing);
+        this.showPauseModal.set(true);
+        this.unsubscribe();
+      },
+      error: () => {
+        this.error.set('Não foi possível pausar o exame. Verifique sua conexão e tente novamente.');
       }
     });
   }
 
-  pauseAttempt(): void {
-    if (this.loading() || this.error() || this.finishingAttempt()) return;
-
-    this.submitCurrentAnswer();
-    this.saveLocalProgress();
-
-    this.isPaused.set(true);
-    this.showPauseModal.set(true);
-
+  private unsubscribe() {
     this.timerSubscription?.unsubscribe();
+    this.heartbeatSubscription?.unsubscribe();
   }
 
   resumeAttempt(): void {
-    this.showPauseModal.set(false);
-    this.isPaused.set(false);
+    if (this.loading() || this.finishingAttempt()) return;
 
-    this.startTimer();
+    this.attemptsApi.resumeAttempt(this.attemptId).subscribe({
+      next: (timing) => {
+        this.setTimingFromServer(timing);
+        this.showPauseModal.set(false);
+
+        if (!this.timerSubscription || this.timerSubscription.closed) {
+          this.startTimer();
+        }
+
+        if (!this.heartbeatSubscription || this.heartbeatSubscription.closed) {
+          this.startHeartbeat();
+        }
+      },
+      error: () => {
+        this.error.set('Não foi possível retomar o exame. Verifique sua conexão e tente novamente.');
+      }
+    });
   }
 
   toggleAnswer(optionKey: string): void {
@@ -325,15 +391,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       ...currentMap,
       [currentIdx]: nextAnswers,
     });
-
-    this.saveLocalProgress();
-  }
-
-  private clearLocalProgress(): void {
-    try {
-      this.storage.removeItem(this.getStorageKey());
-    } catch (err) {
-    }
   }
 
   loadAttempt(): void {
@@ -341,11 +398,30 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       next: (attempt) => {
         this.loadExam(attempt.examId);
         this.loadQuestions();
+        this.startFirstHeartbeat(attempt);
+        this.attemptLoaded.set(true);
       },
-      error: (error) => {
-        console.error(error);
+      error: () => {
         this.error.set('Erro ao carregar tentativa. Por favor, tente novamente.');
         this.loading.set(false);
+      },
+      complete: () => this.checkIfLoaded()
+    });
+  }
+
+  private startFirstHeartbeat(attempt: AttemptResponse) {
+    this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
+      next: (timing) => {
+        this.setTimingFromServer(timing);
+        this.showPauseModal.set(timing.paused);
+      },
+      error: () => {
+        this.setTimingFromServer({
+          endsAt: attempt.endsAt,
+          paused: attempt.paused ?? false
+        });
+
+        if (attempt.paused) this.showPauseModal.set(true);
       }
     });
   }
@@ -354,9 +430,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
         this.exam.set(exam);
+        this.examLoaded.set(true);
         this.checkIfLoaded();
       },
-      error: (error) => {
+      error: () => {
         this.error.set('Erro ao carregar exame.');
         this.loading.set(false);
       }
@@ -367,7 +444,9 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.attemptsApi.getAttemptQuestions(this.attemptId).subscribe({
       next: (questions) => {
         this.questions.set(questions);
+        this.questionsLoaded.set(true);
         this.checkIfLoaded();
+        this.loadAnswers();
       },
       error: () => {
         this.error.set('Erro ao carregar questões.');
@@ -377,15 +456,19 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   checkIfLoaded(): void {
-    if (this.exam() && this.questions().length > 0) {
+    if (this.examLoaded() && this.questionsLoaded()) {
       this.loading.set(false);
 
-      if (this.timeRemaining() === 0) {
-        this.timeRemaining.set(this.duration());
+      if (this.endsAtMs()) {
+        this.updateRemainingFromEndsAt();
       }
 
       if (!this.timerSubscription || this.timerSubscription.closed) {
         this.startTimer();
+      }
+
+      if (!this.heartbeatSubscription || this.heartbeatSubscription.closed) {
+        this.startHeartbeat();
       }
     }
   }
@@ -444,22 +527,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       });
   }
 
-  private saveLocalProgress(): void {
-    try {
-      const progress = {
-        selectedAnswers: this.selectedAnswers(),
-        answeredQuestions: Array.from(this.answeredQuestions()),
-        currentQuestionIndex: this.currentQuestionIndex(),
-        timeRemaining: this.timeRemaining(),
-        timestamp: new Date().toISOString()
-      };
-
-      this.storage.setItem(this.getStorageKey(), JSON.stringify(progress));
-
-    } catch (err) {
-    }
-  }
-
   isMultipleChoice(question: AttemptQuestionResponse): boolean {
     const text = question?.text?.toLowerCase();
     return text?.includes('escolha dois') ||
@@ -474,21 +541,30 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
       text?.includes('(selecione');
   }
 
-  private loadLocalProgress(): void {
-    const saved = this.storage.getItem(this.getStorageKey());
-    if (!saved) return;
+  private loadAnswers(): void {
+    this.attemptsApi.getAnswers(this.attemptId).subscribe({
+      next: (answer) => {
+        if (answer && answer.length > 0) {
+          const selectedMap: { [index: number]: string[] } = {};
+          const answeredSet = new Set<number>();
 
-    const progress = JSON.parse(saved);
-    this.selectedAnswers.set(progress.selectedAnswers || {});
-    this.answeredQuestions.set(new Set(progress.answeredQuestions || []));
+          answer.forEach(ans => {
+            const questionIndex = this.questions()
+              .findIndex(q => q.questionId === ans.questionId);
 
-    if (progress.currentQuestionIndex !== undefined) {
-      this.currentQuestionIndex.set(progress.currentQuestionIndex);
-    }
+            if (questionIndex !== -1) {
+              selectedMap[questionIndex] = ans.selectedOption ? ans.selectedOption.split(',') : [];
+              answeredSet.add(questionIndex);
+            }
+          });
 
-    if (progress.timeRemaining !== undefined) {
-      this.timeRemaining.set(progress.timeRemaining);
-    }
+          this.selectedAnswers.set(selectedMap);
+          this.answeredQuestions.set(answeredSet);
+
+          this.goToNextAnswerPending();
+        }
+      }
+    });
   }
 
   goToQuestion(index: number): void {
@@ -511,20 +587,30 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   confirmExit(): void {
-    if (this.showPauseModal()) {
-      this.showPauseModal.set(false);
-      this.isPaused.set(false);
-    }
-
     this.showExitModal.set(true);
   }
 
   exitAttempt(): void {
-    // TODO: Avaliar se é necessário cancelar a tentativa no backend ou apenas deixar expirar o tempo
-    // this.clearLocalProgress();
-    // this.timerSubscription?.unsubscribe();
-    // this.attemptsApi.cancelAttempt(this.attemptId).subscribe({});
+    if (this.loading() || this.finishingAttempt()) {
+      this.navigateToDashboard();
+      return;
+    }
 
+    this.attemptsApi.pauseAttempt(this.attemptId).subscribe({
+      next: (timing) => {
+        this.setTimingFromServer(timing);
+        this.isPaused.set(true);
+        this.showExitModal.set(false);
+        this.unsubscribe();
+        this.navigateToDashboard();
+      },
+      error: () => {
+        this.finishError.set('Não foi possível salvar e sair do exame. Verifique sua conexão e tente novamente.');
+      }
+    });
+  }
+
+  private navigateToDashboard() {
     this.router.navigate(['/dashboard']);
   }
 
@@ -542,12 +628,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
     this.attemptsApi.finishAttempt(this.attemptId).subscribe({
       next: () => {
-        this.clearLocalProgress();
         this.router.navigate(['/attempt', this.attemptId, 'result']);
       },
       error: () => {
-        this.finishingAttempt.set(false);
         this.finishError.set('Erro ao finalizar o exame. Suas respostas estão salvas. Por favor, tente novamente.');
+        this.finishingAttempt.set(false);
       }
     });
   }
@@ -556,8 +641,19 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.finishAttempt();
   }
 
-  goBack(): void {
-    this.router.navigate(['/exams']);
+  private goToNextAnswerPending() {
+    const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), -1);
+    const nextPendingIndex = this.questions().findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
+
+    if (nextPendingIndex !== -1) {
+      this.currentQuestionIndex.set(nextPendingIndex);
+    } else {
+      this.currentQuestionIndex.set(this.questions().length - 1);
+    }
+  }
+
+  hasAtLeastOneAnswer() {
+    return this.answeredQuestions().size > 0;
   }
 }
 

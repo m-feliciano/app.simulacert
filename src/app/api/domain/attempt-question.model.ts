@@ -6,6 +6,7 @@ export interface AttemptQuestionOption {
 
 export interface AttemptQuestionResponse {
   questionId: string;
+  questionCode?: string;
   text: string;
   domain: string;
   difficulty: string;

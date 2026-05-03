@@ -1,6 +1,7 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
+import {LucideAngularModule, Lightbulb} from 'lucide-angular';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {StatsApiService} from '../../api/stats.service';
@@ -15,7 +16,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe, LucideAngularModule],
   template: `
     <div seoHead>
       <div class="dashboard">
@@ -56,7 +57,9 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
             @if (showRecommendations()) {
               <div class="recommendations-section">
                 <div class="recommendation-card">
-                  <div class="recommendation-icon">💡</div>
+                  <div class="recommendation-icon">
+                    <lucide-icon [img]="Lightbulb" class="icon-premium"></lucide-icon>
+                  </div>
                   <div class="recommendation-content">
                     <h3>Recomendação para você</h3>
                     <p>{{ recommendation() }}</p>
@@ -140,6 +143,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
   styleUrls: [`./dashboard.component.css`]
 })
 export class DashboardComponent implements OnInit {
+  readonly Lightbulb = Lightbulb;
 
   stats = signal<UserStatsDto | null>(null);
   recentAttempts = signal<AttemptResponse[]>([]);

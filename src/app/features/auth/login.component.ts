@@ -15,25 +15,20 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
   styleUrls: ['./login.component.css'],
   template: `
     <div seoHead>
-      <div class="auth-card">
-        <div class="logo-container">
-          <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360"/>
-        </div>
+      <div class="auth-page sc-page">
+        <div class="auth-card sc-card sc-card--premium">
+          <div class="logo-container">
+            <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360"/>
+          </div>
 
-        <p class="tagline">Prepare-se para certificações AWS, Azure e GCP</p>
+          <p class="tagline">Comece a estudar em menos de 30 segundos</p>
 
-        <div class="value-props">
-          <div class="prop">✓ Simulados atualizados</div>
-          <div class="prop">✓ Análise de desempenho</div>
-          <div class="prop">✓ Acesso ilimitado</div>
-        </div>
+          <h2 class="auth-title">Faça login</h2>
 
-        <h2>Faça login</h2>
-
-        <button type="button"
-                class="btn-google"
-                (click)="loginWithGoogle()"
-                [disabled]="loadingGoogle()">
+          <button type="button"
+                  class="btn-google sc-btn sc-btn--outline"
+                  (click)="loginWithGoogle()"
+                  [disabled]="loadingGoogle()">
 
           <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
             <path fill="#4285F4"
@@ -49,46 +44,40 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
           {{ loadingGoogle() ? 'Conectando...' : 'Continuar com Google' }}
         </button>
 
-        <div class="divider">
-          <span>ou</span>
-        </div>
+          <div class="divider">
+            <span>ou</span>
+          </div>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" aria-label="Formulário de login">
-          <div class="form-group">
-            <label for="login-email">Email</label>
-            <input id="login-email" type="email" formControlName="email" class="form-control" aria-required="true"/>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" aria-label="Formulário de login">
+            <div class="form-group">
+              <label for="login-email">Email</label>
+              <input id="login-email" type="email" formControlName="email" class="sc-input" aria-required="true"/>
             @if (loginForm.get('email')?.touched && loginForm.get('email')?.invalid) {
-              <div class="error" aria-live="polite">
-                Email é obrigatório
-              </div>
+                <div class="error" aria-live="polite">Email é obrigatório</div>
             }
-          </div>
-          <div class="form-group">
-            <label for="login-password">Senha</label>
-            <input id="login-password" type="password" formControlName="password" class="form-control"
-                   aria-required="true"/>
-            @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
-              <div class="error" aria-live="polite">
-                Senha é obrigatória
-              </div>
-            }
-            <div class="forgot-password-link">
-              <a routerLink="/forgot-password">Esqueci minha senha</a>
             </div>
-          </div>
-          @if (errorMessage()) {
-            <div class="error" aria-live="polite">{{ errorMessage() }}</div>
-          }
-          <button type="submit"
-                  class="btn-primary"
-                  [disabled]="loginForm.invalid || loading()">
-            {{ loading() ? 'Entrando...' : 'Entrar' }}
-          </button>
-        </form>
+            <div class="form-group">
+              <label for="login-password">Senha</label>
+              <input id="login-password" type="password" formControlName="password" class="sc-input" aria-required="true"/>
+            @if (loginForm.get('password')?.touched && loginForm.get('password')?.invalid) {
+                <div class="error" aria-live="polite">Senha é obrigatória</div>
+            }
+              <div class="forgot-password-link">
+                <a routerLink="/forgot-password">Esqueci minha senha</a>
+              </div>
+            </div>
+            @if (errorMessage()) {
+              <div class="error" aria-live="polite">{{ errorMessage() }}</div>
+            }
+            <button type="submit" class="sc-btn sc-btn--primary" [disabled]="loginForm.invalid || loading()">
+              {{ loading() ? 'Entrando...' : 'Entrar' }}
+            </button>
+          </form>
 
-        <div class="auth-footer">
-          <p class="cta-secondary">Novo aqui? <a routerLink="/register">Crie sua conta grátis</a></p>
-          <p class="link-secondary"><a routerLink="/how-it-works">Como funciona?</a></p>
+          <div class="auth-footer">
+            <p class="cta-secondary">Novo aqui? <a routerLink="/register">Crie sua conta grátis</a></p>
+            <p class="link-secondary"><a routerLink="/how-it-works">Como funciona?</a></p>
+          </div>
         </div>
       </div>
     </div>
@@ -146,9 +135,9 @@ export class LoginComponent {
           this.loading.set(false);
           this.router.navigate(['/exams']);
         },
-        error: (error) => {
+        error: () => {
           this.loading.set(false);
-          this.errorMessage.set(error.error?.message || 'Erro ao fazer login');
+          this.errorMessage.set('Erro ao fazer login');
         }
       });
     }

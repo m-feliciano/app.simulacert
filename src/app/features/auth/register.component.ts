@@ -15,19 +15,26 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
   styleUrls: ['./register.component.css'],
   template: `
     <div seoHead>
-      <div class="auth-card">
-        <div class="logo-container">
-          <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360">
-        </div>
+      <div class="auth-page sc-page">
+        <div class="auth-card sc-card sc-card--premium">
+          <div class="logo-container">
+            <img ngSrc="/simulacert-logo.svg" priority alt="simulacert" class="auth-logo" height="96" width="360">
+          </div>
 
-        <p class="tagline">Comece a estudar em menos de 30 segundos</p>
+          <p class="tagline">Prepare-se para certificações AWS, Azure e GCP</p>
 
-        <h2>Criar conta grátis</h2>
+          <div class="value-props">
+            <div class="prop"><span class="check">✓</span> Simulados atualizados</div>
+            <div class="prop"><span class="check">✓</span> Análise de desempenho</div>
+            <div class="prop"><span class="check">✓</span> Acesso ilimitado</div>
+          </div>
 
-        <button type="button"
-                class="btn-google"
-                (click)="registerWithGoogle()"
-                [disabled]="loadingGoogle()">
+          <h2 class="auth-title">Criar conta grátis</h2>
+
+          <button type="button"
+                  class="btn-google sc-btn sc-btn--outline"
+                  (click)="registerWithGoogle()"
+                  [disabled]="loadingGoogle()">
 
           <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
             <path fill="#4285F4"
@@ -40,49 +47,45 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
                   d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.961L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>
           </svg>
 
-          {{ loadingGoogle() ? 'Conectando...' : 'Continuar com Google' }}
-        </button>
-
-        <div class="divider">
-          <span>ou</span>
-        </div>
-
-        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-label="Formulário de cadastro">
-          <div class="form-group">
-            <label for="register-email">Email</label>
-            <input id="register-email" type="email" formControlName="email" class="form-control" aria-required="true"/>
-            @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
-              <div class="error" aria-live="polite">
-                Email válido é obrigatório
-              </div>
-            }
-          </div>
-
-          <div class="form-group">
-            <label for="register-password">Senha</label>
-            <input id="register-password" type="password" formControlName="password" class="form-control"
-                   aria-required="true"/>
-            @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
-              <div class="error" aria-live="polite">
-                Senha deve ter no mínimo 6 caracteres
-              </div>
-            }
-          </div>
-
-          @if (errorMessage()) {
-            <div class="error" aria-live="polite">{{ errorMessage() }}</div>
-          }
-
-          <button type="submit" class="btn-primary" [disabled]="registerForm.invalid || loading()">
-            {{ loading() ? 'Criando conta...' : 'Começar grátis' }}
+            {{ loadingGoogle() ? 'Conectando...' : 'Continuar com Google' }}
           </button>
-        </form>
 
-        <p class="legal">Sem cartão. Sem compromisso. Cancele quando quiser.</p>
+          <div class="divider">
+            <span>ou</span>
+          </div>
 
-        <div class="auth-footer">
-          <p class="cta-secondary">Já tem uma conta? <a routerLink="/login">Entrar</a></p>
-          <p class="link-secondary"><a routerLink="/how-it-works">Como funciona?</a></p>
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" aria-label="Formulário de cadastro">
+            <div class="form-group">
+              <label for="register-email">Email</label>
+              <input id="register-email" type="email" formControlName="email" class="sc-input" aria-required="true"/>
+              @if (registerForm.get('email')?.touched && registerForm.get('email')?.invalid) {
+                <div class="error" aria-live="polite">Email válido é obrigatório</div>
+              }
+            </div>
+
+            <div class="form-group">
+              <label for="register-password">Senha</label>
+              <input id="register-password" type="password" formControlName="password" class="sc-input" aria-required="true"/>
+              @if (registerForm.get('password')?.touched && registerForm.get('password')?.invalid) {
+                <div class="error" aria-live="polite">Senha deve ter no mínimo 6 caracteres</div>
+              }
+            </div>
+
+            @if (errorMessage()) {
+              <div class="error" aria-live="polite">{{ errorMessage() }}</div>
+            }
+
+            <button type="submit" class="sc-btn sc-btn--primary" [disabled]="registerForm.invalid || loading()">
+              {{ loading() ? 'Criando conta...' : 'Começar grátis' }}
+            </button>
+          </form>
+
+          <p class="legal">Sem cartão. Sem compromisso. Cancele quando quiser.</p>
+
+          <div class="auth-footer">
+            <p class="cta-secondary">Já tem uma conta? <a routerLink="/login">Entrar</a></p>
+            <p class="link-secondary"><a routerLink="/how-it-works">Como funciona?</a></p>
+          </div>
         </div>
       </div>
     </div>
@@ -140,9 +143,9 @@ export class RegisterComponent {
             this.loading.set(false);
             this.router.navigate(['/login']);
           },
-          error: (error) => {
+          error: () => {
             this.loading.set(false);
-            this.errorMessage.set(error.error?.message || 'Erro ao registrar');
+            this.errorMessage.set('Erro ao registrar');
           }
         });
     }

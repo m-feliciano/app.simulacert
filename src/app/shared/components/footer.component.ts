@@ -6,82 +6,65 @@ import {RouterLink} from '@angular/router';
   standalone: true,
   imports: [RouterLink],
   template: `
-    <footer class="app-footer">
-      <div class="footer-content">
+    <footer class="app-footer sc-glass">
+      <div class="footer-content sc-page">
         <p class="copyright">© {{ currentYear }} SimulaCert. Todos os direitos reservados.</p>
         <nav class="footer-links">
           <a routerLink="/contato" class="footer-link">Contato</a>
           <a routerLink="/termos-de-uso" class="footer-link">Termos de Uso</a>
-          <a routerLink="/politica-de-privacidade" class="footer-link">Política de Privacidade</a>
+          <a routerLink="/politica-de-privacidade" class="footer-link">Privacidade</a>
         </nav>
       </div>
     </footer>
   `,
   styles: [`
-    .footer-links a {
-      color: #bbb;
-    }
-    .footer-content p {
-      color: #bbb;
-    }
     .app-footer {
-      background: var(--color-dark, #232F3E);
-      color: rgba(255, 255, 255, 0.85);
-      padding: var(--spacing-lg, 1.5rem) var(--spacing-md, 1rem);
-      font-size: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      padding: var(--spacing-md) 0;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+      position: relative;
+      z-index: 10;
     }
 
     .footer-content {
-      max-width: 1200px;
-      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: var(--spacing-md, 1rem);
+      gap: var(--spacing-md);
+      padding-left: var(--spacing-lg);
+      padding-right: var(--spacing-lg);
     }
 
     .copyright {
       margin: 0;
-      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
     }
 
     .footer-links {
       display: flex;
-      gap: var(--spacing-lg, 1.5rem);
-      flex-wrap: wrap;
-      justify-content: center;
+      gap: var(--spacing-lg);
     }
 
     .footer-link {
-      color: rgba(255, 255, 255, 0.85);
+      color: var(--muted);
       text-decoration: none;
-      transition: color 0.2s ease;
+      font-size: 13px;
+      font-weight: 500;
+      transition: var(--transition-fast);
       position: relative;
+      z-index: 11;
     }
 
     .footer-link:hover {
-      color: var(--color-primary, #FF9900);
-    }
-
-    .footer-link:focus {
-      outline: 2px solid var(--color-primary, #FF9900);
-      outline-offset: 2px;
-      border-radius: 2px;
+      color: var(--text);
     }
 
     @media (min-width: 640px) {
       .footer-content {
         flex-direction: row;
         justify-content: space-between;
-      }
-
-      .copyright {
-        text-align: left;
-      }
-
-      .footer-links {
-        justify-content: flex-end;
       }
     }
   `]

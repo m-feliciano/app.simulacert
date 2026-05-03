@@ -1,21 +1,25 @@
-import {Component, signal} from '@angular/core';
+import {Component, signal, inject} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
 import {SupportModalComponent} from '../../shared/components/support-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
+import {LucideAngularModule, BarChart3, NotebookPen, TrendingUp, Newspaper, Settings, HeartHandshake, Menu, Palette, Type, Trophy} from 'lucide-angular';
+import {ThemeService} from '../theme/theme.service';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule],
   template: `
     <div class="app-layout" seoHead>
-      <header class="topbar">
+      <header class="topbar sc-glass">
         <div class="topbar-left">
           @if (isMobile()) {
-            <button class="sidebar-toggle" (click)="toggleSidebar()">☰</button>
+            <button class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Abrir menu">
+              <lucide-icon [img]="icons.menu" class="icon" aria-hidden="true"></lucide-icon>
+            </button>
           }
           <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="96" width="360">
         </div>
@@ -25,14 +29,17 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
             <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
             <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
             <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
+            <a routerLink="/achievements" routerLinkActive="active" class="nav-item">Conquistas</a>
 
             @if (authFacade.isAdmin()) {
               <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
             }
 
             <a routerLink="/news" routerLinkActive="false" class="nav-item muted">Novidades</a>
+
             <button class="nav-item support-btn" (click)="showSupportModal = true">
-              <span class="nav-icon">☕</span> Apoie
+              <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
+              Apoie
             </button>
           </nav>
         }
@@ -41,7 +48,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
           @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
             <button class="logout-btn" (click)="logout()">Sair</button>
           } @else {
-            <button class="login-btn" routerLink="/login">Entrar</button>
+            <button class="login-btn sc-btn sc-btn--primary" routerLink="/login">Entrar</button>
           }
         </div>
       </header>
@@ -52,30 +59,34 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
           <aside class="sidebar" [ngClass]="{'collapsed': sidebarCollapsed()}">
             <nav class="sidebar-nav">
               <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-                <span class="nav-icon">📊</span>
+                <lucide-icon [img]="icons.dashboard" class="nav-icon" aria-hidden="true"></lucide-icon>
                 <span class="nav-label">Dashboard</span>
               </a>
               <a routerLink="/exams" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-                <span class="nav-icon">📝</span>
+                <lucide-icon [img]="icons.exams" class="nav-icon" aria-hidden="true"></lucide-icon>
                 <span class="nav-label">Exames</span>
               </a>
               <a routerLink="/stats" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-                <span class="nav-icon">📈</span>
+                <lucide-icon [img]="icons.stats" class="nav-icon" aria-hidden="true"></lucide-icon>
                 <span class="nav-label">Estatísticas</span>
               </a>
+              <a routerLink="/achievements" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
+                <lucide-icon [img]="icons.achievements" class="nav-icon" aria-hidden="true"></lucide-icon>
+                <span class="nav-label">Conquistas</span>
+              </a>
               <a routerLink="/news" routerLinkActive="false" class="nav-item muted" (click)="onNavItemClick()">
-                <span class="nav-icon">📰</span>
+                <lucide-icon [img]="icons.news" class="nav-icon" aria-hidden="true"></lucide-icon>
                 <span class="nav-label">Novidades</span>
               </a>
 
               @if (authFacade.isAdmin()) {
                 <a routerLink="/admin" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
-                  <span class="nav-icon">⚙️</span>
+                  <lucide-icon [img]="icons.admin" class="nav-icon" aria-hidden="true"></lucide-icon>
                   <span class="nav-label">Console</span>
                 </a>
               }
               <button class="nav-item support-btn" (click)="showSupportModal = true">
-                <span class="nav-icon">☕</span>
+                <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
                 <span class="nav-label">Apoie</span>
               </button>
             </nav>
@@ -100,7 +111,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     .muted {
       opacity: 0.6;
       cursor: not-allowed !important;
-      color: #dddddd !important;
+      color: var(--muted) !important;
     }
 
     .muted:hover {
@@ -119,12 +130,12 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 60px;
-      background: var(--color-dark);
-      color: white;
+      height: 64px;
       padding: 0 var(--spacing-lg);
-      box-shadow: var(--shadow-sm);
+      border-bottom: 1px solid var(--border);
       z-index: 1000;
+      position: sticky;
+      top: 0;
     }
 
     .topbar-left {
@@ -136,16 +147,18 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     .sidebar-toggle {
       background: none;
       border: none;
-      color: white;
-      font-size: 24px;
       cursor: pointer;
       padding: var(--spacing-xs) var(--spacing-sm);
       border-radius: var(--border-radius-sm);
       transition: var(--transition-fast);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
     }
 
     .sidebar-toggle:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(17, 24, 39, 0.06);
     }
 
     .logo {
@@ -173,7 +186,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     }
 
     .logout-btn {
-      background: var(--color-primary);
+      background: var(--brand-primary);
       border: none;
       color: white;
       padding: 8px 16px;
@@ -193,21 +206,20 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       transform: translateY(0);
     }
 
-    .login-btn {
-      background: var(--color-primary-green);
-      border: none;
-      color: white;
-      padding: 8px 16px;
-      border-radius: var(--border-radius-sm);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: var(--transition-fast);
+
+    .topbar-nav .nav-item {
+      color: var(--text-2);
     }
 
-    .login-btn:hover {
-      background: var(--color-primary-green-dark);
-      transform: translateY(-1px);
+    .topbar-nav .nav-item:hover {
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
+    }
+
+    .topbar-nav .nav-item.active,
+    .topbar-nav .nav-item:focus-visible {
+      background: rgba(255, 153, 0, 0.14);
+      color: var(--brand-primary-600);
     }
 
     .login-btn:active {
@@ -222,13 +234,14 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 
     .sidebar {
       width: 250px;
-      background: var(--color-secondary);
-      color: white;
+      background: var(--surface);
+      color: var(--text);
+      border-right: 1px solid var(--border);
       transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.33s, width 0.45s cubic-bezier(0.4,0,0.2,1);
       opacity: 1;
       overflow-x: hidden;
       overflow-y: auto;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 12px 0 32px rgba(17, 24, 39, 0.10);
       z-index: 1000;
     }
 
@@ -250,7 +263,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
         left: 0;
         bottom: 0;
         transform: translateX(0);
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.3);
+        box-shadow: 12px 0 34px rgba(17, 24, 39, 0.14);
       }
 
       .sidebar.collapsed {
@@ -265,8 +278,8 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(0, 0, 0, 0.5);
-        backdrop-filter: blur(2px);
+        background: rgba(17, 24, 39, 0.42);
+        backdrop-filter: blur(4px);
         z-index: 999;
         animation: fadeIn 0.2s ease;
       }
@@ -294,7 +307,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       align-items: center;
       gap: var(--spacing-md);
       padding: var(--spacing-md) var(--spacing-lg);
-      color: white;
+      color: var(--text-2);
       text-decoration: none;
       transition: var(--transition-fast);
       position: relative;
@@ -313,11 +326,13 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     }
 
     .nav-item:hover {
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
     }
 
     .nav-item.active {
-      background: var(--color-primary);
+      background: rgba(255, 153, 0, 0.14);
+      color: var(--brand-primary-600);
     }
 
     .nav-item.active::before {
@@ -325,9 +340,9 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     }
 
     .nav-icon {
-      font-size: 20px;
-      min-width: 20px;
-      text-align: center;
+      width: 18px;
+      height: 18px;
+      min-width: 18px;
     }
 
     .sidebar.collapsed .nav-label {
@@ -338,7 +353,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      background: var(--color-bg-primary);
+      background: var(--bg);
     }
 
     .content-wrapper {
@@ -346,6 +361,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       display: flex;
       flex-direction: column;
       padding: var(--spacing-lg) var(--spacing-lg) 0;
+      position: relative;
     }
 
     .content-wrapper > app-footer {
@@ -362,11 +378,11 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     .support-btn {
       background: none;
       border: none;
-      color: white;
+      color: var(--text-2);
       font-size: 1rem;
       display: flex;
       align-items: center;
-      gap: var(--spacing-md);
+      gap: 10px;
       cursor: pointer;
       padding: var(--spacing-md) var(--spacing-lg);
       transition: background 0.2s;
@@ -374,8 +390,8 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       text-align: left;
     }
     .support-btn:hover {
-      background: rgba(255, 255, 255, 0.08);
-      color: var(--color-primary);
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
     }
 
     .topbar-nav {
@@ -387,7 +403,7 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     .topbar-nav .nav-item {
       background: none;
       border: none;
-      color: white;
+      color: var(--text-2);
       font-size: 1rem;
       padding: 8px 16px;
       border-radius: var(--border-radius-sm);
@@ -400,12 +416,12 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
     }
     .topbar-nav .nav-item.active,
     .topbar-nav .nav-item:focus-visible {
-      background: var(--color-primary);
-      color: #fff;
+      background: rgba(255, 153, 0, 0.14);
+      color: var(--brand-primary-600);
     }
     .topbar-nav .nav-item:hover {
-      background: rgba(255,255,255,0.08);
-      color: var(--color-primary);
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
     }
     @media (max-width: 768px) {
       .topbar-nav { display: none; }
@@ -413,9 +429,24 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
   `]
 })
 export class AppLayoutComponent {
+  readonly icons = {
+    menu: Menu,
+    dashboard: BarChart3,
+    exams: NotebookPen,
+    stats: TrendingUp,
+    achievements: Trophy,
+    news: Newspaper,
+    admin: Settings,
+    support: HeartHandshake,
+    palette: Palette,
+    type: Type
+  };
+
   sidebarCollapsed = signal(true);
   isMobile = signal(false);
   showSupportModal = false;
+
+  public themeService = inject(ThemeService);
 
   constructor(
     public authFacade: AuthFacade,

@@ -1,6 +1,6 @@
 import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {ActivatedRoute, RouterLink} from '@angular/router';
+import {ActivatedRoute, Router, RouterLink} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptResponse, AttemptStatus, ExamResponse} from '../../api/domain';
@@ -73,12 +73,10 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
           </div>
 
           <div class="actions">
-            <a routerLink="/exams" class="btn-secondary">Ver Exames</a>
-            <a routerLink="/stats" class="btn-primary">Ver Estatísticas</a>
-            <a routerLink="/dashboard" class="btn-secondary">Dashboard</a>
 
             @if (attempt()?.status == AttemptStatus.COMPLETED) {
-              <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-primary">Ver Questões</a>
+              <a [routerLink]="['/attempt', attempt()?.id, 'questions']" class="btn-secondary">Questões</a>
+              <a (click)="retakeExam()" class="btn-secondary">Refazer Exame</a>
             }
 
           </div>
@@ -99,18 +97,17 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 
     h1 {
       margin: 0 0 10px;
-      color: #232f3e;
-      font-size: 32px;
+      font-size: 2rem;
     }
 
     .exam-title {
       margin: 0;
-      color: #666;
-      font-size: 18px;
+      color: var(--muted);
+      font-size: 1.125rem;
     }
 
     .score-card {
-      background: white;
+      background: var(--surface);
       padding: 60px 40px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -128,13 +125,13 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
     }
 
     .score-label {
-      font-size: 18px;
-      color: #666;
+      font-size: 1.125rem;
+      color: var(--muted);
       margin-bottom: 20px;
     }
 
     .score-value {
-      font-size: 72px;
+      font-size: 4.5rem;
       font-weight: bold;
       margin-bottom: 20px;
     }
@@ -152,7 +149,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
     }
 
     .score-status {
-      font-size: 24px;
+      font-size: 1.5rem;
       font-weight: bold;
       margin-bottom: 10px;
     }
@@ -170,8 +167,8 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
     }
 
     .score-message {
-      font-size: 16px;
-      color: #666;
+      font-size: 1rem;
+      color: var(--muted);
     }
 
     .attempt-details {
@@ -182,7 +179,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
     }
 
     .detail-card {
-      background: white;
+      background: var(--surface);
       padding: 25px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -190,15 +187,15 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
     }
 
     .detail-label {
-      font-size: 14px;
-      color: #666;
+      font-size: 0.875rem;
+      color: var(--muted);
       margin-bottom: 10px;
     }
 
     .detail-value {
-      font-size: 18px;
+      font-size: 1.125rem;
       font-weight: bold;
-      color: #232f3e;
+      color: var(--text);
     }
 
     .actions {
@@ -208,7 +205,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
       flex-wrap: wrap;
     }
 
-    .btn-primary, .btn-secondary {
+    .btn-secondary {
       padding: 12px 24px;
       border-radius: 4px;
       text-decoration: none;
@@ -216,22 +213,13 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
       text-align: center;
     }
 
-    .btn-primary {
-      background: #ff9900;
-      color: white;
-    }
-
-    .btn-primary:hover {
-      background: #ec7211;
-    }
-
     .btn-secondary {
-      background: #37475a;
-      color: white;
+      background: var(--surface-2);
+      color: var(--text);
     }
 
     .btn-secondary:hover {
-      background: #232f3e;
+      background: var(--surface-3);
     }
   `]
 })
@@ -249,6 +237,7 @@ export class ResultComponent implements OnInit {
     private examsApi: ExamsApiService,
     private seoFactory: SeoFactoryService,
     private seoFacade: SeoFacadeService,
+    private router: Router,
   ) {
     this.seoFacade.set(this.seoFactory.website({
       title: 'Resultado do Exame | SimulaCert',
@@ -343,5 +332,22 @@ export class ResultComponent implements OnInit {
 
     const correctAnswers = Math.round((score! / 100) * questions);
     return `${correctAnswers} de ${questions} corretas`;
+  }
+
+  retakeExam() {
+      const attemptId = this.attempt()!.id;
+      if (!attemptId) {
+        this.error.set('ID da tentativa não encontrado. Não é possível retomar o exame.');
+        return;
+      }
+
+      this.attemptsApi.retakeAttempt(attemptId).subscribe({
+        next: (newAttempt) => {
+          this.router.navigate(['/attempt', newAttempt.id, 'run']);
+        },
+        error: () => {
+          this.error.set('Erro ao iniciar nova tentativa. Por favor, tente novamente.');
+        }
+      });
   }
 }

@@ -20,7 +20,6 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
       display: flex;
       flex-direction: column;
       min-height: 100vh;
-      background: linear-gradient(135deg, #232F3E 0%, #37475A 70%, #FF9900 100%);
       position: relative;
       overflow: hidden;
     }

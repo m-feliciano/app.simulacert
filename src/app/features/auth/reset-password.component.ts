@@ -95,7 +95,7 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
       display: block;
       margin-bottom: 5px;
       font-weight: 500;
-      color: #fff;
+      color: var(--text-2);
       font-size: 14px;
     }
 

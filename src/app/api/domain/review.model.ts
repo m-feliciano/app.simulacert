@@ -13,3 +13,10 @@ export interface CreateReviewRequest {
   comment?: string;
 }
 
+export interface ReviewSummary {
+  submitted: number;
+  detailed?: number;
+  useful?: number;
+  approved?: number;
+}
+

@@ -38,24 +38,18 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
           @for (q of filteredQuestions(); track q.questionId; let i = $index) {
             <div class="question-card" [class.correct]="isCorrect(q)" [class.incorrect]="!isCorrect(q)">
               <div class="question-header">
-                <span class="question-index">Questão {{ i + 1 }}</span>
-                <span class="result-chip" [class.correct-chip]="isCorrect(q)" [class.incorrect-chip]="!isCorrect(q)">
-                  {{ isCorrect(q) ? 'Acertou' : 'Errou' }}
-                </span>
+                <span class="question-index">Questão {{ q.questionCode }}</span>
               </div>
               <div class="question-text">{{ q.text }}</div>
 
               <ul class="options-list">
                 @for (opt of q.options; track opt.key) {
-                  <li [class.correct-option]="opt.isCorrect" [class.selected-option]="isSelectedOption(q, opt.key)">
+                  <li [class.correct-option]="opt.isCorrect"
+                      [class.selected-option]="isSelectedOption(q, opt.key)"
+                      [class.incorrect-option]="isSelectedOption(q, opt.key) && !opt.isCorrect">
+
                     <span class="option-key">{{ opt.key }})</span>
                     <span class="option-text">{{ opt.text }}</span>
-                    @if (opt.isCorrect) {
-                      <span class="correct-label">Correta</span>
-                    }
-                    @if (isSelectedOption(q, opt.key)) {
-                      <span class="selected-label">Sua resposta</span>
-                    }
                   </li>
                 }
               </ul>

@@ -80,7 +80,7 @@ import {FormatDatePipe} from '../pipes/format-date.pipe';
   `,
   styles: [`
     .review-card {
-      background: white;
+      background: var(--surface);
       padding: 30px;
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -89,26 +89,26 @@ import {FormatDatePipe} from '../pipes/format-date.pipe';
 
     .not-finalized {
       text-align: center;
-      color: #666;
+      color: var(--muted);
       padding: 20px;
     }
 
     .loading {
       text-align: center;
-      color: #666;
+      color: var(--muted);
       padding: 20px;
     }
 
     h3 {
       margin: 0 0 15px;
-      color: #232f3e;
-      font-size: 22px;
+      color: var(--text);
+      font-size: 1.375rem;
     }
 
     .review-description {
       margin: 0 0 20px;
-      color: #666;
-      font-size: 14px;
+      color: var(--muted);
+      font-size: 0.875rem;
     }
 
     .rating-section {
@@ -118,7 +118,7 @@ import {FormatDatePipe} from '../pipes/format-date.pipe';
     .rating-section label {
       display: block;
       margin-bottom: 10px;
-      color: #232f3e;
+      color: var(--text-2);
       font-weight: 500;
     }
 
@@ -129,19 +129,21 @@ import {FormatDatePipe} from '../pipes/format-date.pipe';
     .comment-section label {
       display: block;
       margin-bottom: 8px;
-      color: #232f3e;
+      color: var(--text-2);
       font-weight: 500;
     }
 
     textarea {
       width: 100%;
       padding: 12px;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
       font-family: inherit;
-      font-size: 14px;
+      font-size: 0.875rem;
       resize: vertical;
       box-sizing: border-box;
+      background: var(--surface-2);
+      color: var(--text);
     }
 
     textarea:focus {
@@ -150,35 +152,34 @@ import {FormatDatePipe} from '../pipes/format-date.pipe';
     }
 
     textarea:disabled {
-      background: #f5f5f5;
+      background: var(--surface);
       cursor: not-allowed;
     }
 
     .char-count {
       text-align: right;
-      font-size: 12px;
-      color: #666;
+      font-size: 0.75rem;
+      color: var(--muted);
       margin-top: 4px;
     }
 
     .submit-btn {
-      background: #ff9900;
-      color: white;
+      background: var(--surface-2);
+      color: var(--text);
       border: none;
       padding: 12px 24px;
-      border-radius: 4px;
-      font-size: 16px;
+      border-radius: var(--radius-sm);
+      font-size: 1rem;
       font-weight: 500;
       cursor: pointer;
       transition: background 0.2s;
     }
 
     .submit-btn:hover:not(:disabled) {
-      background: #ec7211;
+      background: var(--surface-3);
     }
 
     .submit-btn:disabled {
-      background: #ccc;
       cursor: not-allowed;
     }
 
@@ -207,15 +208,16 @@ import {FormatDatePipe} from '../pipes/format-date.pipe';
     .comment-readonly {
       margin: 20px 0;
       padding: 15px;
-      background: #f9f9f9;
-      border-radius: 4px;
-      color: #333;
+      background: var(--surface-2);
+      border-radius: var(--radius-md);
+      color: var(--text-2);
       font-style: italic;
+      font-size: 0.9375rem;
     }
 
     .review-date {
-      font-size: 12px;
-      color: #666;
+      font-size: 0.75rem;
+      color: var(--muted);
       margin-top: 15px;
     }
   `]

@@ -27,7 +27,7 @@ import {Component, EventEmitter, Output} from '@angular/core';
       z-index: 2000;
     }
     .support-modal-content {
-      background: #fff;
+      background: var(--surface);
       border-radius: 12px;
       box-shadow: 0 4px 24px rgba(0,0,0,0.18);
       padding: 2rem 2.5rem 2rem 2.5rem;
@@ -54,10 +54,9 @@ import {Component, EventEmitter, Output} from '@angular/core';
       margin-top: 0.5rem;
       margin-bottom: 1rem;
       font-size: 1.2rem;
-      color: #232f3e;
     }
     p {
-      color: #37475a;
+      color: var(--muted);
       margin-bottom: 1.5rem;
     }
     .support-btn {

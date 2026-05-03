@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, makeStateKey, OnInit, signal, TransferState} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
@@ -51,8 +51,14 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                 </div>
 
                 @if (exam.slug) {
-                  <img class="exam-icon" [ngSrc]="exam.slug + '.png'" [alt]="exam.title + ' ícone'" width="150"
-                       height="150" priority/>
+                  <img class="exam-icon"
+                       [ngSrc]="exam.slug + '.png'"
+                       [alt]="exam.title + ' ícone'"
+                       width="120"
+                       height="120"
+                       fetchpriority="high"
+                       decoding="sync"
+                       [priority]="$index < 2"/>
                 }
 
                 @if (exam.description) {
@@ -99,15 +105,15 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       .exam-icon {
         display: block;
         margin: 16px auto;
-        max-width: 100%;
-        height: auto;
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
       }
       .page-title {
         text-align: center;
         margin: 32px 0 24px 0;
         font-size: 2.2rem;
         font-weight: 700;
-        color: var(--color-dark);
       }
 
       .skeleton-loader {
@@ -120,29 +126,29 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       }
 
       .skeleton-card {
-        background: #fff;
+        background: var(--color-bg-secondary);
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-        width: 260px;
+        width: 300px;
         padding: 24px 18px 18px 18px;
         display: flex;
         flex-direction: column;
         gap: 16px;
-        min-height: 180px;
+        min-height: 380px;
         animation: skeleton-pulse 1.2s infinite ease-in-out;
       }
 
       .skeleton-title {
         height: 22px;
         width: 70%;
-        background: #ececec;
+        background: var(--color-bg-secondary);
         border-radius: 4px;
       }
 
       .skeleton-line {
         height: 14px;
         width: 100%;
-        background: #ececec;
+        background: var(--color-bg-secondary);
         border-radius: 4px;
       }
 
@@ -153,7 +159,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       .skeleton-btn {
         height: 32px;
         width: 90px;
-        background: #e0e0e0;
+        background: var(--color-bg-secondary);
         border-radius: 6px;
         margin-top: 12px;
       }
@@ -236,7 +242,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 
     h3 {
       margin: 0;
-      color: var(--color-dark);
+      color: var(--text);
       font-size: 18px;
       flex: 1;
     }
@@ -387,14 +393,16 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 })
 export class ExamsListComponent implements OnInit {
   exams = signal<ExamResponse[]>([]);
-  loading = signal(false);
+  loading = signal(true);
   error = signal('');
+  private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
   constructor(
     private examsApi: ExamsApiService,
     private router: Router,
     private seoFactory: SeoFactoryService,
     private seoFacade: SeoFacadeService,
+    private transferState: TransferState,
   ) {
   }
 
@@ -425,12 +433,10 @@ export class ExamsListComponent implements OnInit {
   }
 
   loadExams(): void {
-    this.loading.set(true);
-    this.error.set('');
-
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams.set([...exams, ...this.incomingExams()]);
+        this.transferState.set(this.examsKey, exams);
       },
       error: () => {
         this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
@@ -477,6 +483,15 @@ export class ExamsListComponent implements OnInit {
         slug: 'aws-certified-developer-dva-c02'
       },
       {
+        id: '4d3f6a89-4b2c-5e7d-9f8a-7c9d0e1f2a3b',
+        title: 'AWS Certified AI Practitioner',
+        description: 'Exame prático focado em inteligência artificial e machine learning na AWS, com questões alinhadas ao conteúdo da certificação AWS Certified AI Practitioner, ideal para quem busca se aprofundar nessa área.',
+        difficulty: 'EASY',
+        totalQuestions: 150,
+        incoming: true,
+        slug: 'aws-certified-ai-practitioner'
+      },
+      {
         id: '2a1bdc34-2d4f-4c3b-9f7e-5b1e6d9f7c9f',
         title: 'Microsoft Certified Azure Fundamentals (AZ-900)',
         description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
@@ -484,6 +499,15 @@ export class ExamsListComponent implements OnInit {
         totalQuestions: 174,
         incoming: true,
         slug: 'azure-certified-fundamentals-az-900'
+      },
+      {
+        id: '3c5e7a89-4b2c-5e7d-9f8a-7c9d0e1f2a3c',
+        title: 'Microsoft Certified Azure AI Fundamentals (AI-900)',
+        description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais de inteligência artificial e machine learning no Microsoft Azure, conforme os tópicos cobrados na certificação.',
+        difficulty: 'EASY',
+        totalQuestions: 120,
+        incoming: true,
+        slug: 'azure-certified-fundamentals-ai-900'
       }
     ];
   }

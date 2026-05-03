@@ -1,5 +1,5 @@
 .attempt-questions-result {
-  max-width: 900px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: 32px 0;
 }
@@ -7,8 +7,6 @@
 .btn-back {
   display: inline-block;
   margin-bottom: 24px;
-  background: #37475a;
-  color: #fff;
   padding: 8px 18px;
   border-radius: 4px;
   text-decoration: none;
@@ -16,17 +14,13 @@
   transition: background 0.2s;
 }
 
-.btn-back:hover {
-  background: #232f3e;
-}
-
 .question-card {
-  background: #fff;
+  background: var(--color-bg-secondary);
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   margin-bottom: 32px;
   padding: 24px;
-  border-left: 8px solid #ccc;
+  border-left: 4px solid #ccc;
   transition: border-color 0.2s;
 }
 
@@ -45,26 +39,9 @@
   margin-bottom: 12px;
 }
 
-.result-chip {
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 13px;
-  color: #fff;
-  font-weight: 500;
-}
-
-.correct-chip {
-  background: #4caf50;
-}
-
-.incorrect-chip {
-  background: #f44336;
-}
-
 .question-text {
-  font-size: 17px;
   margin-bottom: 12px;
-  color: #222;
+  color: var(--text);
 }
 
 .options-list {
@@ -78,8 +55,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 15px;
   border-bottom: 1px solid #eee;
+  color: var(--color-text-secondary);
 }
 
 .options-list li:last-child {
@@ -93,14 +70,18 @@
 }
 
 .correct-option {
-  color: #388e3c;
+  color: #388e3c !important;
   font-weight: 500;
 }
 
 .selected-option {
-  background: #e3f2fd;
   border-radius: 4px;
   padding: 2px 6px;
+}
+
+.incorrect-option {
+  color: #c62828 !important;
+  font-weight: 500;
 }
 
 .correct-label {
@@ -122,6 +103,7 @@
 }
 
 .filter-bar {
+  color: var(--text);
   display: flex;
   gap: 12px;
   margin: 0 0 32px 0;
@@ -129,12 +111,11 @@
 }
 
 .filter-bar button {
-  background: #f5f7fa;
-  color: #37475a;
+  background: transparent;
+  color: var(--text);
   border: 1px solid #dbe2ea;
   border-radius: 6px;
   padding: 7px 18px;
-  font-size: 15px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.18s, color 0.18s, border 0.18s;
@@ -143,30 +124,26 @@
 
 .filter-bar button.active,
 .filter-bar button:focus {
-  background: #1976d2;
-  color: #fff;
+  color: #1976d2;
   border-color: #1976d2;
+  outline: none;
 }
 
 /* Cores específicas para botões de filtro corretas/incorretas */
 .filter-bar button.active:nth-child(2) {
-  background: #4caf50;
-  color: #fff;
   border-color: #4caf50;
+  color: #4caf50;
 }
 .filter-bar button.active:nth-child(3) {
-  background: #f44336;
-  color: #fff;
   border-color: #f44336;
+  color: #f44336;
 }
 
 .filter-bar button:hover:not(.active):nth-child(2) {
-  background: #e8f5e9;
-  color: #388e3c;
   border-color: #4caf50;
+  color: #4caf50;
 }
 .filter-bar button:hover:not(.active):nth-child(3) {
-  background: #ffebee;
-  color: #c62828;
   border-color: #f44336;
+  color: #f44336;
 }
