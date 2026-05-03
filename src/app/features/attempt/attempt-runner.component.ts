@@ -1,4 +1,4 @@
-import {Component, DestroyRef, OnDestroy, OnInit, signal} from '@angular/core';
+import {Component, DestroyRef, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -7,11 +7,13 @@ import {AttemptQuestionResponse, AttemptResponse, ExamResponse} from '../../api/
 import {interval, Subscription} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
+import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 
 @Component({
   selector: 'app-attempt-runner',
   standalone: true,
-  imports: [CommonModule, FormatTimePipe],
+  imports: [CommonModule, FormatTimePipe, FormatDatePipe],
+  encapsulation: ViewEncapsulation.None,
   styleUrls: ['./attempt-runner.component.css'],
   template: `
     <div class="attempt-runner">
@@ -40,9 +42,6 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
             <h2>{{ exam()!.title }}</h2>
           </div>
           <div class="header-right">
-            <div class="timer" title="Tempo restante">
-              {{ timeRemaining() | formatTime }}
-            </div>
             <button class="btn-pause" (click)="pauseAttempt()" title="Pausar Exame">
               ⏸ Pausar
             </button>
@@ -52,8 +51,33 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
           </div>
         </div>
 
-        <div class="progress-bar">
+        <div class="progress-bar"
+             (mouseenter)="showPopover.set(true)"
+             (mouseleave)="popoverPinned() || showPopover.set(false)"
+             (click)="showPopover.set(!showPopover())">
+
           <div class="progress-fill" [style.width.%]="progress"></div>
+
+          @if (showPopover()) {
+            <div class="progress-popover" (click)="$event.stopPropagation()">
+              <button
+                class="pin-btn"
+                title="Fixar popover"
+                aria-label="Fixar popover"
+                [attr.aria-pressed]="popoverPinned() ? 'true' : 'false'"
+                (click)="togglePopoverPin($event)">
+                📌
+              </button>
+
+              <div class="popover-row"><strong>Início:</strong> {{ startedAtMs() | formatDate }}</div>
+              <div class="popover-row"><strong>Fim:</strong> {{ endsAtMs()| formatDate }}</div>
+              <div class="popover-row"><strong>Restante:</strong> {{ timeRemaining() | formatTime }}</div>
+              <div class="popover-row"><strong>Progresso:</strong> {{ progress | number:'1.0-0' }}%</div>
+              <div class="popover-row"><strong>Sync:</strong> <span [class.ok]="heartbeatOk()"
+                                                                    [class.err]="!heartbeatOk()">{{ heartbeatOk() ? 'OK' : 'Erro' }}</span> • {{ lastHeartbeatAt() | formatDate }}
+              </div>
+            </div>
+          }
         </div>
 
         <div class="question-navigation">
@@ -207,6 +231,9 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   answeredQuestions = signal(new Set<number>());
   currentQuestionIndex = signal(0);
   timeRemaining = signal(0);
+  startedAtMs = signal<number | null>(null);
+  showPopover = signal(false);
+  popoverPinned = signal(false);
   finishingAttempt = signal(false);
   showFinishModal = signal(false);
   showExitModal = signal(false);
@@ -214,8 +241,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   isPaused = signal(false);
   error = signal('');
   finishError = signal('');
+  endsAtMs = signal<number | null>(null);
 
-  private endsAtMs = signal<number | null>(null);
   private readonly TIMER_TICK_MS = 1000;
   private readonly HEARTBEAT_EVERY_MS = 10_000;
 
@@ -226,6 +253,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   attemptLoaded = signal(false);
   examLoaded = signal(false);
   questionsLoaded = signal(false);
+  heartbeatOk = signal(true);
+  lastHeartbeatAt = signal<number | null>(new Date().getTime());
 
   constructor(
     private route: ActivatedRoute,
@@ -240,8 +269,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   get progress(): number {
-    const questionsLength = this.questions().length;
-    return questionsLength > 0 ? (this.answeredQuestions().size / questionsLength) * 100 : 0;
+    const total = this.questions().length;
+    if (total === 0) return 0;
+
+    const answered = this.answeredQuestions().size;
+    return (answered / total) * 100;
   }
 
   ngOnInit(): void {
@@ -312,6 +344,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
         this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
           next: (timing) => {
+            this.heartbeatOk.set(true);
+            this.lastHeartbeatAt.set(Date.now());
             this.setTimingFromServer(timing);
           }
         });
@@ -396,6 +430,16 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   loadAttempt(): void {
     this.attemptsApi.getAttempt(this.attemptId).subscribe({
       next: (attempt) => {
+        if (attempt.startedAt && attempt.endsAt) {
+          const startedMs = Date.parse(attempt.startedAt);
+          const endsMs = Date.parse(attempt.endsAt);
+
+          if (!Number.isNaN(startedMs) && !Number.isNaN(endsMs) && endsMs > startedMs) {
+            this.startedAtMs.set(startedMs);
+            this.endsAtMs.set(endsMs);
+          }
+        }
+
         this.loadExam(attempt.examId);
         this.loadQuestions();
         this.startFirstHeartbeat(attempt);
@@ -565,6 +609,15 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  togglePopoverPin(event: Event) {
+    event?.stopPropagation();
+    const next = !this.popoverPinned();
+    this.popoverPinned.set(next);
+    if (next) {
+      this.showPopover.set(true);
+    }
   }
 
   goToQuestion(index: number): void {

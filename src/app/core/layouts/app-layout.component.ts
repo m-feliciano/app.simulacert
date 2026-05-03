@@ -14,7 +14,7 @@ import {ThemeService} from '../theme/theme.service';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule],
   template: `
     <div class="app-layout" seoHead>
-      <header class="topbar sc-glass">
+      <header class="topbar sc-glass sc-glass--acrylic">
         <div class="topbar-left">
           @if (isMobile()) {
             <button class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Abrir menu">
@@ -133,8 +133,10 @@ import {ThemeService} from '../theme/theme.service';
       height: 64px;
       padding: 0 var(--spacing-lg);
       border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      position: sticky;
+      z-index: 1100;
+      position: fixed;
+      left: 0;
+      right: 0;
       top: 0;
     }
 
@@ -259,7 +261,7 @@ import {ThemeService} from '../theme/theme.service';
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
-        top: 60px;
+        top: 64px;
         left: 0;
         bottom: 0;
         transform: translateX(0);
@@ -274,7 +276,7 @@ import {ThemeService} from '../theme/theme.service';
       .sidebar-overlay {
         display: block;
         position: fixed;
-        top: 60px;
+        top: 64px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -354,6 +356,7 @@ import {ThemeService} from '../theme/theme.service';
       overflow-y: auto;
       overflow-x: hidden;
       background: var(--bg);
+      padding-top: 64px;
     }
 
     .content-wrapper {
@@ -392,6 +395,10 @@ import {ThemeService} from '../theme/theme.service';
     .support-btn:hover {
       background: rgba(17, 24, 39, 0.06);
       color: var(--text);
+    }
+
+    .support-btn .nav-icon {
+      color: hotpink;
     }
 
     .topbar-nav {
