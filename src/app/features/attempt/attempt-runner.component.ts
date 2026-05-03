@@ -1,5 +1,5 @@
 import {Component, DestroyRef, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
@@ -8,11 +8,12 @@ import {interval, Subscription} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
 import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
+import {LucideAngularModule} from 'lucide-angular';
 
 @Component({
   selector: 'app-attempt-runner',
   standalone: true,
-  imports: [CommonModule, FormatTimePipe, FormatDatePipe],
+  imports: [CommonModule, FormatTimePipe, FormatDatePipe, LucideAngularModule, NgOptimizedImage],
   encapsulation: ViewEncapsulation.None,
   styleUrls: ['./attempt-runner.component.css'],
   template: `
@@ -39,8 +40,12 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
       } @else if (!loading() && !error() && exam() && questionsLoaded()) {
         <div class="attempt-header">
           <div class="header-left">
-            <h2>{{ exam()!.title }}</h2>
+           <div style="display: flex; align-items: center; gap: 24px;">
+             <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="40" width="180">
+             <h3>{{ exam()!.title }}</h3>
+           </div>
           </div>
+
           <div class="header-right">
             <button class="btn-pause" (click)="pauseAttempt()" title="Pausar Exame">
               ⏸ Pausar
@@ -59,7 +64,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
           <div class="progress-fill" [style.width.%]="progress"></div>
 
           @if (showPopover()) {
-            <div class="progress-popover" (click)="$event.stopPropagation()">
+            <div class="progress-popover sc-glass sc-glass--acrylic" (click)="$event.stopPropagation()">
               <button
                 class="pin-btn"
                 title="Fixar popover"

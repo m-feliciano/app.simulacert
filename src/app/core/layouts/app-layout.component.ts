@@ -21,7 +21,7 @@ import {ThemeService} from '../theme/theme.service';
               <lucide-icon [img]="icons.menu" class="icon" aria-hidden="true"></lucide-icon>
             </button>
           }
-          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="96" width="360">
+          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="30" width="180">
         </div>
 
         @if (!isMobile()) {
