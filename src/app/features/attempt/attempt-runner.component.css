@@ -268,7 +268,7 @@ h2 {
 }
 
 .question-number {
-  font-weight: bold;
+  font-weight: bold !important;
   color: var(--color-dark);
   /*font-size: 0.875rem;*/
 }

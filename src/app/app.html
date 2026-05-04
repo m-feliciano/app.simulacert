@@ -42,7 +42,9 @@
         <label>Idioma</label>
         <div class="options-grid">
           <button (click)="themeService.setLanguage('pt_br')" [class.active]="themeService.language() === 'pt_br'">Português</button>
-          <button (click)="themeService.setLanguage('en')" [class.active]="themeService.language() === 'en'">English</button>
+          <button [disabled]="true"
+            (click)="themeService.setLanguage('en')"
+                  [class.active]="themeService.language() === 'en'">English</button>
 <!--          <button (click)="themeService.setLanguage('es')" [class.active]="themeService.language() === 'es'">Español</button>-->
         </div>
       </div>

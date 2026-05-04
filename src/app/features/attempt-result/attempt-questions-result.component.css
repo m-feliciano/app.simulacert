@@ -39,6 +39,10 @@
   margin-bottom: 12px;
 }
 
+.question-index {
+  font-weight: bold;
+}
+
 .question-text {
   margin-bottom: 12px;
   color: var(--text);
