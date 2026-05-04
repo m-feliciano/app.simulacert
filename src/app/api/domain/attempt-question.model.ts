@@ -1,3 +1,5 @@
+import {ExplanationResponse} from './explanation.model';
+
 export interface AttemptQuestionOption {
   key: string;
   text: string;
@@ -12,5 +14,6 @@ export interface AttemptQuestionResponse {
   difficulty: string;
   options: AttemptQuestionOption[];
   selectedOption: string;
+  explanation?: ExplanationResponse;
 }
 

@@ -7,6 +7,7 @@ export interface ExplanationRequest {
 
 export interface ExplanationResponse {
   explanationId: string;
+  questionId: string;
   content: string;
   model: string;
   expiresAt: string;

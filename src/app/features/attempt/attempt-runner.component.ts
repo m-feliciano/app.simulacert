@@ -41,7 +41,7 @@ import {LucideAngularModule} from 'lucide-angular';
         <div class="attempt-header">
           <div class="header-left">
            <div style="display: flex; align-items: center; gap: 24px;">
-             <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="40" width="180">
+             <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120">
              <h3>{{ exam()!.title }}</h3>
            </div>
           </div>

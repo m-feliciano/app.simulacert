@@ -1,4 +1,5 @@
 import {QuestionOption} from './question.model';
+import {ExplanationResponse} from './explanation.model';
 
 export enum AttemptStatus {
   IN_PROGRESS = 'IN_PROGRESS',
@@ -44,6 +45,7 @@ export interface AttemptQuestionResponse {
   questionId: string;
   text: string;
   questionCode?: string;
+  explanation?: ExplanationResponse;
 }
 
 export interface SubmitAnswerRequest {

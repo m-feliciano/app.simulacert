@@ -1,8 +1,8 @@
 import {Component, Input, signal, ViewEncapsulation} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ExplanationsApiService } from '../../api/explanations.service';
-import { ExplanationResponse } from '../../api/domain';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ExplanationsApiService} from '../../api/explanations.service';
+import {ExplanationResponse} from '../../api/domain';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
 
@@ -28,7 +28,7 @@ import DOMPurify from 'dompurify';
         </div>
       }
 
-      @if (showExplanation() && explanation()) {
+      @if (showExplanation()) {
         <div class="explanation-card">
           <div class="explanation-header">
             <h4>Explicação da questão</h4>
@@ -357,15 +357,24 @@ export class QuestionExplanationComponent {
   @Input() attemptId!: string;
   @Input() certification!: string;
 
+  @Input() set explanation(val: ExplanationResponse | undefined) {
+    if (!val) return;
+
+    this._explanation.set(val);
+    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(val.content));
+    this.showExplanation.set(true);
+  }
+
   showExplanation = signal(false);
   loading = signal(false);
   error = signal<string | null>(null);
-  explanation = signal<ExplanationResponse | null>(null);
 
   safeHtml: SafeHtml = signal(null as SafeHtml | null);
   rating = signal(0);
   submittingFeedback = signal(false);
   feedbackSubmitted = signal(false);
+
+  private _explanation = signal<ExplanationResponse | null | undefined>(null);
 
   comment = '';
 
@@ -386,7 +395,7 @@ export class QuestionExplanationComponent {
 
     this.explanationsApi.generateExplanation(this.questionId, request).subscribe({
       next: (response) => {
-        this.explanation.set(response);
+        this._explanation.set(response);
         this.showExplanation.set(true);
         this.loading.set(false);
         this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(response.content));
@@ -410,7 +419,7 @@ export class QuestionExplanationComponent {
   }
 
   submitFeedback(): void {
-    const explanationId = this.explanation()?.explanationId;
+    const explanationId = this._explanation()?.explanationId;
     if (!explanationId || this.rating() === 0) return;
 
     this.submittingFeedback.set(true);
@@ -433,7 +442,7 @@ export class QuestionExplanationComponent {
   }
 
   modelName() {
-    return this.explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
+    return this._explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
   }
 }
 

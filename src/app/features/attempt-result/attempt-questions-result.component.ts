@@ -1,13 +1,14 @@
-import { Component, OnInit, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { AttemptQuestionsApiService } from '../../api/attempt-questions.service';
-import { AttemptsApiService } from '../../api/attempts.service';
-import { ExamsApiService } from '../../api/exams.service';
-import { AttemptQuestionResponse } from '../../api/domain/attempt-question.model';
-import { AttemptResponse, ExamResponse } from '../../api/domain';
-import { QuestionExplanationComponent } from '../../shared/components/question-explanation.component';
+import {Component, effect, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {forkJoin} from 'rxjs';
+import {AttemptQuestionsApiService} from '../../api/attempt-questions.service';
+import {AttemptsApiService} from '../../api/attempts.service';
+import {ExamsApiService} from '../../api/exams.service';
+import {AttemptQuestionResponse} from '../../api/domain/attempt-question.model';
+import {AttemptResponse, ExamResponse, ExplanationResponse} from '../../api/domain';
+import {QuestionExplanationComponent} from '../../shared/components/question-explanation.component';
+import {QuestionsApiService} from '../../api/questions.service';
 
 @Component({
   selector: 'app-attempt-questions-result',
@@ -25,9 +26,13 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
       </div>
 
       <div class="filter-bar">
-        <button [class.active]="filter() === 'all'" (click)="setFilter('all')">{{ questions().length}} todas</button>
-        <button [class.active]="filter() === 'correct'" (click)="setFilter('correct')">{{ filterBy('correct').length }} corretas</button>
-        <button [class.active]="filter() === 'incorrect'" (click)="setFilter('incorrect')">{{ filterBy('incorrect').length }} incorretas</button>
+        <button [class.active]="filter() === 'all'" (click)="setFilter('all')">{{ questions().length }} todas</button>
+        <button [class.active]="filter() === 'correct'" (click)="setFilter('correct')">{{ filterBy('correct').length }}
+          corretas
+        </button>
+        <button [class.active]="filter() === 'incorrect'"
+                (click)="setFilter('incorrect')">{{ filterBy('incorrect').length }} incorretas
+        </button>
       </div>
 
       @if (loading()) {
@@ -57,6 +62,7 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
               @if (attempt() && exam()) {
                 <app-question-explanation
                   [questionId]="q.questionId"
+                  [explanation]="q.explanation"
                   [attemptId]="attempt()!.id"
                   [certification]="exam()!.title">
                 </app-question-explanation>
@@ -83,7 +89,8 @@ export class AttemptQuestionsResultComponent implements OnInit {
     protected route: ActivatedRoute,
     private api: AttemptQuestionsApiService,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService
+    private examsApi: ExamsApiService,
+    private questionService: QuestionsApiService
   ) {
     effect(() => {
       this.updateFilteredQuestions();
@@ -110,6 +117,24 @@ export class AttemptQuestionsResultComponent implements OnInit {
               this.loading.set(false);
             }
           });
+
+
+          this.questionService.getAllExplanations({
+            questionIds: questions.map(q => q.questionId)
+          }).subscribe({
+            next: (responses: ExplanationResponse[]) => {
+              responses?.forEach(exp => {
+                this.questions.update(qs => {
+                  const q = qs.find(q => q.questionId === exp.questionId);
+                  if (q) q.explanation = exp;
+                  return qs;
+                });
+              });
+            },
+            error: () => {
+            }
+          });
+
         },
         error: () => {
           this.loading.set(false);
