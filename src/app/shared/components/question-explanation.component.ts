@@ -1,10 +1,11 @@
-import {Component, Input, signal, ViewEncapsulation} from '@angular/core';
+import {Component, Inject, Input, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {ExplanationsApiService} from '../../api/explanations.service';
 import {ExplanationResponse} from '../../api/domain';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
+import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
 
 @Component({
   selector: 'app-question-explanation',
@@ -380,6 +381,7 @@ export class QuestionExplanationComponent {
 
   constructor(private explanationsApi: ExplanationsApiService,
               private sanitizer: DomSanitizer,
+              @Inject(LOCAL_STORAGE) private storage: Storage | null,
   ) {}
 
   requestExplanation(): void {
@@ -389,7 +391,7 @@ export class QuestionExplanationComponent {
     const request = {
       questionId: this.questionId,
       examAttemptId: this.attemptId,
-      language: 'pt-br',
+      language: this.storage?.getItem('language') || 'pt_br',
       certification: this.certification
     };
 

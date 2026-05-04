@@ -1,4 +1,4 @@
-import {Injectable, signal, effect, inject, Inject, PLATFORM_ID} from '@angular/core';
+import {effect, Inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
 
@@ -17,6 +17,11 @@ export class ThemeService {
   themeMode = signal<ThemeMode>('dark');
   fontSize = signal<FontSize>('medium');
   fontFamily = signal<FontFamily>('serif');
+
+  alertChangeLanguage = signal<Record<string, string>>({
+      'pt_br': 'Você está prestes a mudar o idioma para Português.\n\n A tela será recarregada para aplicar as mudanças. Deseja continuar?',
+      'en': 'You are about to change the language to English.\n\n The screen will reload to apply the changes. Do you want to continue?'
+  });
 
   private readonly isBrowser: boolean;
 
@@ -45,6 +50,7 @@ export class ThemeService {
         this.storage?.setItem(this.THEME_KEY, mode);
         this.storage?.setItem(this.FONT_SIZE_KEY, size);
         this.storage?.setItem(this.FONT_FAMILY_KEY, family);
+        this.storage?.setItem('language', this.language());
       }
     });
   }
@@ -131,5 +137,21 @@ export class ThemeService {
     if (!this.isBrowser || !this.storage) return 'serif';
 
     return (this.storage.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
+  }
+
+  setLanguage(lang: string) {
+    if (!this.isBrowser || !this.storage) return;
+
+    if (confirm(this.alertChangeLanguage()[this.language()])) {
+      this.storage.setItem('language', lang);
+
+      setTimeout(() => window.location.reload(), 200);
+    }
+  }
+
+  language() {
+    if (!this.isBrowser || !this.storage) return 'pt_br';
+
+    return this.storage.getItem('language') || 'pt_br';
   }
 }

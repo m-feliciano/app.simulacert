@@ -90,8 +90,7 @@ export class AttemptQuestionsResultComponent implements OnInit {
     protected route: ActivatedRoute,
     private api: AttemptQuestionsApiService,
     private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService,
-    private questionService: QuestionsApiService
+    private examsApi: ExamsApiService
   ) {
     effect(() => {
       this.updateFilteredQuestions();
@@ -118,29 +117,6 @@ export class AttemptQuestionsResultComponent implements OnInit {
               this.loading.set(false);
             }
           });
-
-          const incorrectQuestionIds = questions
-            .filter(q => !this.isCorrect(q))
-            .map(q => q.questionId);
-
-          if (incorrectQuestionIds.length === 0) {
-            return;
-          }
-
-          this.questionService.getAllExplanations({questionIds: incorrectQuestionIds}).subscribe({
-            next: (responses: ExplanationResponse[]) => {
-
-              const values = responses?.reduce((acc, exp) => {
-                acc[exp.questionId] = exp;
-                return acc;
-              }, {} as Record<string, ExplanationResponse>);
-
-              this.explanations.set(values);
-            },
-            error: () => {
-            }
-          });
-
         },
         error: () => {
           this.loading.set(false);
