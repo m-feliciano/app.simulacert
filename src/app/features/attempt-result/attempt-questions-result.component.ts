@@ -119,10 +119,15 @@ export class AttemptQuestionsResultComponent implements OnInit {
             }
           });
 
+          const incorrectQuestionIds = questions
+            .filter(q => !this.isCorrect(q))
+            .map(q => q.questionId);
 
-          this.questionService.getAllExplanations({
-            questionIds: questions.map(q => q.questionId)
-          }).subscribe({
+          if (incorrectQuestionIds.length === 0) {
+            return;
+          }
+
+          this.questionService.getAllExplanations({questionIds: incorrectQuestionIds}).subscribe({
             next: (responses: ExplanationResponse[]) => {
 
               const values = responses?.reduce((acc, exp) => {
