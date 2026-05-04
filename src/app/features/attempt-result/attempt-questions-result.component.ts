@@ -62,7 +62,7 @@ import {QuestionsApiService} from '../../api/questions.service';
               @if (attempt() && exam()) {
                 <app-question-explanation
                   [questionId]="q.questionId"
-                  [explanation]="q.explanation"
+                  [explanation]="explanations()[q.questionId]"
                   [attemptId]="attempt()!.id"
                   [certification]="exam()!.title">
                 </app-question-explanation>
@@ -84,6 +84,7 @@ export class AttemptQuestionsResultComponent implements OnInit {
 
   filter = signal<'all' | 'correct' | 'incorrect'>('all');
   filteredQuestions = signal<AttemptQuestionResponse[]>([]);
+  explanations = signal<Record<string, ExplanationResponse>>({});
 
   constructor(
     protected route: ActivatedRoute,
@@ -123,13 +124,13 @@ export class AttemptQuestionsResultComponent implements OnInit {
             questionIds: questions.map(q => q.questionId)
           }).subscribe({
             next: (responses: ExplanationResponse[]) => {
-              responses?.forEach(exp => {
-                this.questions.update(qs => {
-                  const q = qs.find(q => q.questionId === exp.questionId);
-                  if (q) q.explanation = exp;
-                  return qs;
-                });
-              });
+
+              const values = responses?.reduce((acc, exp) => {
+                acc[exp.questionId] = exp;
+                return acc;
+              }, {} as Record<string, ExplanationResponse>);
+
+              this.explanations.set(values);
             },
             error: () => {
             }
