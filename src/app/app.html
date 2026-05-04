@@ -41,11 +41,12 @@
       <div class="dropdown-section">
         <label>Idioma</label>
         <div class="options-grid">
-          <button (click)="themeService.setLanguage('pt_br')" [class.active]="themeService.language() === 'pt_br'">Português</button>
-          <button [disabled]="true"
-            (click)="themeService.setLanguage('en')"
+          <button disabled
+                  style="cursor: not-allowed; opacity: 0.5;"
+                  [class.active]="themeService.language() === 'pt_br'">Português</button>
+          <button disabled
+                  style="cursor: not-allowed; opacity: 0.5;"
                   [class.active]="themeService.language() === 'en'">English</button>
-<!--          <button (click)="themeService.setLanguage('es')" [class.active]="themeService.language() === 'es'">Español</button>-->
         </div>
       </div>
     </div>

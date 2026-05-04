@@ -142,9 +142,6 @@ export class ThemeService {
   setLanguage(lang: string) {
     if (!this.isBrowser || !this.storage) return;
 
-    // TODO: Finish internationalization
-    if (lang === 'en') return;
-
     if (confirm(this.alertChangeLanguage()[this.language()])) {
       this.storage.setItem('language', lang);
 
