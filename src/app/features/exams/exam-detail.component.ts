@@ -78,7 +78,7 @@ import {FormsModule} from '@angular/forms';
                   </div>
                   <div>
                     <h3>Modo Prática</h3>
-                    <p class="mode-caption">Em breve</p>
+                    <p class="mode-caption">Feedback imediato, ideal para aprendizado</p>
                     <ul class="mode-features">
                       <li>Veja explicações durante o simulado</li>
                       <li>Sem limite de tempo</li>
