@@ -1,11 +1,9 @@
 import {Routes, UrlMatchResult, UrlSegment} from '@angular/router';
 import {PublicLayoutComponent} from './core/layouts/public-layout.component';
 import {AppLayoutComponent} from './core/layouts/app-layout.component';
-import {DashboardComponent} from './features/dashboard/dashboard.component';
 import {ExamsListComponent} from './features/exams/exams-list.component';
 import {AttemptRunnerComponent} from './features/attempt/attempt-runner.component';
 import {authGuard} from './core/guards/auth.guard';
-import {adminGuard} from './core/guards/admin.guard';
 import {ExamsSlugResolver} from './features/exams/exams-slug.resolver';
 
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

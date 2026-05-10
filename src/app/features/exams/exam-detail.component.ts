@@ -70,11 +70,9 @@ import {FormsModule} from '@angular/forms';
 
                 <div type="button"
                      class="mode-card"
-                     style="cursor: not-allowed"
+                     (click)="selectMode('practice')"
                      [class.selected]="selectedMode() === 'practice'"
-                     disabled
-                     aria-disabled="true"
-                     aria-label="Modo prática (em breve)">
+                     aria-label="Modo prática">
                   <div class="mode-icon" aria-hidden="true">
                     <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
                   </div>
@@ -247,7 +245,7 @@ export class ExamDetailComponent implements OnInit {
   };
 
   questionCountOptions = [10, 20, 30, 40, 50, 65];
-  private lastSelectedQuestionCountOption = signal<number | 'custom'>(20);
+  private readonly lastSelectedQuestionCountOption = signal<number | 'custom'>(20);
 
   customQuestionCount = signal<number>(20);
   exam = signal<ExamResponse | null>(null);
@@ -271,14 +269,14 @@ export class ExamDetailComponent implements OnInit {
   });
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private examsApi: ExamsApiService,
-    private attemptsApi: AttemptsApiService,
-    private authFacade: AuthFacade,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
-    private setupPrefs: ExamAttemptSetupPreferencesService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly examsApi: ExamsApiService,
+    private readonly attemptsApi: AttemptsApiService,
+    private readonly authFacade: AuthFacade,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
+    private readonly setupPrefs: ExamAttemptSetupPreferencesService,
   ) {
   }
 
@@ -353,7 +351,7 @@ export class ExamDetailComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const resolvedExam = this.route.snapshot.data['exam'] as ExamResponse | null | undefined;
+    const resolvedExam = this.route.snapshot.data['exam'] as ExamResponse | undefined;
     const slug = this.route.snapshot.paramMap.get('slug');
 
     if (resolvedExam) {
@@ -433,6 +431,7 @@ export class ExamDetailComponent implements OnInit {
       limitSeconds,
       durationMinutes: setup.durationMinutes,
       difficulty: setup.difficulty,
+      mode: this.selectedMode(),
     }).subscribe({
       next: (response) => {
         const location = response.headers.get('Location') || response.headers.get('location');

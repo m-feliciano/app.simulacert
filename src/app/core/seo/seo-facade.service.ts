@@ -6,7 +6,7 @@ import {SeoMeta} from './seo.model';
 export class SeoFacadeService {
   private readonly state = signal<SeoMeta | null>(null);
 
-  constructor(private seoService: SeoService) {
+  constructor(private readonly seoService: SeoService) {
   }
 
   set(meta: SeoMeta): void {

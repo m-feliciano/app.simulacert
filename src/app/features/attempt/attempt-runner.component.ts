@@ -1,4 +1,13 @@
-import {Component, DestroyRef, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnDestroy,
+  OnInit,
+  Signal,
+  signal,
+  ViewEncapsulation,
+  WritableSignal
+} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -9,11 +18,12 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
 import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 import {LucideAngularModule} from 'lucide-angular';
+import {QuestionExplanationComponent} from '../../shared/components/question-explanation.component';
 
 @Component({
   selector: 'app-attempt-runner',
   standalone: true,
-  imports: [CommonModule, FormatTimePipe, FormatDatePipe, LucideAngularModule, NgOptimizedImage],
+  imports: [CommonModule, FormatTimePipe, FormatDatePipe, LucideAngularModule, NgOptimizedImage, QuestionExplanationComponent],
   encapsulation: ViewEncapsulation.None,
   styleUrls: ['./attempt-runner.component.css'],
   template: `
@@ -40,10 +50,10 @@ import {LucideAngularModule} from 'lucide-angular';
       } @else if (!loading() && !error() && exam() && questionsLoaded()) {
         <div class="attempt-header">
           <div class="header-left">
-           <div style="display: flex; align-items: center; gap: 24px;">
-             <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120">
-             <h3>{{ exam()!.title }}</h3>
-           </div>
+            <div style="display: flex; align-items: center; gap: 24px;">
+              <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120">
+              <h3>{{ exam()!.title }}</h3>
+            </div>
           </div>
 
           <div class="header-right">
@@ -79,7 +89,8 @@ import {LucideAngularModule} from 'lucide-angular';
               <div class="popover-row"><strong>Restante:</strong> {{ timeRemaining() | formatTime }}</div>
               <div class="popover-row"><strong>Progresso:</strong> {{ progress | number:'1.0-0' }}%</div>
               <div class="popover-row"><strong>Sync:</strong> <span [class.ok]="heartbeatOk()"
-                                                                    [class.err]="!heartbeatOk()">{{ heartbeatOk() ? 'OK' : 'Erro' }}</span> • {{ lastHeartbeatAt() | formatDate }}
+                                                                    [class.err]="!heartbeatOk()">{{ heartbeatOk() ? 'OK' : 'Erro' }}</span>
+                • {{ lastHeartbeatAt() | formatDate }}
               </div>
             </div>
           }
@@ -159,6 +170,16 @@ import {LucideAngularModule} from 'lucide-angular';
                 </button>
               }
             </div>
+
+            @if (attemptId && attemptMode() == 'practice') {
+              <app-question-explanation
+                [questionId]="currentQuestion.questionId"
+                [explanation]="currentQuestion.explanation"
+                [showExplanation]="showExplanation"
+                [attemptId]="attemptId"
+                [certification]="exam()!.title">
+              </app-question-explanation>
+            }
           </div>
         }
       }
@@ -247,6 +268,15 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   error = signal('');
   finishError = signal('');
   endsAtMs = signal<number | null>(null);
+  attemptMode = signal<'exam' | 'practice'>('exam');
+
+  loading = signal(true);
+  attemptLoaded = signal(false);
+  examLoaded = signal(false);
+  questionsLoaded = signal(false);
+  heartbeatOk = signal(true);
+  lastHeartbeatAt = signal<number | null>(Date.now());
+  showExplanation = signal(false);
 
   private readonly TIMER_TICK_MS = 1000;
   private readonly HEARTBEAT_EVERY_MS = 10_000;
@@ -254,19 +284,12 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   private heartbeatSubscription?: Subscription;
   private timerSubscription?: Subscription;
 
-  loading = signal(true);
-  attemptLoaded = signal(false);
-  examLoaded = signal(false);
-  questionsLoaded = signal(false);
-  heartbeatOk = signal(true);
-  lastHeartbeatAt = signal<number | null>(new Date().getTime());
-
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService,
-    private destroyRef: DestroyRef
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly attemptsApi: AttemptsApiService,
+    private readonly examsApi: ExamsApiService,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   get currentQuestion(): AttemptQuestionResponse | null {
@@ -443,6 +466,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
             this.startedAtMs.set(startedMs);
             this.endsAtMs.set(endsMs);
           }
+
+          this.attemptMode.set(attempt.mode || 'exam');
         }
 
         this.loadExam(attempt.examId);
@@ -628,12 +653,14 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   goToQuestion(index: number): void {
     this.submitCurrentAnswer();
     this.currentQuestionIndex.set(index);
+    this.showExplanation.set(false);
   }
 
   previousQuestion(): void {
     if (this.currentQuestionIndex() > 0) {
       this.submitCurrentAnswer();
       this.currentQuestionIndex.update(i => i - 1);
+      this.showExplanation.set(false);
     }
   }
 
@@ -641,6 +668,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     if (this.currentQuestionIndex() < this.questions().length - 1) {
       this.submitCurrentAnswer();
       this.currentQuestionIndex.update(i => i + 1);
+      this.showExplanation.set(false);
     }
   }
 
@@ -703,10 +731,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), -1);
     const nextPendingIndex = this.questions().findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
 
-    if (nextPendingIndex !== -1) {
-      this.currentQuestionIndex.set(nextPendingIndex);
-    } else {
+    if (nextPendingIndex === -1) {
       this.currentQuestionIndex.set(this.questions().length - 1);
+    } else {
+      this.currentQuestionIndex.set(nextPendingIndex);
     }
   }
 

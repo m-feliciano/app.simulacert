@@ -1,6 +1,5 @@
 export interface ExplanationRequest {
   examAttemptId: string;
-  language: string;
   certification: string;
   questionId: string;
 }

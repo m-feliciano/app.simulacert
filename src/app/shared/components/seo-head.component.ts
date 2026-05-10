@@ -7,7 +7,7 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 })
 export class SeoHeadDirective implements OnInit, OnChanges, OnDestroy {
   constructor(
-    private seoFacade: SeoFacadeService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
   }
 

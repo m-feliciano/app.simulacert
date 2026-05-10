@@ -244,6 +244,7 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
       font-family: inherit;
       font-size: 14px;
       resize: vertical;
+      background: var(--surface-2);
       transition: var(--transition-fast);
     }
 
@@ -357,6 +358,7 @@ export class QuestionExplanationComponent {
   @Input() questionId!: string;
   @Input() attemptId!: string;
   @Input() certification!: string;
+  @Input() showExplanation = signal(false);
 
   @Input() set explanation(val: ExplanationResponse | undefined) {
     if (!val) return;
@@ -366,7 +368,6 @@ export class QuestionExplanationComponent {
     this.showExplanation.set(true);
   }
 
-  showExplanation = signal(false);
   loading = signal(false);
   error = signal<string | null>(null);
 
@@ -375,13 +376,13 @@ export class QuestionExplanationComponent {
   submittingFeedback = signal(false);
   feedbackSubmitted = signal(false);
 
-  private _explanation = signal<ExplanationResponse | null | undefined>(null);
+  private readonly _explanation = signal<ExplanationResponse | null | undefined>(null);
 
   comment = '';
 
-  constructor(private explanationsApi: ExplanationsApiService,
-              private sanitizer: DomSanitizer,
-              @Inject(LOCAL_STORAGE) private storage: Storage | null,
+  constructor(private readonly explanationsApi: ExplanationsApiService,
+              private readonly sanitizer: DomSanitizer,
+              @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
   ) {}
 
   requestExplanation(): void {
@@ -391,7 +392,6 @@ export class QuestionExplanationComponent {
     const request = {
       questionId: this.questionId,
       examAttemptId: this.attemptId,
-      language: this.storage?.getItem('language') || 'pt_br',
       certification: this.certification
     };
 
@@ -428,7 +428,7 @@ export class QuestionExplanationComponent {
 
     const feedback = {
       rating: this.rating(),
-      comment: this.comment.trim() || undefined
+      comment: this.comment.trim()
     };
 
     this.explanationsApi.submitFeedback(explanationId, feedback).subscribe({

@@ -20,6 +20,7 @@ export interface AttemptResponse {
   startedAt: string;
   status: AttemptStatus;
   userId: string;
+  mode?: 'exam' | 'practice';
 }
 
 export interface AttemptTimingResponse {
@@ -36,6 +37,7 @@ export interface StartAttemptRequest {
   limitSeconds: number;
   durationMinutes?: number;
   difficulty?: 'any' | 'easy' | 'medium' | 'hard';
+  mode?: string;
 }
 
 export interface AttemptQuestionResponse {

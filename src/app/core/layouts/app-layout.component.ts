@@ -1,11 +1,23 @@
-import {Component, signal, inject} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
 import {SupportModalComponent} from '../../shared/components/support-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
-import {LucideAngularModule, BarChart3, NotebookPen, TrendingUp, Newspaper, Settings, HeartHandshake, Menu, Palette, Type, Trophy} from 'lucide-angular';
+import {
+  BarChart3,
+  HeartHandshake,
+  LucideAngularModule,
+  Menu,
+  Newspaper,
+  NotebookPen,
+  Palette,
+  Settings,
+  TrendingUp,
+  Trophy,
+  Type
+} from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
 
 @Component({
@@ -456,8 +468,8 @@ export class AppLayoutComponent {
   public themeService = inject(ThemeService);
 
   constructor(
-    public authFacade: AuthFacade,
-    private router: Router
+    protected readonly authFacade: AuthFacade,
+    private readonly router: Router
   ) {
     this.checkIfMobile();
   }
@@ -479,7 +491,7 @@ export class AppLayoutComponent {
   }
 
   private checkIfMobile(): void {
-    if (typeof window === 'undefined') {
+    if (globalThis.window === undefined) {
       this.isMobile.set(false);
       return;
     }

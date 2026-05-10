@@ -17,7 +17,7 @@ export class ScoreStatusComponent {
   @Input() score: number = 0;
 
   get statusClass(): string {
-    if (this.score >= 72) return 'passed';
+    if (this.score >= 70) return 'passed';
     if (this.score >= 50) return 'warning';
     return 'failed';
   }
