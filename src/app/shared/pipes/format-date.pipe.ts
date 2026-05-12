@@ -6,9 +6,9 @@ import {Pipe, PipeTransform} from '@angular/core';
 })
 export class FormatDatePipe implements PipeTransform {
 
-  transform(value?: string): string {
+  transform(value: string | number | null): string {
     if (!value) return '';
-    return this.formatDate(value);
+    return this.formatDate(new Date(value).toISOString());
   }
 
   private formatDate(dateString: string): string {

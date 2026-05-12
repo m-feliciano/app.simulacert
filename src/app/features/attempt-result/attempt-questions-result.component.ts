@@ -1,13 +1,14 @@
-import { Component, OnInit, signal, effect } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { AttemptQuestionsApiService } from '../../api/attempt-questions.service';
-import { AttemptsApiService } from '../../api/attempts.service';
-import { ExamsApiService } from '../../api/exams.service';
-import { AttemptQuestionResponse } from '../../api/domain/attempt-question.model';
-import { AttemptResponse, ExamResponse } from '../../api/domain';
-import { QuestionExplanationComponent } from '../../shared/components/question-explanation.component';
+import {Component, effect, OnInit, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import {forkJoin} from 'rxjs';
+import {AttemptQuestionsApiService} from '../../api/attempt-questions.service';
+import {AttemptsApiService} from '../../api/attempts.service';
+import {ExamsApiService} from '../../api/exams.service';
+import {AttemptQuestionResponse} from '../../api/domain/attempt-question.model';
+import {AttemptResponse, ExamResponse, ExplanationResponse} from '../../api/domain';
+import {QuestionExplanationComponent} from '../../shared/components/question-explanation.component';
+import {QuestionsApiService} from '../../api/questions.service';
 
 @Component({
   selector: 'app-attempt-questions-result',
@@ -25,9 +26,13 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
       </div>
 
       <div class="filter-bar">
-        <button [class.active]="filter() === 'all'" (click)="setFilter('all')">{{ questions().length}} todas</button>
-        <button [class.active]="filter() === 'correct'" (click)="setFilter('correct')">{{ filterBy('correct').length }} corretas</button>
-        <button [class.active]="filter() === 'incorrect'" (click)="setFilter('incorrect')">{{ filterBy('incorrect').length }} incorretas</button>
+        <button [class.active]="filter() === 'all'" (click)="setFilter('all')">{{ questions().length }} todas</button>
+        <button [class.active]="filter() === 'correct'" (click)="setFilter('correct')">{{ filterBy('correct').length }}
+          corretas
+        </button>
+        <button [class.active]="filter() === 'incorrect'"
+                (click)="setFilter('incorrect')">{{ filterBy('incorrect').length }} incorretas
+        </button>
       </div>
 
       @if (loading()) {
@@ -57,6 +62,7 @@ import { QuestionExplanationComponent } from '../../shared/components/question-e
               @if (attempt() && exam()) {
                 <app-question-explanation
                   [questionId]="q.questionId"
+                  [explanation]="explanations()[q.questionId]"
                   [attemptId]="attempt()!.id"
                   [certification]="exam()!.title">
                 </app-question-explanation>
@@ -78,6 +84,7 @@ export class AttemptQuestionsResultComponent implements OnInit {
 
   filter = signal<'all' | 'correct' | 'incorrect'>('all');
   filteredQuestions = signal<AttemptQuestionResponse[]>([]);
+  explanations = signal<Record<string, ExplanationResponse>>({});
 
   constructor(
     protected route: ActivatedRoute,

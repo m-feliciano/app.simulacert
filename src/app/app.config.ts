@@ -9,6 +9,7 @@ import {Meta, provideClientHydration, Title, withEventReplay} from '@angular/pla
 import {provideLocalStorage} from './core/storage/local-storage.token';
 
 import {routes} from './app.routes';
+import {LanguageInterceptor} from './core/interceptors/language.interceptor';
 
 function getApiConfig(): ApiConfig {
   const baseUrl = environment.apiConfig.baseUrl;
@@ -26,6 +27,7 @@ export const appConfig: ApplicationConfig = {
     provideLocalStorage(),
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: LanguageInterceptor, multi: true },
     {provide: API_CONFIG, useFactory: getApiConfig},
     Title,
     Meta, provideClientHydration(withEventReplay())

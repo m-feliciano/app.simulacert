@@ -118,9 +118,9 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
                       </div>
                       @if (attempt.score) {
                         <div class="attempt-score"
-                             [ngClass]="{'green': attempt.score >= 75,
+                             [ngClass]="{'green': attempt.score >= 70,
                                         'red': attempt.score < 40,
-                                        'yellow': attempt.score >= 40 && attempt.score <= 74}">
+                                        'yellow': attempt.score >= 40 && attempt.score < 70}">
                           {{ attempt.score | formatPercentile }}%
                         </div>
                       }
@@ -163,11 +163,11 @@ export class DashboardComponent implements OnInit {
   }
 
   constructor(
-    private authFacade: AuthFacade,
-    private attemptsApi: AttemptsApiService,
-    private statsApi: StatsApiService,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly authFacade: AuthFacade,
+    private readonly attemptsApi: AttemptsApiService,
+    private readonly statsApi: StatsApiService,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Dashboard | SimulaCert',
@@ -261,11 +261,7 @@ export class DashboardComponent implements OnInit {
   loadRecentAttempts(userId: string): void {
     this.attemptsApi.getAttemptsByUser(userId).subscribe({
       next: (attempts) => {
-        const sorted = attempts
-          .sort((a, b) =>
-            new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-          .slice(0, 5);
-        this.recentAttempts.set(sorted);
+        this.recentAttempts.set(attempts);
       },
     });
   }

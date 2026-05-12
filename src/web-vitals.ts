@@ -1,5 +1,7 @@
 import {onCLS, onINP, onLCP, onTTFB} from 'web-vitals';
 
+declare const process: any;
+
 export function reportWebVitals(callback: (metric: any) => void = () => {
 }): void {
   onCLS(callback);
@@ -8,8 +10,7 @@ export function reportWebVitals(callback: (metric: any) => void = () => {
   onTTFB(callback);
 }
 
-declare const process: any;
-if (typeof window !== 'undefined' && (process?.env?.NODE_ENV === 'production' || window.location.hostname !== 'localhost')) {
+if (globalThis.window && (process?.env?.NODE_ENV === 'production' || globalThis.location.hostname !== 'localhost')) {
 
   reportWebVitals((metric) => {
     // TODO: analytics integration

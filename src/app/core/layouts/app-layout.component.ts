@@ -1,11 +1,23 @@
-import {Component, signal, inject} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
 import {FooterComponent} from '../../shared/components/footer.component';
 import {SupportModalComponent} from '../../shared/components/support-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
-import {LucideAngularModule, BarChart3, NotebookPen, TrendingUp, Newspaper, Settings, HeartHandshake, Menu, Palette, Type, Trophy} from 'lucide-angular';
+import {
+  BarChart3,
+  HeartHandshake,
+  LucideAngularModule,
+  Menu,
+  Newspaper,
+  NotebookPen,
+  Palette,
+  Settings,
+  TrendingUp,
+  Trophy,
+  Type
+} from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
 
 @Component({
@@ -14,14 +26,14 @@ import {ThemeService} from '../theme/theme.service';
   imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule],
   template: `
     <div class="app-layout" seoHead>
-      <header class="topbar sc-glass">
+      <header class="topbar sc-glass sc-glass--acrylic">
         <div class="topbar-left">
           @if (isMobile()) {
             <button class="sidebar-toggle" (click)="toggleSidebar()" aria-label="Abrir menu">
               <lucide-icon [img]="icons.menu" class="icon" aria-hidden="true"></lucide-icon>
             </button>
           }
-          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="96" width="360">
+          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120"/>
         </div>
 
         @if (!isMobile()) {
@@ -133,8 +145,10 @@ import {ThemeService} from '../theme/theme.service';
       height: 64px;
       padding: 0 var(--spacing-lg);
       border-bottom: 1px solid var(--border);
-      z-index: 1000;
-      position: sticky;
+      z-index: 1100;
+      position: fixed;
+      left: 0;
+      right: 0;
       top: 0;
     }
 
@@ -259,7 +273,7 @@ import {ThemeService} from '../theme/theme.service';
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
-        top: 60px;
+        top: 64px;
         left: 0;
         bottom: 0;
         transform: translateX(0);
@@ -274,7 +288,7 @@ import {ThemeService} from '../theme/theme.service';
       .sidebar-overlay {
         display: block;
         position: fixed;
-        top: 60px;
+        top: 64px;
         left: 0;
         right: 0;
         bottom: 0;
@@ -354,6 +368,7 @@ import {ThemeService} from '../theme/theme.service';
       overflow-y: auto;
       overflow-x: hidden;
       background: var(--bg);
+      padding-top: 64px;
     }
 
     .content-wrapper {
@@ -392,6 +407,10 @@ import {ThemeService} from '../theme/theme.service';
     .support-btn:hover {
       background: rgba(17, 24, 39, 0.06);
       color: var(--text);
+    }
+
+    .support-btn .nav-icon {
+      color: hotpink;
     }
 
     .topbar-nav {
@@ -449,8 +468,8 @@ export class AppLayoutComponent {
   public themeService = inject(ThemeService);
 
   constructor(
-    public authFacade: AuthFacade,
-    private router: Router
+    protected readonly authFacade: AuthFacade,
+    private readonly router: Router
   ) {
     this.checkIfMobile();
   }
@@ -472,7 +491,7 @@ export class AppLayoutComponent {
   }
 
   private checkIfMobile(): void {
-    if (typeof window === 'undefined') {
+    if (globalThis.window === undefined) {
       this.isMobile.set(false);
       return;
     }

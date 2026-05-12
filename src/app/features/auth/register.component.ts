@@ -101,12 +101,12 @@ export class RegisterComponent {
   private readonly baseUrl: string;
 
   constructor(
-    private fb: FormBuilder,
-    private authFacade: AuthFacade,
-    private router: Router,
+    private readonly fb: FormBuilder,
+    private readonly authFacade: AuthFacade,
+    private readonly router: Router,
     @Inject(API_CONFIG) private config: ApiConfig,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     this.registerForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -129,7 +129,7 @@ export class RegisterComponent {
     this.loadingGoogle.set(true);
     this.errorMessage.set('');
 
-    window.location.href = `${this.baseUrl}/api/v1/auth/oauth/google`;
+    globalThis.location.href = `${this.baseUrl}/api/v1/auth/oauth/google`;
   }
 
   onSubmit(): void {

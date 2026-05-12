@@ -11,8 +11,8 @@ export class ExamsApiService {
   private readonly baseUrl: string;
 
   constructor(
-    private http: HttpClient,
-    @Inject(API_CONFIG) private config: ApiConfig
+    private readonly http: HttpClient,
+    @Inject(API_CONFIG) private readonly config: ApiConfig
   ) {
     this.baseUrl = `${this.config.baseUrl}/api/v1/exams`;
   }
@@ -35,10 +35,6 @@ export class ExamsApiService {
 
   deleteExam(examId: string): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${examId}`);
-  }
-
-  examExists(examId: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.baseUrl}/${examId}/exists`);
   }
 
   importFromDirectory(): Observable<void> {

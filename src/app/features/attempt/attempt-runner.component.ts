@@ -1,5 +1,14 @@
-import {Component, DestroyRef, OnDestroy, OnInit, signal} from '@angular/core';
-import {CommonModule} from '@angular/common';
+import {
+  Component,
+  DestroyRef,
+  OnDestroy,
+  OnInit,
+  Signal,
+  signal,
+  ViewEncapsulation,
+  WritableSignal
+} from '@angular/core';
+import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {ExamsApiService} from '../../api/exams.service';
@@ -7,11 +16,15 @@ import {AttemptQuestionResponse, AttemptResponse, ExamResponse} from '../../api/
 import {interval, Subscription} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
+import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
+import {LucideAngularModule} from 'lucide-angular';
+import {QuestionExplanationComponent} from '../../shared/components/question-explanation.component';
 
 @Component({
   selector: 'app-attempt-runner',
   standalone: true,
-  imports: [CommonModule, FormatTimePipe],
+  imports: [CommonModule, FormatTimePipe, FormatDatePipe, LucideAngularModule, NgOptimizedImage, QuestionExplanationComponent],
+  encapsulation: ViewEncapsulation.None,
   styleUrls: ['./attempt-runner.component.css'],
   template: `
     <div class="attempt-runner">
@@ -37,12 +50,13 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
       } @else if (!loading() && !error() && exam() && questionsLoaded()) {
         <div class="attempt-header">
           <div class="header-left">
-            <h2>{{ exam()!.title }}</h2>
-          </div>
-          <div class="header-right">
-            <div class="timer" title="Tempo restante">
-              {{ timeRemaining() | formatTime }}
+            <div style="display: flex; align-items: center; gap: 24px;">
+              <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120">
+              <h3>{{ exam()!.title }}</h3>
             </div>
+          </div>
+
+          <div class="header-right">
             <button class="btn-pause" (click)="pauseAttempt()" title="Pausar Exame">
               ⏸ Pausar
             </button>
@@ -52,8 +66,34 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
           </div>
         </div>
 
-        <div class="progress-bar">
+        <div class="progress-bar"
+             (mouseenter)="showPopover.set(true)"
+             (mouseleave)="popoverPinned() || showPopover.set(false)"
+             (click)="showPopover.set(!showPopover())">
+
           <div class="progress-fill" [style.width.%]="progress"></div>
+
+          @if (showPopover()) {
+            <div class="progress-popover sc-glass sc-glass--acrylic" (click)="$event.stopPropagation()">
+              <button
+                class="pin-btn"
+                title="Fixar popover"
+                aria-label="Fixar popover"
+                [attr.aria-pressed]="popoverPinned() ? 'true' : 'false'"
+                (click)="togglePopoverPin($event)">
+                📌
+              </button>
+
+              <div class="popover-row"><strong>Início:</strong> {{ startedAtMs() | formatDate }}</div>
+              <div class="popover-row"><strong>Fim:</strong> {{ endsAtMs()| formatDate }}</div>
+              <div class="popover-row"><strong>Restante:</strong> {{ timeRemaining() | formatTime }}</div>
+              <div class="popover-row"><strong>Progresso:</strong> {{ progress | number:'1.0-0' }}%</div>
+              <div class="popover-row"><strong>Sync:</strong> <span [class.ok]="heartbeatOk()"
+                                                                    [class.err]="!heartbeatOk()">{{ heartbeatOk() ? 'OK' : 'Erro' }}</span>
+                • {{ lastHeartbeatAt() | formatDate }}
+              </div>
+            </div>
+          }
         </div>
 
         <div class="question-navigation">
@@ -130,6 +170,16 @@ import {FormatTimePipe} from '../../shared/pipes/format-time.pipe';
                 </button>
               }
             </div>
+
+            @if (attemptId && attemptMode() == 'practice') {
+              <app-question-explanation
+                [questionId]="currentQuestion.questionId"
+                [explanation]="currentQuestion.explanation"
+                [showExplanation]="showExplanation"
+                [attemptId]="attemptId"
+                [certification]="exam()!.title">
+              </app-question-explanation>
+            }
           </div>
         }
       }
@@ -207,6 +257,9 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   answeredQuestions = signal(new Set<number>());
   currentQuestionIndex = signal(0);
   timeRemaining = signal(0);
+  startedAtMs = signal<number | null>(null);
+  showPopover = signal(false);
+  popoverPinned = signal(false);
   finishingAttempt = signal(false);
   showFinishModal = signal(false);
   showExitModal = signal(false);
@@ -214,25 +267,29 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   isPaused = signal(false);
   error = signal('');
   finishError = signal('');
+  endsAtMs = signal<number | null>(null);
+  attemptMode = signal<'exam' | 'practice'>('exam');
 
-  private endsAtMs = signal<number | null>(null);
+  loading = signal(true);
+  attemptLoaded = signal(false);
+  examLoaded = signal(false);
+  questionsLoaded = signal(false);
+  heartbeatOk = signal(true);
+  lastHeartbeatAt = signal<number | null>(Date.now());
+  showExplanation = signal(false);
+
   private readonly TIMER_TICK_MS = 1000;
   private readonly HEARTBEAT_EVERY_MS = 10_000;
 
   private heartbeatSubscription?: Subscription;
   private timerSubscription?: Subscription;
 
-  loading = signal(true);
-  attemptLoaded = signal(false);
-  examLoaded = signal(false);
-  questionsLoaded = signal(false);
-
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService,
-    private destroyRef: DestroyRef
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly attemptsApi: AttemptsApiService,
+    private readonly examsApi: ExamsApiService,
+    private readonly destroyRef: DestroyRef
   ) {}
 
   get currentQuestion(): AttemptQuestionResponse | null {
@@ -240,8 +297,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   }
 
   get progress(): number {
-    const questionsLength = this.questions().length;
-    return questionsLength > 0 ? (this.answeredQuestions().size / questionsLength) * 100 : 0;
+    const total = this.questions().length;
+    if (total === 0) return 0;
+
+    const answered = this.answeredQuestions().size;
+    return (answered / total) * 100;
   }
 
   ngOnInit(): void {
@@ -312,6 +372,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
         this.attemptsApi.heartbeatAttempt(this.attemptId).subscribe({
           next: (timing) => {
+            this.heartbeatOk.set(true);
+            this.lastHeartbeatAt.set(Date.now());
             this.setTimingFromServer(timing);
           }
         });
@@ -396,6 +458,18 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   loadAttempt(): void {
     this.attemptsApi.getAttempt(this.attemptId).subscribe({
       next: (attempt) => {
+        if (attempt.startedAt && attempt.endsAt) {
+          const startedMs = Date.parse(attempt.startedAt);
+          const endsMs = Date.parse(attempt.endsAt);
+
+          if (!Number.isNaN(startedMs) && !Number.isNaN(endsMs) && endsMs > startedMs) {
+            this.startedAtMs.set(startedMs);
+            this.endsAtMs.set(endsMs);
+          }
+
+          this.attemptMode.set(attempt.mode || 'exam');
+        }
+
         this.loadExam(attempt.examId);
         this.loadQuestions();
         this.startFirstHeartbeat(attempt);
@@ -567,15 +641,26 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     });
   }
 
+  togglePopoverPin(event: Event) {
+    event?.stopPropagation();
+    const next = !this.popoverPinned();
+    this.popoverPinned.set(next);
+    if (next) {
+      this.showPopover.set(true);
+    }
+  }
+
   goToQuestion(index: number): void {
     this.submitCurrentAnswer();
     this.currentQuestionIndex.set(index);
+    this.showExplanation.set(false);
   }
 
   previousQuestion(): void {
     if (this.currentQuestionIndex() > 0) {
       this.submitCurrentAnswer();
       this.currentQuestionIndex.update(i => i - 1);
+      this.showExplanation.set(false);
     }
   }
 
@@ -583,6 +668,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     if (this.currentQuestionIndex() < this.questions().length - 1) {
       this.submitCurrentAnswer();
       this.currentQuestionIndex.update(i => i + 1);
+      this.showExplanation.set(false);
     }
   }
 
@@ -645,10 +731,10 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), -1);
     const nextPendingIndex = this.questions().findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
 
-    if (nextPendingIndex !== -1) {
-      this.currentQuestionIndex.set(nextPendingIndex);
-    } else {
+    if (nextPendingIndex === -1) {
       this.currentQuestionIndex.set(this.questions().length - 1);
+    } else {
+      this.currentQuestionIndex.set(nextPendingIndex);
     }
   }
 

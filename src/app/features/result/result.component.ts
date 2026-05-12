@@ -232,12 +232,12 @@ export class ResultComponent implements OnInit {
   error = signal('');
 
   constructor(
-    private route: ActivatedRoute,
-    private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
-    private router: Router,
+    private readonly route: ActivatedRoute,
+    private readonly attemptsApi: AttemptsApiService,
+    private readonly examsApi: ExamsApiService,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
+    private readonly router: Router,
   ) {
     this.seoFacade.set(this.seoFactory.website({
       title: 'Resultado do Exame | SimulaCert',
@@ -250,7 +250,7 @@ export class ResultComponent implements OnInit {
 
   get isPassed(): boolean {
     const score = this.attempt()?.score || 0;
-    return score >= 72;
+    return score >= 70;
   }
 
   isAttemptFinalized(): boolean {
@@ -330,7 +330,7 @@ export class ResultComponent implements OnInit {
       return `Todas as ${questions} corretas`;
     }
 
-    const correctAnswers = Math.round((score! / 100) * questions);
+    const correctAnswers = Math.round((score / 100) * questions);
     return `${correctAnswers} de ${questions} corretas`;
   }
 

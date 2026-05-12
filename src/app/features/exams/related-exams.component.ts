@@ -92,13 +92,12 @@ export class RelatedExamsComponent implements OnInit {
   related = signal<ExamResponse[]>([]);
   private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
-  constructor(private examsApi: ExamsApiService,
-              private transferState: TransferState
+  constructor(private readonly examsApi: ExamsApiService,
+              private readonly transferState: TransferState
   ) {
   }
 
   ngOnInit(): void {
-
     if (this.transferState.hasKey(this.examsKey)) {
       const exams = this.transferState.get<ExamResponse[]>(this.examsKey, []);
       this.setRelatedExams(exams);
@@ -106,7 +105,10 @@ export class RelatedExamsComponent implements OnInit {
 
     } else {
       this.examsApi.getAllExams().subscribe({
-        next: (all) => this.setRelatedExams(all),
+        next: (all) => {
+          this.setRelatedExams(all);
+          this.transferState.set(this.examsKey, all);
+        },
         error: () => this.related.set([])
       });
     }

@@ -1,10 +1,11 @@
-import {Component, Input, signal, ViewEncapsulation} from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { ExplanationsApiService } from '../../api/explanations.service';
-import { ExplanationResponse } from '../../api/domain';
+import {Component, Inject, Input, signal, ViewEncapsulation} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormsModule} from '@angular/forms';
+import {ExplanationsApiService} from '../../api/explanations.service';
+import {ExplanationResponse} from '../../api/domain';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import DOMPurify from 'dompurify';
+import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
 
 @Component({
   selector: 'app-question-explanation',
@@ -28,7 +29,7 @@ import DOMPurify from 'dompurify';
         </div>
       }
 
-      @if (showExplanation() && explanation()) {
+      @if (showExplanation()) {
         <div class="explanation-card">
           <div class="explanation-header">
             <h4>Explicação da questão</h4>
@@ -243,6 +244,7 @@ import DOMPurify from 'dompurify';
       font-family: inherit;
       font-size: 14px;
       resize: vertical;
+      background: var(--surface-2);
       transition: var(--transition-fast);
     }
 
@@ -356,21 +358,31 @@ export class QuestionExplanationComponent {
   @Input() questionId!: string;
   @Input() attemptId!: string;
   @Input() certification!: string;
+  @Input() showExplanation = signal(false);
 
-  showExplanation = signal(false);
+  @Input() set explanation(val: ExplanationResponse | undefined) {
+    if (!val) return;
+
+    this._explanation.set(val);
+    this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(val.content));
+    this.showExplanation.set(true);
+  }
+
   loading = signal(false);
   error = signal<string | null>(null);
-  explanation = signal<ExplanationResponse | null>(null);
 
   safeHtml: SafeHtml = signal(null as SafeHtml | null);
   rating = signal(0);
   submittingFeedback = signal(false);
   feedbackSubmitted = signal(false);
 
+  private readonly _explanation = signal<ExplanationResponse | null | undefined>(null);
+
   comment = '';
 
-  constructor(private explanationsApi: ExplanationsApiService,
-              private sanitizer: DomSanitizer,
+  constructor(private readonly explanationsApi: ExplanationsApiService,
+              private readonly sanitizer: DomSanitizer,
+              @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
   ) {}
 
   requestExplanation(): void {
@@ -380,13 +392,12 @@ export class QuestionExplanationComponent {
     const request = {
       questionId: this.questionId,
       examAttemptId: this.attemptId,
-      language: 'pt-br',
       certification: this.certification
     };
 
     this.explanationsApi.generateExplanation(this.questionId, request).subscribe({
       next: (response) => {
-        this.explanation.set(response);
+        this._explanation.set(response);
         this.showExplanation.set(true);
         this.loading.set(false);
         this.safeHtml = this.sanitizer.bypassSecurityTrustHtml(DOMPurify.sanitize(response.content));
@@ -410,14 +421,14 @@ export class QuestionExplanationComponent {
   }
 
   submitFeedback(): void {
-    const explanationId = this.explanation()?.explanationId;
+    const explanationId = this._explanation()?.explanationId;
     if (!explanationId || this.rating() === 0) return;
 
     this.submittingFeedback.set(true);
 
     const feedback = {
       rating: this.rating(),
-      comment: this.comment.trim() || undefined
+      comment: this.comment.trim()
     };
 
     this.explanationsApi.submitFeedback(explanationId, feedback).subscribe({
@@ -433,7 +444,7 @@ export class QuestionExplanationComponent {
   }
 
   modelName() {
-    return this.explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
+    return this._explanation()?.model?.replace(/-\d{4}-\d{2}-\d{2}$/, '');
   }
 }
 

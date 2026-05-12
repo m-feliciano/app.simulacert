@@ -234,7 +234,7 @@ export class ReviewCardComponent implements OnInit {
   rating = signal(0);
   comment = '';
 
-  constructor(private reviewsApi: ReviewsApiService) {}
+  constructor(private readonly reviewsApi: ReviewsApiService) {}
 
   ngOnInit(): void {
     if (this.finalized && this.attemptId) {

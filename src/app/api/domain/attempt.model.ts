@@ -1,4 +1,5 @@
 import {QuestionOption} from './question.model';
+import {ExplanationResponse} from './explanation.model';
 
 export enum AttemptStatus {
   IN_PROGRESS = 'IN_PROGRESS',
@@ -19,6 +20,7 @@ export interface AttemptResponse {
   startedAt: string;
   status: AttemptStatus;
   userId: string;
+  mode?: 'exam' | 'practice';
 }
 
 export interface AttemptTimingResponse {
@@ -35,6 +37,7 @@ export interface StartAttemptRequest {
   limitSeconds: number;
   durationMinutes?: number;
   difficulty?: 'any' | 'easy' | 'medium' | 'hard';
+  mode?: string;
 }
 
 export interface AttemptQuestionResponse {
@@ -44,6 +47,7 @@ export interface AttemptQuestionResponse {
   questionId: string;
   text: string;
   questionCode?: string;
+  explanation?: ExplanationResponse;
 }
 
 export interface SubmitAnswerRequest {

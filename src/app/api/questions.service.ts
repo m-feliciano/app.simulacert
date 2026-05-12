@@ -1,7 +1,13 @@
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { QuestionResponse, CreateQuestionRequest, PagedModelQuestionResponse, Pageable } from './domain';
+import {
+  QuestionResponse,
+  CreateQuestionRequest,
+  PagedModelQuestionResponse,
+  Pageable,
+  ExplanationResponse
+} from './domain';
 import { API_CONFIG, ApiConfig } from './config/api.config';
 
 @Injectable({
@@ -11,8 +17,8 @@ export class QuestionsApiService {
   private readonly baseUrl: string;
 
   constructor(
-    private http: HttpClient,
-    @Inject(API_CONFIG) private config: ApiConfig
+    private readonly http: HttpClient,
+    @Inject(API_CONFIG) private readonly config: ApiConfig
   ) {
     this.baseUrl = `${this.config.baseUrl}/api/v1/questions`;
   }
@@ -37,6 +43,12 @@ export class QuestionsApiService {
     }
 
     return this.http.get<PagedModelQuestionResponse>(`${this.baseUrl}/exam/${examId}`, { params });
+  }
+
+  getAllExplanations(param: { questionIds: string[] }): Observable<ExplanationResponse[]> {
+    return this.http.get<ExplanationResponse[]>(`${this.baseUrl}/explanations`, {
+      params: new HttpParams().set('questionIds', param.questionIds.join(','))
+    });
   }
 }
 

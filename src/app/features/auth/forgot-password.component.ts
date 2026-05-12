@@ -206,9 +206,9 @@ export class ForgotPasswordComponent {
   emailSent = signal(false);
 
   constructor(
-    private fb: FormBuilder,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly fb: FormBuilder,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     this.forgotPasswordForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]]

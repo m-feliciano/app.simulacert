@@ -1,12 +1,12 @@
 export interface ExplanationRequest {
   examAttemptId: string;
-  language: string;
   certification: string;
   questionId: string;
 }
 
 export interface ExplanationResponse {
   explanationId: string;
+  questionId: string;
   content: string;
   model: string;
   expiresAt: string;

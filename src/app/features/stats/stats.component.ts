@@ -144,10 +144,10 @@ export class StatsComponent implements OnInit {
   loading = signal(true);
 
   constructor(
-    private authFacade: AuthFacade,
-    private statsApi: StatsApiService,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly authFacade: AuthFacade,
+    private readonly statsApi: StatsApiService,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     const meta = this.seoFactory.website({
       title: 'Estatísticas | SimulaCert',

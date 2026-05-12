@@ -10,7 +10,7 @@
   flex-wrap: wrap;
   gap: var(--spacing-md);
   background: var(--color-bg-secondary);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-sm);
   border-radius: var(--border-radius-md);
   box-shadow: var(--shadow-sm);
   margin-bottom: var(--spacing-lg);
@@ -30,7 +30,7 @@
 
 @media (min-width: 768px) {
   .attempt-header {
-    padding: var(--spacing-lg) var(--spacing-xl);
+    padding: var(--spacing-sm) var(--spacing-xl);
   }
 }
 
@@ -118,8 +118,65 @@ h2 {
   height: 8px;
   background: var(--color-border-light);
   border-radius: var(--border-radius-sm);
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
   margin-bottom: var(--spacing-lg);
+}
+
+.ok {
+  color: var(--color-success);
+}
+
+.err {
+  color: var(--color-danger);
+}
+
+.progress-bar {
+  position: relative;
+  cursor: pointer;
+}
+
+.progress-popover {
+  position: fixed;
+  top: 200px;
+  left: 60%;
+  transform: translate(-50%, -100%);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  padding: 10px 12px;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  min-width: 220px;
+  z-index: 1200;
+  cursor: default;
+}
+
+.progress-popover .pin-btn {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-text-secondary)
+}
+.progress-popover .pin-btn[aria-pressed="true"] {
+  color: var(--color-primary);
+}
+
+.progress-popover .popover-row {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+}
+
+.progress-popover .popover-row strong {
+  color: var(--color-text-primary);
+  display: inline-block;
+  width: 80px;
 }
 
 .progress-fill {
@@ -211,7 +268,7 @@ h2 {
 }
 
 .question-number {
-  font-weight: bold;
+  font-weight: bold !important;
   color: var(--color-dark);
   /*font-size: 0.875rem;*/
 }

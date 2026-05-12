@@ -126,8 +126,8 @@ import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 })
 export class TermsOfUseComponent {
 
-  constructor(private seoFactory: SeoFactoryService,
-              private seoFacade: SeoFacadeService) {
+  constructor(private readonly seoFactory: SeoFactoryService,
+              private readonly seoFacade: SeoFacadeService) {
     const seo = this.seoFactory.website({
       title: 'Termos de Uso | SimulaCert',
       description: 'Leia os Termos de Uso da plataforma SimulaCert.',

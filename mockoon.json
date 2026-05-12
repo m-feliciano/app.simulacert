@@ -1,0 +1,1637 @@
+{
+  "uuid": "89392562-4b4f-45c9-a2a0-ac8b1b14cee6",
+  "lastMigration": 33,
+  "name": "Demo API",
+  "endpointPrefix": "dev",
+  "latency": 200,
+  "port": 3000,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "183c687e-747a-4415-9558-c4b2555a4412",
+      "type": "http",
+      "documentation": "Start exam attempt",
+      "method": "post",
+      "endpoint": "/api/v1/attempts",
+      "responses": [
+        {
+          "uuid": "ed3a0dfa-a9bc-4077-91e1-4178c6e9b380",
+          "body": "[\n  {{#repeat 10}}\n  {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"examId\": \"{{ faker 'string.uuid' }}\",\n    \"userId\": \"{{ faker 'string.uuid' }}\",\n    \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n    \"score\": {{ faker 'number.int' min=0 max=100 }},\n    \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n    \"startedAt\": \"{{ faker 'date.recent' }}\",\n    \"endsAt\": \"{{ faker 'date.future' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Start exam attempt",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "8f2a1286-d46c-464c-b5bf-c5984bf54236",
+      "type": "http",
+      "documentation": "Get user attempts",
+      "method": "get",
+      "endpoint": "api/v1/attempts/user/:userId",
+      "responses": [
+        {
+          "uuid": "0472f431-8b18-49b7-8820-1cb5e61fdca7",
+          "body": "[\n  {{#repeat 10}}\n  {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"examId\": \"{{ faker 'string.uuid' }}\",\n    \"userId\": \"{{ faker 'string.uuid' }}\",\n    \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n    \"score\": {{ faker 'number.int' min=0 max=100 }},\n    \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n    \"startedAt\": \"{{ faker 'date.recent' }}\",\n    \"endsAt\": \"{{ faker 'date.future' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get user attempts",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f6d4cacf-03e3-430d-96cd-faa964cea84c",
+      "type": "http",
+      "documentation": "Get attempt by ID",
+      "method": "get",
+      "endpoint": "api/v1/attempts/:attemptId",
+      "responses": [
+        {
+          "uuid": "17aae3f2-453d-4a11-9731-ae4889bbf8e4",
+          "body": "{\r\n  \"id\": \"{{ faker 'string.uuid' }}\",\r\n  \"examId\": \"{{ faker 'string.uuid' }}\",\r\n  \"userId\": \"{{ faker 'string.uuid' }}\",\r\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\r\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\r\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\r\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\r\n  \"endsAt\": \"{{ faker 'date.future' }}\",\r\n  \"questionIds\": [\r\n    {{#repeat 20}}\r\n    \"{{ faker 'string.uuid' }}\"{{#unless @last}},{{/unless}}\r\n    {{/repeat}}\r\n  ]\r\n}\r\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get attempt by ID",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b00076e8-f1b9-4a74-a412-04a1f14dedee",
+      "type": "http",
+      "documentation": "Get answer for attempt",
+      "method": "get",
+      "endpoint": "/api/v1/attempts/:attemptId/answers",
+      "responses": [
+        {
+          "uuid": "54ad6d5c-c17f-48a2-b47e-063a826af9ef",
+          "body": "[\n  {{#repeat 10}}\n  {\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get answer for attempt",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "d9abd013-6af9-4286-aec5-c6617a49dd14",
+      "type": "http",
+      "documentation": "Delete answer for question",
+      "method": "delete",
+      "endpoint": "api/v1/attempts/:attemptId/answers/:questionId",
+      "responses": [
+        {
+          "uuid": "7163b9ab-cf6a-4fce-8013-da6b6e4d6ab7",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Delete answer for question",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "72869223-6a43-4509-854b-1353bacad4af",
+      "type": "http",
+      "documentation": "Submit answer for question",
+      "method": "post",
+      "endpoint": "api/v1/attempts/:attemptId/answers/:questionId",
+      "responses": [
+        {
+          "uuid": "5c517e04-f04f-4a74-95db-ebf204dc8ddf",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Submit answer for question",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "af4be232-2942-46c5-8741-582b3533868b",
+      "type": "http",
+      "documentation": "Cancel exam attempt",
+      "method": "post",
+      "endpoint": "api/v1/attempts/:attemptId/cancel",
+      "responses": [
+        {
+          "uuid": "c8bb0c2c-5cbf-4066-a729-6c37bca6902f",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Cancel exam attempt",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0cb8646f-1c5d-4f20-8a82-ca29fb06a143",
+      "type": "http",
+      "documentation": "Finish exam attempt",
+      "method": "post",
+      "endpoint": "api/v1/attempts/:attemptId/finish",
+      "responses": [
+        {
+          "uuid": "6f172c3b-85b1-4b50-a9f1-5c622403ecb7",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Finish exam attempt",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "4c33d844-a135-4111-bae3-ce16fe2c3861",
+      "type": "http",
+      "documentation": "Attempt heartbeat",
+      "method": "post",
+      "endpoint": "/api/v1/attempts/:attemptId/heartbeat",
+      "responses": [
+        {
+          "uuid": "8d69c944-c4a2-4827-a4d8-78f285c72415",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Attempt heartbeat",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "16bc4a4f-9ed0-4422-85ea-472e71aa6eee",
+      "type": "http",
+      "documentation": "Pause attempt timer",
+      "method": "post",
+      "endpoint": "/api/v1/attempts/:attemptId/pause",
+      "responses": [
+        {
+          "uuid": "f7a80164-4aa3-4a1e-bce1-1d359fc00f61",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Pause attempt timer",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f097416f-2e99-4e25-8466-881c4096bb32",
+      "type": "http",
+      "documentation": "Get attempt questions",
+      "method": "get",
+      "endpoint": "/api/v1/attempts/:attemptId/questions",
+      "responses": [
+        {
+          "uuid": "5f071026-11d6-4071-80e9-5e7689076e69",
+          "body": "[\r\n  {{#repeat 10}}\r\n  {\r\n    \"id\": \"{{ faker 'string.uuid' }}\",\r\n    \"examId\": \"{{ faker 'string.uuid' }}\",\r\n    \"code\": \"Q{{ faker 'number.int' min=1000 max=9999 }}\",\r\n    \"text\": \"{{ faker 'lorem.paragraph' 6 }}?\",\r\n    \"domain\": \"{{ oneOf 'EC2' 'S3' 'Lambda' 'RDS' }}\",\r\n    \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\",\r\n    \"options\": [\r\n      {{#repeat 4}}\r\n      {\r\n        \"key\": \"{{ oneOf 'A' 'B' 'C' 'D' }}\",\r\n        \"text\": \"{{ faker 'lorem.paragraph' }}\",\r\n        \"isCorrect\": {{#if @first}}true{{else}}false{{/if}}\r\n      }{{#unless @last}},{{/unless}}\r\n      {{/repeat}}\r\n    ]\r\n  }{{#unless @last}},{{/unless}}\r\n  {{/repeat}}\r\n]\r\n",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get attempt questions",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "1c18361f-8526-4117-a427-d6fff046d92e",
+      "type": "http",
+      "documentation": "Resume attempt timer",
+      "method": "post",
+      "endpoint": "/api/v1/attempts/:attemptId/resume",
+      "responses": [
+        {
+          "uuid": "4f47fcd6-776e-4764-94ea-465a6b5c1598",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Resume attempt timer",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b2efa074-cb6d-4975-aae7-bfd6f00292ad",
+      "type": "http",
+      "documentation": "Retake exam attempt",
+      "method": "post",
+      "endpoint": "/api/v1/attempts/:attemptId/retake",
+      "responses": [
+        {
+          "uuid": "5a690f5b-ba51-40e7-932e-c9ba88dd7cf7",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n  \"score\": {{ faker 'number.int' min=0 max=100 }},\n  \"mode\": \"{{ oneOf 'PRACTICE' 'EXAM' }}\",\n  \"startedAt\": \"{{ faker 'date.recent' }}\",\n  \"endsAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Retake exam attempt",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "40738a67-2e0f-4fca-83c7-e078615a94d5",
+      "type": "http",
+      "documentation": "User login",
+      "method": "post",
+      "endpoint": "/api/v1/auth/login",
+      "responses": [
+        {
+          "uuid": "7bd390b1-31c3-4a3b-b68a-9949ff9b9dd8",
+          "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{{ base64 'mock-payload' }}\",\n  \"refreshToken\": \"{{ faker 'string.uuid' }}\",\n  \"type\": \"Bearer\",\n  \"user\": {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"name\": \"{{ faker 'person.fullName' }}\",\n    \"email\": \"{{ faker 'internet.email' }}\",\n    \"role\": \"USER\",\n    \"active\": true\n  }\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "User login",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "f75eb53d-5e55-4dc9-931e-78b133f924e7",
+      "type": "http",
+      "documentation": "Get current authenticated user",
+      "method": "get",
+      "endpoint": "/api/v1/auth/me",
+      "responses": [
+        {
+          "uuid": "360eeff9-e97e-4e27-a08e-04a8d159e123",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"USER\",\n  \"active\": true,\n  \"createdAt\": \"{{ now }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get current authenticated user",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "5aa76ad2-942f-4ed6-92d2-3d1e3f6a7e52",
+      "type": "http",
+      "documentation": "API Endpoint",
+      "method": "get",
+      "endpoint": "/api/v1/auth/oauth/google",
+      "responses": [
+        {
+          "uuid": "f054a80a-beb3-4d5c-b726-40cbb3722d22",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "API Endpoint",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "ad9773d0-fe61-4553-a30f-38b2ab559eda",
+      "type": "http",
+      "documentation": "API Endpoint",
+      "method": "post",
+      "endpoint": "/api/v1/auth/oauth/google/exchange",
+      "responses": [
+        {
+          "uuid": "5f3086a7-4863-48bf-9209-10db447d89c0",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "API Endpoint",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "956d51e2-f1a1-4c18-8953-a0f6ef45d7e6",
+      "type": "http",
+      "documentation": "API Endpoint",
+      "method": "post",
+      "endpoint": "/api/v1/auth/refresh-token",
+      "responses": [
+        {
+          "uuid": "81b483f5-1d22-442e-955b-0e06893d9df6",
+          "body": "{}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "API Endpoint",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "1a345ef6-0e4e-4cd0-808a-6d1beb04c718",
+      "type": "http",
+      "documentation": "Register new user",
+      "method": "post",
+      "endpoint": "/api/v1/auth/register",
+      "responses": [
+        {
+          "uuid": "da43d371-7fee-40c6-a1ed-ac6bd360f6c9",
+          "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.{{ base64 'mock-payload' }}\",\n  \"refreshToken\": \"{{ faker 'string.uuid' }}\",\n  \"type\": \"Bearer\",\n  \"user\": {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"name\": \"{{ faker 'person.fullName' }}\",\n    \"email\": \"{{ faker 'internet.email' }}\",\n    \"role\": \"USER\"\n  }\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Register new user",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "1b1f1d02-3065-46b3-bbb7-e8789c5c69b5",
+      "type": "http",
+      "documentation": "API Endpoint",
+      "method": "get",
+      "endpoint": "/api/v1/auth/users",
+      "responses": [
+        {
+          "uuid": "88ebb649-f47f-4cea-a015-d2dcbde477e2",
+          "body": "[\n  {{#repeat 10}}\n  {\n   \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": {{ oneOf true false }},\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "API Endpoint",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "d636a979-077b-44f7-a7e1-bb23431c7dbe",
+      "type": "http",
+      "documentation": "Create anonymous user",
+      "method": "post",
+      "endpoint": "/api/v1/auth/users/anonymous",
+      "responses": [
+        {
+          "uuid": "091986ce-de53-4ded-b7f2-6a8ffe13849b",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": true,\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Create anonymous user",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "acfaa69e-9783-4fc7-819b-15d2067323f0",
+      "type": "http",
+      "documentation": "Get user by email",
+      "method": "get",
+      "endpoint": "api/v1/auth/users/email/:email",
+      "responses": [
+        {
+          "uuid": "2c2586ce-4727-40e5-9d4e-83dc0d7c4883",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": {{ oneOf true false }},\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get user by email",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "44cb3fea-c94b-4bd2-be26-23c1cb782b13",
+      "type": "http",
+      "documentation": "Get user by ID",
+      "method": "get",
+      "endpoint": "api/v1/auth/users/:userId",
+      "responses": [
+        {
+          "uuid": "9e691559-ff47-408c-a0eb-41c5a17fdee9",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": true,\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get user by ID",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "7abc8327-197e-4146-891b-f4ded4a5227c",
+      "type": "http",
+      "documentation": "Activate user account",
+      "method": "put",
+      "endpoint": "/api/v1/auth/users/:userId/activate",
+      "responses": [
+        {
+          "uuid": "081aed8e-d460-42aa-86bd-721a7e5fc3af",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": true,\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Activate user account",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "314bbce6-bc19-4d34-95e2-f8ca7a754b80",
+      "type": "http",
+      "documentation": "Deactivate user account",
+      "method": "put",
+      "endpoint": "/api/v1/auth/users/:userId/deactivate",
+      "responses": [
+        {
+          "uuid": "a5d78739-3784-413a-8f22-d932010e3b10",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": false,\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Deactivate user account",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "d25e6725-e670-46af-88d4-d643dc406dbd",
+      "type": "http",
+      "documentation": "Change user password",
+      "method": "put",
+      "endpoint": "/api/v1/auth/users/:userId/password",
+      "responses": [
+        {
+          "uuid": "8e118fda-a126-47f7-bc75-1daa739232f9",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"name\": \"{{ faker 'person.fullName' }}\",\n  \"email\": \"{{ faker 'internet.email' }}\",\n  \"role\": \"{{ oneOf 'USER' 'ADMIN' }}\",\n  \"active\": true,\n  \"createdAt\": \"{{ faker 'date.past' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Change user password",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "d16b3dbc-6ced-4431-8e20-381330172d17",
+      "type": "http",
+      "documentation": "Get all exams",
+      "method": "get",
+      "endpoint": "/api/v1/exams",
+      "responses": [
+        {
+          "uuid": "2a004c3d-571a-4f13-ab57-396eef9ff142",
+          "body": "[\n  {{#repeat 1}}\n  {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"title\": \"AWS {{ oneOf 'Cloud Practitioner' 'Developer' 'Solutions Architect' }} Exam\",\n    \"slug\": \"{{ oneOf 'aws-certified-developer-dva-c02' 'aws-certified-developer-clf-c02' 'aws-certified-ai-practitioner' 'azure-certified-fundamentals-az-900' 'azure-certified-fundamentals-ai-900' }}\",\n    \"description\": \"{{ faker 'lorem.paragraph' }}\",\n    \"durationMinutes\": {{ faker 'number.int' min=60 max=180 }},\n    \"totalQuestions\": {{ faker 'number.int' min=50 max=80 }},\n    \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get all exams",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "4cf3936c-50ea-4657-93c6-76f309eecaed",
+      "type": "http",
+      "documentation": "Create new exam",
+      "method": "post",
+      "endpoint": "/api/v1/exams",
+      "responses": [
+        {
+          "uuid": "3215f922-eb7f-46ff-a3bb-5db770e4ff9f",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"title\": \"AWS {{ oneOf 'Cloud Practitioner' 'Developer' 'Solutions Architect' }} Exam\",\n  \"slug\": \"{{ oneOf 'aws-certified-developer-dva-c02' 'aws-certified-developer-clf-c02' 'aws-certified-ai-practitioner' 'azure-certified-fundamentals-az-900' 'azure-certified-fundamentals-ai-900' }}\",\n  \"description\": \"{{ faker 'lorem.paragraph' }}\",\n  \"durationMinutes\": {{ faker 'number.int' min=60 max=180 }},\n  \"totalQuestions\": {{ faker 'number.int' min=50 max=80 }},\n  \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Create new exam",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "b03e3bb3-804e-4604-880f-9e1452ecdb54",
+      "type": "http",
+      "documentation": "Import exams from JSON files",
+      "method": "post",
+      "endpoint": "/api/v1/exams/import",
+      "responses": [
+        {
+          "uuid": "cd53a972-d96e-4250-9eec-f24614900665",
+          "body": "[\n  {{#repeat 1}}\n  {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"title\": \"AWS {{ oneOf 'Cloud Practitioner' 'Developer' 'Solutions Architect' }} Exam\",\n    \"slug\": \"{{ oneOf 'aws-certified-developer-dva-c02' 'aws-certified-developer-clf-c02' 'aws-certified-ai-practitioner' 'azure-certified-fundamentals-az-900' 'azure-certified-fundamentals-ai-900' }}\",\n    \"description\": \"{{ faker 'lorem.paragraph' }}\",\n    \"durationMinutes\": {{ faker 'number.int' min=60 max=180 }},\n    \"totalQuestions\": {{ faker 'number.int' min=50 max=80 }},\n    \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Import exams from JSON files",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "a9297393-7798-45fe-9f08-041740d3f40d",
+      "type": "http",
+      "documentation": "Get exam by slug",
+      "method": "get",
+      "endpoint": "api/v1/exams/slug/:slug",
+      "responses": [
+        {
+          "uuid": "710b8f67-e349-4824-b850-558de29b901e",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"title\": \"AWS {{ oneOf 'Cloud Practitioner' 'Developer' 'Solutions Architect' }} Exam\",\n  \"slug\": \"{{ oneOf 'aws-certified-developer-dva-c02' 'aws-certified-developer-clf-c02' 'aws-certified-ai-practitioner' 'azure-certified-fundamentals-az-900' 'azure-certified-fundamentals-ai-900' }}\",\n  \"description\": \"{{ faker 'lorem.paragraph' }}\",\n  \"durationMinutes\": {{ faker 'number.int' min=60 max=180 }},\n  \"totalQuestions\": {{ faker 'number.int' min=50 max=80 }},\n  \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get exam by slug",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0ceb5b51-e466-4dd8-a376-b40fdd724cd5",
+      "type": "http",
+      "documentation": "Delete exam",
+      "method": "delete",
+      "endpoint": "/api/v1/exams/:examId",
+      "responses": [
+        {
+          "uuid": "dd9178d2-0aca-4137-bb02-3ccb8fcc539e",
+          "body": "",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Delete exam",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "63f52012-db7f-425c-a0f8-1e299f017791",
+      "type": "http",
+      "documentation": "Get exam by ID",
+      "method": "get",
+      "endpoint": "api/v1/exams/:examId",
+      "responses": [
+        {
+          "uuid": "b46d6ff0-794d-4a14-81d5-c59eced7cd5a",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"title\": \"AWS {{ oneOf 'Cloud Practitioner' 'Developer' 'Solutions Architect' }} Exam\",\n  \"slug\": \"{{ oneOf 'aws-certified-developer-dva-c02' 'aws-certified-developer-clf-c02' 'aws-certified-ai-practitioner' 'azure-certified-fundamentals-az-900' 'azure-certified-fundamentals-ai-900' }}\",\n  \"description\": \"{{ faker 'lorem.paragraph' }}\",\n  \"durationMinutes\": {{ faker 'number.int' min=60 max=180 }},\n  \"totalQuestions\": {{ faker 'number.int' min=50 max=80 }},\n  \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get exam by ID",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "01d5f246-a9f8-45e4-8ec5-11edb877c34e",
+      "type": "http",
+      "documentation": "Update exam",
+      "method": "put",
+      "endpoint": "api/v1/exams/:examId",
+      "responses": [
+        {
+          "uuid": "ee204407-7dbc-4180-a12c-136b7e9e5639",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"title\": \"AWS {{ oneOf 'Cloud Practitioner' 'Developer' 'Solutions Architect' }} Exam\",\n  \"slug\": \"{{ oneOf 'aws-certified-developer-dva-c02' 'aws-certified-developer-clf-c02' 'aws-certified-ai-practitioner' 'azure-certified-fundamentals-az-900' 'azure-certified-fundamentals-ai-900' }}\",\n  \"description\": \"{{ faker 'lorem.paragraph' }}\",\n  \"durationMinutes\": {{ faker 'number.int' min=60 max=180 }},\n  \"totalQuestions\": {{ faker 'number.int' min=50 max=80 }},\n  \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Update exam",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "0369daa7-7c35-483a-ab8e-cfbc510dfff3",
+      "type": "http",
+      "documentation": "Submit feedback for an explanation",
+      "method": "post",
+      "endpoint": "/api/v1/explanations/:explanationId/feedback",
+      "responses": [
+        {
+          "uuid": "ba2a8baa-c7c9-4dbc-890a-c69ddb472d84",
+          "body": "{\n  \"explanationId\": \"{{ faker 'string.uuid' }}\",\n  \"questionId\": \"{{ faker 'string.uuid' }}\",\n  \"content\": \"{{ faker 'lorem.paragraph' }}\",\n  \"model\": \"gpt-4\",\n  \"expiresAt\": \"{{ faker 'date.future' }}\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Submit feedback for an explanation",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "7c7371ac-5c1f-4879-b06a-ee43462f4fd2",
+      "type": "http",
+      "documentation": "Create a new question",
+      "method": "post",
+      "endpoint": "/api/v1/questions",
+      "responses": [
+        {
+          "uuid": "fc628bd0-41af-4ef9-b08c-ecd07664dd34",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"code\": \"Q{{ faker 'number.int' min=1000 max=9999 }}\",\n  \"text\": \"{{ faker 'lorem.sentence' }}?\",\n  \"domain\": \"{{ oneOf 'EC2' 'S3' 'Lambda' 'RDS' }}\",\n  \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\",\n  \"options\": [\n    {{#repeat 4}}\n    {\n      \"optionKey\": \"{{ oneOf 'A' 'B' 'C' 'D' }}\",\n      \"optionText\": \"{{ faker 'lorem.sentence' }}\",\n      \"isCorrect\": {{ @index 0 }}\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Create a new question",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "2324e438-4f8a-4fab-b673-1646c2c9443c",
+      "type": "http",
+      "documentation": "Get questions by exam (paginated)",
+      "method": "get",
+      "endpoint": "/api/v1/questions/exam/:examId",
+      "responses": [
+        {
+          "uuid": "9a9b2e3e-8c2a-4a57-a939-f9ec8e9d0904",
+          "body": "{\n  \"content\": [\n    {{#repeat 5}}\n    {\n      \"id\": \"{{ faker 'string.uuid' }}\",\n      \"examId\": \"{{ urlParam 'examId' }}\",\n      \"code\": \"Q{{ faker 'number.int' min=1000 max=9999 }}\",\n      \"text\": \"{{ faker 'lorem.sentence' }}?\",\n      \"domain\": \"{{ oneOf 'EC2' 'S3' 'Lambda' 'RDS' 'VPC' }}\",\n      \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\",\n      \"options\": [\n        {{#repeat 4}}\n        {\n          \"optionKey\": \"{{ oneOf 'A' 'B' 'C' 'D' }}\",\n          \"optionText\": \"{{ faker 'lorem.sentence' }}\",\n          \"isCorrect\": {{ @index 0 }}\n        }{{#unless @last}},{{/unless}}\n        {{/repeat}}\n      ]\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ],\n  \"page\": {\n    \"number\": 0,\n    \"size\": 10,\n    \"totalElements\": {{ faker 'number.int' min=20 max=100 }},\n    \"totalPages\": {{ faker 'number.int' min=2 max=10 }}\n  }\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get questions by exam (paginated)",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "cbb2c137-0de8-4d47-929b-8ff6816fe4c8",
+      "type": "http",
+      "documentation": "Get question by ID",
+      "method": "get",
+      "endpoint": "/api/v1/questions/:questionId",
+      "responses": [
+        {
+          "uuid": "54fda69a-7d11-485a-a5df-0697217d44f8",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"examId\": \"{{ faker 'string.uuid' }}\",\n  \"code\": \"Q{{ faker 'number.int' min=1000 max=9999 }}\",\n  \"text\": \"{{ faker 'lorem.sentence' }}?\",\n  \"domain\": \"{{ oneOf 'EC2' 'S3' 'Lambda' 'RDS' }}\",\n  \"difficulty\": \"{{ oneOf 'EASY' 'MEDIUM' 'HARD' }}\",\n  \"options\": [\n    {{#repeat 4}}\n    {\n      \"optionKey\": \"{{ oneOf 'A' 'B' 'C' 'D' }}\",\n      \"optionText\": \"{{ faker 'lorem.sentence' }}\",\n      \"isCorrect\": {{ @index 0 }}\n    }{{#unless @last}},{{/unless}}\n    {{/repeat}}\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get question by ID",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "e282ec2d-695b-4bcc-8197-ecc8f314a5a5",
+      "type": "http",
+      "documentation": "Request AI explanation for a question",
+      "method": "post",
+      "endpoint": "/api/v1/questions/:questionId/explanations",
+      "responses": [
+        {
+          "uuid": "1ac53690-12fe-4a4c-8931-7f807118f274",
+          "body": "{\r\n  \"explanationId\": \"{{ faker 'string.uuid' }}\",\r\n  \"questionId\": \"{{ faker 'string.uuid' }}\",\r\n  \"content\": \"{{ faker 'lorem.paragraph' 10 }}\",\r\n  \"model\": \"{{ oneOf 'gpt-4' 'gpt-3.5-turbo' 'llama-2' }}\",\r\n  \"expiresAt\": \"{{ faker 'date.future' }}\"\r\n}\r\n",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Request AI explanation for a question",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "e8c752d5-dc67-42ff-ba30-31d7a16d0be9",
+      "type": "http",
+      "documentation": "Create review",
+      "method": "post",
+      "endpoint": "/api/v1/reviews",
+      "responses": [
+        {
+          "uuid": "14787401-981f-40c7-a8ad-4ed72a3200fc",
+          "body": "[\n  {{#repeat 3}}\n  {\n    \"id\": \"{{ faker 'string.uuid' }}\",\n    \"attemptId\": \"{{ faker 'string.uuid' }}\",\n    \"userId\": \"{{ faker 'string.uuid' }}\",\n    \"rating\": {{ faker 'number.int' min=1 max=5 }},\n    \"comment\": \"{{ faker 'lorem.sentence' }}\",\n    \"createdAt\": \"{{ faker 'date.recent' }}\"\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "Create review",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "fdd0f4c0-01c3-414c-a88a-27ca9900643e",
+      "type": "http",
+      "documentation": "Get review by attempt",
+      "method": "get",
+      "endpoint": "api/v1/reviews/by-attempt/:attemptId",
+      "responses": [
+        {
+          "uuid": "a58d227a-05eb-4da8-9ce2-4efd3e9b0659",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"attemptId\": \"{{ faker 'string.uuid' }}\",\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"rating\": {{ faker 'number.int' min=1 max=5 }},\n  \"comment\": \"{{ faker 'lorem.paragraph' }}\",\n  \"createdAt\": \"{{ faker 'date.recent' }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get review by attempt",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "6dfaadea-bcf1-4ad0-9337-43f3e7165374",
+      "type": "http",
+      "documentation": "Get review summary for a user",
+      "method": "get",
+      "endpoint": "api/v1/reviews/summary/user/:userId",
+      "responses": [
+        {
+          "uuid": "f679b94f-ed95-47bc-86b0-67f515490ea2",
+          "body": "{\n  \"submitted\": {{ faker 'number.int' min=5 max=50 }},\n  \"approved\": {{ faker 'number.int' min=3 max=40 }},\n  \"useful\": {{ faker 'number.int' min=1 max=30 }},\n  \"detailed\": {{ faker 'number.int' min=0 max=20 }}\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get review summary for a user",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "36be25cb-355d-4d13-8fbf-078a26fb95a0",
+      "type": "http",
+      "documentation": "Get user statistics",
+      "method": "get",
+      "endpoint": "api/v1/stats/user/:userId",
+      "responses": [
+        {
+          "uuid": "fc8874cc-217a-4912-93a1-c77fb3f69a52",
+          "body": "{\n  \"userId\": \"{{ faker 'string.uuid' }}\",\n  \"totalAttempts\": {{ faker 'number.int' min=5 max=50 }},\n  \"completedAttempts\": {{ faker 'number.int' min=3 max=45 }},\n  \"bestScore\": {{ faker 'number.int' min=70 max=100 }},\n  \"averageScore\": {{ faker 'number.float' min=50 max=95 }},\n  \"lastAttemptAt\": \"{{ faker 'date.recent' }}\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get user statistics",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "149fef79-21a8-42aa-a4bb-578666897557",
+      "type": "http",
+      "documentation": "Get performance by AWS domain",
+      "method": "get",
+      "endpoint": "api/v1/stats/user/:userId/domains",
+      "responses": [
+        {
+          "uuid": "96ba9310-ef40-457e-9ac3-6b42a531e64c",
+          "body": "[\n  {{#repeat 5}}\n  {\n    \"awsDomain\": \"{{ oneOf 'EC2' 'S3' 'Lambda' 'RDS' 'VPC' }}\",\n    \"totalQuestions\": {{ faker 'number.int' min=10 max=50 }},\n    \"correctAnswers\": {{ faker 'number.int' min=5 max=45 }},\n    \"accuracyRate\": {{ faker 'number.float' min=0.5 max=1 }}\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get performance by AWS domain",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "ec98e5d9-eaaf-4e65-bf73-ead686d0cc14",
+      "type": "http",
+      "documentation": "Get attempt history",
+      "method": "get",
+      "endpoint": "api/v1/stats/user/:userId/history",
+      "responses": [
+        {
+          "uuid": "300fcca6-ac0c-4376-ba17-8a4694df74de",
+          "body": "[\n  {{#repeat 5}}\n  {\n    \"userId\": \"{{ faker 'string.uuid' }}\",\n    \"totalAttempts\": {{ faker 'number.int' min=5 max=50 }},\n    \"completedAttempts\": {{ faker 'number.int' min=3 max=45 }},\n    \"bestScore\": {{ faker 'number.int' min=70 max=100 }},\n    \"averageScore\": {{ faker 'number.float' min=50 max=95 }},\n    \"startedAt\": \"{{ faker 'date.recent' }}\",\n    \"endsAt\": \"{{ faker 'date.future' }}\",\n    \"lastAttemptAt\": \"{{faker 'date.past'}}\",\n    \"status\": \"{{ oneOf 'IN_PROGRESS' 'COMPLETED' 'ABANDONED' }}\",\n    \"attemptId\": \"{{ faker 'string.uuid' }}\",\n    \"examId\": \"{{ faker 'string.uuid' }}\",\n    \"examTitle\": \"{{ faker 'lorem.sentence' }}\",\n    \"score\": {{ faker 'number.int' min=20 max=100 }}\n  }{{#unless @last}},{{/unless}}\n  {{/repeat}}\n]",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "Get attempt history",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "29e6b598-426a-4d91-945c-1e61d6a32f1c",
+      "type": "http",
+      "documentation": "API Endpoint",
+      "method": "post",
+      "endpoint": "/api/v1/translations/translate",
+      "responses": [
+        {
+          "uuid": "6adc025b-f525-4461-b206-10e37d4edca4",
+          "body": "{\n  \"id\": \"{{ faker 'string.uuid' }}\",\n  \"entityId\": \"{{ faker 'string.uuid' }}\",\n  \"entityType\": \"QUESTION\",\n  \"language\": \"{{ oneOf 'pt-BR' 'en-US' 'es-ES' }}\",\n  \"field\": \"text\",\n  \"value\": \"{{ faker 'lorem.sentence' }}\",\n  \"reviewed\": false,\n  \"source\": \"api\"\n}",
+          "latency": 0,
+          "statusCode": 201,
+          "label": "API Endpoint",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "183c687e-747a-4415-9558-c4b2555a4412"
+    },
+    {
+      "type": "route",
+      "uuid": "8f2a1286-d46c-464c-b5bf-c5984bf54236"
+    },
+    {
+      "type": "route",
+      "uuid": "f6d4cacf-03e3-430d-96cd-faa964cea84c"
+    },
+    {
+      "type": "route",
+      "uuid": "b00076e8-f1b9-4a74-a412-04a1f14dedee"
+    },
+    {
+      "type": "route",
+      "uuid": "d9abd013-6af9-4286-aec5-c6617a49dd14"
+    },
+    {
+      "type": "route",
+      "uuid": "72869223-6a43-4509-854b-1353bacad4af"
+    },
+    {
+      "type": "route",
+      "uuid": "af4be232-2942-46c5-8741-582b3533868b"
+    },
+    {
+      "type": "route",
+      "uuid": "0cb8646f-1c5d-4f20-8a82-ca29fb06a143"
+    },
+    {
+      "type": "route",
+      "uuid": "4c33d844-a135-4111-bae3-ce16fe2c3861"
+    },
+    {
+      "type": "route",
+      "uuid": "16bc4a4f-9ed0-4422-85ea-472e71aa6eee"
+    },
+    {
+      "type": "route",
+      "uuid": "f097416f-2e99-4e25-8466-881c4096bb32"
+    },
+    {
+      "type": "route",
+      "uuid": "1c18361f-8526-4117-a427-d6fff046d92e"
+    },
+    {
+      "type": "route",
+      "uuid": "b2efa074-cb6d-4975-aae7-bfd6f00292ad"
+    },
+    {
+      "type": "route",
+      "uuid": "40738a67-2e0f-4fca-83c7-e078615a94d5"
+    },
+    {
+      "type": "route",
+      "uuid": "f75eb53d-5e55-4dc9-931e-78b133f924e7"
+    },
+    {
+      "type": "route",
+      "uuid": "5aa76ad2-942f-4ed6-92d2-3d1e3f6a7e52"
+    },
+    {
+      "type": "route",
+      "uuid": "ad9773d0-fe61-4553-a30f-38b2ab559eda"
+    },
+    {
+      "type": "route",
+      "uuid": "956d51e2-f1a1-4c18-8953-a0f6ef45d7e6"
+    },
+    {
+      "type": "route",
+      "uuid": "1a345ef6-0e4e-4cd0-808a-6d1beb04c718"
+    },
+    {
+      "type": "route",
+      "uuid": "1b1f1d02-3065-46b3-bbb7-e8789c5c69b5"
+    },
+    {
+      "type": "route",
+      "uuid": "d636a979-077b-44f7-a7e1-bb23431c7dbe"
+    },
+    {
+      "type": "route",
+      "uuid": "acfaa69e-9783-4fc7-819b-15d2067323f0"
+    },
+    {
+      "type": "route",
+      "uuid": "44cb3fea-c94b-4bd2-be26-23c1cb782b13"
+    },
+    {
+      "type": "route",
+      "uuid": "7abc8327-197e-4146-891b-f4ded4a5227c"
+    },
+    {
+      "type": "route",
+      "uuid": "314bbce6-bc19-4d34-95e2-f8ca7a754b80"
+    },
+    {
+      "type": "route",
+      "uuid": "d25e6725-e670-46af-88d4-d643dc406dbd"
+    },
+    {
+      "type": "route",
+      "uuid": "d16b3dbc-6ced-4431-8e20-381330172d17"
+    },
+    {
+      "type": "route",
+      "uuid": "4cf3936c-50ea-4657-93c6-76f309eecaed"
+    },
+    {
+      "type": "route",
+      "uuid": "b03e3bb3-804e-4604-880f-9e1452ecdb54"
+    },
+    {
+      "type": "route",
+      "uuid": "a9297393-7798-45fe-9f08-041740d3f40d"
+    },
+    {
+      "type": "route",
+      "uuid": "0ceb5b51-e466-4dd8-a376-b40fdd724cd5"
+    },
+    {
+      "type": "route",
+      "uuid": "63f52012-db7f-425c-a0f8-1e299f017791"
+    },
+    {
+      "type": "route",
+      "uuid": "01d5f246-a9f8-45e4-8ec5-11edb877c34e"
+    },
+    {
+      "type": "route",
+      "uuid": "0369daa7-7c35-483a-ab8e-cfbc510dfff3"
+    },
+    {
+      "type": "route",
+      "uuid": "7c7371ac-5c1f-4879-b06a-ee43462f4fd2"
+    },
+    {
+      "type": "route",
+      "uuid": "2324e438-4f8a-4fab-b673-1646c2c9443c"
+    },
+    {
+      "type": "route",
+      "uuid": "cbb2c137-0de8-4d47-929b-8ff6816fe4c8"
+    },
+    {
+      "type": "route",
+      "uuid": "e282ec2d-695b-4bcc-8197-ecc8f314a5a5"
+    },
+    {
+      "type": "route",
+      "uuid": "e8c752d5-dc67-42ff-ba30-31d7a16d0be9"
+    },
+    {
+      "type": "route",
+      "uuid": "fdd0f4c0-01c3-414c-a88a-27ca9900643e"
+    },
+    {
+      "type": "route",
+      "uuid": "6dfaadea-bcf1-4ad0-9337-43f3e7165374"
+    },
+    {
+      "type": "route",
+      "uuid": "36be25cb-355d-4d13-8fbf-078a26fb95a0"
+    },
+    {
+      "type": "route",
+      "uuid": "149fef79-21a8-42aa-a4bb-578666897557"
+    },
+    {
+      "type": "route",
+      "uuid": "ec98e5d9-eaaf-4e65-bf73-ead686d0cc14"
+    },
+    {
+      "type": "route",
+      "uuid": "29e6b598-426a-4d91-945c-1e61d6a32f1c"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With,x-content-language"
+    }
+  ],
+  "proxyReqHeaders": [],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [
+    {
+      "uuid": "6c4be66c-8c7f-41ec-ac4b-2329b9f25ede",
+      "id": "ilww",
+      "name": "Users",
+      "documentation": "",
+      "value": "[\n  {{#repeat 50}}\n  {\n    \"id\": \"{{faker 'string.uuid'}}\",\n    \"username\": \"{{faker 'internet.userName'}}\"\n  }\n  {{/repeat}}\n]"
+    }
+  ],
+  "callbacks": []
+}

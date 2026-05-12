@@ -398,11 +398,11 @@ export class ExamsListComponent implements OnInit {
   private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
   constructor(
-    private examsApi: ExamsApiService,
-    private router: Router,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
-    private transferState: TransferState,
+    private readonly examsApi: ExamsApiService,
+    private readonly router: Router,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
+    private readonly transferState: TransferState,
   ) {
   }
 
