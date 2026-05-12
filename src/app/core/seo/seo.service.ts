@@ -5,9 +5,9 @@ import {SeoOpenGraph, SeoTwitter} from './seo.model';
 @Injectable({providedIn: 'root'})
 export class SeoService {
 
-  constructor(private title: Title,
-              private meta: Meta,
-              @Inject(DOCUMENT) private document: Document) {
+  constructor(private readonly title: Title,
+              private readonly meta: Meta,
+              @Inject(DOCUMENT) private readonly document: Document) {
   }
 
   updateTitle(title: string) {
@@ -63,9 +63,9 @@ export class SeoService {
   setJsonLd(id: string, data: unknown): void {
     const scriptId = this.normalizeJsonLdId(id);
 
-    const selectorId = typeof (globalThis as any).CSS !== 'undefined' && typeof (globalThis as any).CSS.escape === 'function'
+    const selectorId = (globalThis as any)?.CSS?.escape === 'function'
       ? (globalThis as any).CSS.escape(scriptId)
-      : scriptId.replace(/([^a-zA-Z0-9_-])/g, '\\$1');
+      : scriptId.replaceAll(/([^a-zA-Z0-9_-])/g, String.raw`\$1`);
 
     const existing = this.document.head.querySelector(`script#${selectorId}`) as HTMLScriptElement | null;
 
@@ -82,19 +82,17 @@ export class SeoService {
   removeJsonLd(id: string): void {
     const scriptId = this.normalizeJsonLdId(id);
 
-    const selectorId = typeof (globalThis as any).CSS !== 'undefined' && typeof (globalThis as any).CSS.escape === 'function'
+    const selectorId = typeof (globalThis as any)?.CSS?.escape === 'function'
       ? (globalThis as any).CSS.escape(scriptId)
-      : scriptId.replace(/([^a-zA-Z0-9_-])/g, '\\$1');
+      : scriptId.replaceAll(/([^a-zA-Z0-9_-])/g, String.raw`\$1`);
 
     const existing = this.document.head.querySelector(`script#${selectorId}`);
-    if (existing) {
-      existing.remove();
-    }
+    existing?.remove();
   }
 
   private normalizeJsonLdId(id: string): string {
     const raw = id.startsWith('ld-json:') ? id : `ld-json-${id}`;
-    return raw.replace(/[^a-zA-Z0-9_-]/g, '-');
+    return raw.replaceAll(/[^a-zA-Z0-9_-]/g, '-');
   }
 
   private normalizeUrl(url: string): string {

@@ -129,7 +129,7 @@ export class RegisterComponent {
     this.loadingGoogle.set(true);
     this.errorMessage.set('');
 
-    window.location.href = `${this.baseUrl}/api/v1/auth/oauth/google`;
+    globalThis.location.href = `${this.baseUrl}/api/v1/auth/oauth/google`;
   }
 
   onSubmit(): void {

@@ -26,12 +26,7 @@ export class AttemptsApiService {
   }
 
   startAttempt(request: StartAttemptRequest): Observable<HttpResponse<void>> {
-    return this.http.post<void>(this.baseUrl, request, { observe: 'response' })
-      .pipe(
-        catchError(error => {
-          return throwError(() => error);
-        })
-      );
+    return this.http.post<void>(this.baseUrl, request, { observe: 'response' });
   }
 
   getAttempt(attemptId: string): Observable<AttemptResponse> {
@@ -39,7 +34,7 @@ export class AttemptsApiService {
   }
 
   getAttemptsByUser(userId: string): Observable<AttemptResponse[]> {
-    return this.http.get<AttemptResponse[]>(`${this.baseUrl}/user/${userId}`);
+    return this.http.get<AttemptResponse[]>(`${this.baseUrl}/user/${userId}?page=0&size=5&sort=desc&sortBy=finishedAt`);
   }
 
   getAttemptQuestions(attemptId: string): Observable<AttemptQuestionResponse[]> {

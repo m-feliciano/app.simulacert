@@ -245,10 +245,10 @@ export class AdminComponent implements OnInit {
   users = signal<UserResponse[]>([]);
 
   constructor(
-    private fb: FormBuilder,
-    private examsApi: ExamsApiService,
-    private questionsApi: QuestionsApiService,
-    private authApi: AuthApiService
+    private readonly fb: FormBuilder,
+    private readonly examsApi: ExamsApiService,
+    private readonly questionsApi: QuestionsApiService,
+    private readonly authApi: AuthApiService
   ) {
     this.examForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],

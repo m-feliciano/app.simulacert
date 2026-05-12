@@ -1,4 +1,4 @@
-import {effect, Inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
+import {DOCUMENT, effect, Inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
 
@@ -26,8 +26,9 @@ export class ThemeService {
   private readonly isBrowser: boolean;
 
   constructor(
-    @Inject(LOCAL_STORAGE) private storage: Storage | null,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
+    @Inject(PLATFORM_ID) private readonly platformId: Object,
+    @Inject(DOCUMENT) private readonly document: Document
   ) {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
@@ -70,7 +71,7 @@ export class ThemeService {
   private applyTheme(mode: ThemeMode) {
     if (!this.isBrowser) return;
 
-    const root = document.documentElement;
+    const root = this.document.documentElement;
     root.classList.remove('theme-light', 'theme-dark', 'theme-warm', 'theme-high-contrast');
     root.classList.add(`theme-${mode}`);
 
@@ -81,11 +82,11 @@ export class ThemeService {
       'high-contrast': '#000000'
     };
 
-    let metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    let metaThemeColor = this.document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
-      metaThemeColor = document.createElement('meta');
+      metaThemeColor = this.document.createElement('meta');
       metaThemeColor.setAttribute('name', 'theme-color');
-      document.head.appendChild(metaThemeColor);
+      this.document.head.appendChild(metaThemeColor);
     }
 
     metaThemeColor.setAttribute('content', themeColors[mode]);
@@ -94,7 +95,7 @@ export class ThemeService {
   private applyFontSize(size: FontSize) {
     if (!this.isBrowser) return;
 
-    const root = document.documentElement;
+    const root = this.document.documentElement;
     root.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge', 'font-extra-small');
     root.classList.add(`font-${size}`);
   }
@@ -102,7 +103,7 @@ export class ThemeService {
   private applyFontFamily(family: FontFamily) {
     if (!this.isBrowser) return;
 
-    const root = document.documentElement;
+    const root = this.document.documentElement;
     root.classList.remove(
       'font-family-sans',
       'font-family-serif',
@@ -120,8 +121,8 @@ export class ThemeService {
     const stored = this.storage?.getItem(this.THEME_KEY) as ThemeMode;
     if (stored) return stored;
 
-    if (typeof window !== 'undefined' && window.matchMedia) {
-      return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    if (globalThis.window !== undefined && globalThis.matchMedia) {
+      return globalThis.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
     }
 
     return 'dark';
@@ -145,7 +146,7 @@ export class ThemeService {
     if (confirm(this.alertChangeLanguage()[this.language()])) {
       this.storage.setItem('language', lang);
 
-      setTimeout(() => window.location.reload(), 200);
+      setTimeout(() => globalThis.location.reload(), 200);
     }
   }
 

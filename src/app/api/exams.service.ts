@@ -37,10 +37,6 @@ export class ExamsApiService {
     return this.http.delete<void>(`${this.baseUrl}/${examId}`);
   }
 
-  examExists(examId: string): Observable<boolean> {
-    return this.http.get<boolean>(`${this.baseUrl}/${examId}/exists`);
-  }
-
   importFromDirectory(): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/import/directory`, {});
   }

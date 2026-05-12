@@ -261,11 +261,7 @@ export class DashboardComponent implements OnInit {
   loadRecentAttempts(userId: string): void {
     this.attemptsApi.getAttemptsByUser(userId).subscribe({
       next: (attempts) => {
-        const sorted = attempts
-          .sort((a, b) =>
-            new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime())
-          .slice(0, 5);
-        this.recentAttempts.set(sorted);
+        this.recentAttempts.set(attempts);
       },
     });
   }

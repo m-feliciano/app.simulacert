@@ -14,8 +14,8 @@ export class ExplanationsApiService {
   private readonly baseUrl: string;
 
   constructor(
-    private http: HttpClient,
-    @Inject(API_CONFIG) private config: ApiConfig
+    private readonly http: HttpClient,
+    @Inject(API_CONFIG) private readonly config: ApiConfig
   ) {
     this.baseUrl = `${this.config.baseUrl}/api/v1`;
   }
