@@ -1,13 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnDestroy,
-  OnInit,
-  Signal,
-  signal,
-  ViewEncapsulation,
-  WritableSignal
-} from '@angular/core';
+import {Component, DestroyRef, effect, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -135,6 +126,7 @@ import {QuestionExplanationComponent} from '../../shared/components/question-exp
                   class="option"
                   [class.selected]="isOptionSelected(option.key)"
                   (click)="toggleAnswer(option.key)">
+
                   @if (isMultipleChoice(currentQuestion)) {
                     <div class="option-checkbox" [class.checked]="isOptionSelected(option.key)">
                       @if (isOptionSelected(option.key)) {
@@ -249,14 +241,14 @@ import {QuestionExplanationComponent} from '../../shared/components/question-exp
     </div>
   `
 })
-export class AttemptRunnerComponent implements OnInit, OnDestroy {
+export class AttemptRunnerComponent implements OnInit {
   attemptId!: string;
   exam = signal<ExamResponse | null>(null);
   questions = signal<AttemptQuestionResponse[]>([]);
   selectedAnswers = signal<{ [index: number]: string[] }>({});
   answeredQuestions = signal(new Set<number>());
   currentQuestionIndex = signal(0);
-  timeRemaining = signal(0);
+  timeRemaining = signal(1);
   startedAtMs = signal<number | null>(null);
   showPopover = signal(false);
   popoverPinned = signal(false);
@@ -277,6 +269,15 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
   heartbeatOk = signal(true);
   lastHeartbeatAt = signal<number | null>(Date.now());
   showExplanation = signal(false);
+
+  private readonly finishAttemptEffect = effect(() => {
+    const timeRemaining = this.timeRemaining();
+    const loaded = this.attemptLoaded();
+    if (loaded && timeRemaining <= 0) {
+      this.unsubscribe();
+      this.finishAttempt();
+    }
+  });
 
   private readonly TIMER_TICK_MS = 1000;
   private readonly HEARTBEAT_EVERY_MS = 10_000;
@@ -309,10 +310,6 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.loadAttempt();
   }
 
-  ngOnDestroy(): void {
-    this.unsubscribe();
-  }
-
   private updateRemainingFromEndsAt(): void {
     const endsAt = this.endsAtMs();
     if (endsAt) {
@@ -323,22 +320,21 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
   private setTimingFromServer(payload: { endsAt?: string; remainingSeconds?: number; paused: boolean }): void {
     if (payload.paused) {
-      if (payload.remainingSeconds !== undefined && payload.remainingSeconds !== null) {
+      if (payload.remainingSeconds) {
         this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
 
       } else if (payload.endsAt) {
         const ms = Date.parse(payload.endsAt);
-        if (!Number.isNaN(ms)) this.endsAtMs.set(ms);
+        if (!Number.isNaN(ms))
+          this.endsAtMs.set(ms);
       }
+    } else if (payload.endsAt) {
+      const ms = Date.parse(payload.endsAt);
+      if (!Number.isNaN(ms))
+        this.endsAtMs.set(ms);
 
-    } else {
-      if (payload.endsAt) {
-        const ms = Date.parse(payload.endsAt);
-        if (!Number.isNaN(ms)) this.endsAtMs.set(ms);
-
-      } else if (payload.remainingSeconds !== undefined && payload.remainingSeconds !== null) {
-        this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
-      }
+    } else if (payload.remainingSeconds) {
+      this.endsAtMs.set(Date.now() + payload.remainingSeconds * 1000);
     }
 
     this.isPaused.set(payload.paused);
@@ -351,13 +347,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     this.timerSubscription = interval(this.TIMER_TICK_MS)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        if (this.isPaused()) return;
-
-        this.updateRemainingFromEndsAt();
-
-        if (this.timeRemaining() <= 0 && this.attemptLoaded()) {
-          this.unsubscribe();
-          this.finishAttempt();
+        if (!this.isPaused()) {
+          this.updateRemainingFromEndsAt();
         }
     });
   }
@@ -426,32 +417,30 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     const currentIdx = this.currentQuestionIndex();
 
     const currentMap = this.selectedAnswers();
-    const currentAnswers = [...(currentMap[currentIdx] ?? [])];
     const expectedCount = this.getExpectedAnswerCount(this.currentQuestion!);
 
-    let nextAnswers: string[] = currentAnswers;
+    let currentAnswers = [...(currentMap[currentIdx] ?? [])];
 
     if (expectedCount === 1) {
       if (currentAnswers.length === 1 && currentAnswers[0] === optionKey) {
-        nextAnswers = [];
+        currentAnswers = [];
       } else {
-        nextAnswers = [optionKey];
+        currentAnswers = [optionKey];
       }
+    } else if (currentAnswers.indexOf(optionKey) > -1) {
+      currentAnswers = currentAnswers.filter(a => a !== optionKey);
+
+    } else if (currentAnswers.length < expectedCount) {
+      currentAnswers = [...currentAnswers, optionKey].sort((a, b) => a.localeCompare(b));
+
     } else {
-      const optionIndex = currentAnswers.indexOf(optionKey);
-      if (optionIndex > -1) {
-        nextAnswers = currentAnswers.filter(a => a !== optionKey);
-      } else if (currentAnswers.length < expectedCount) {
-        nextAnswers = [...currentAnswers, optionKey].sort();
-      } else {
-        alert(`Você só pode selecionar ${expectedCount} opções para esta questão.`);
-        return;
-      }
+      alert(`Você só pode selecionar ${expectedCount} opções para esta questão.`);
+      return;
     }
 
     this.selectedAnswers.set({
       ...currentMap,
-      [currentIdx]: nextAnswers,
+      [currentIdx]: currentAnswers,
     });
   }
 
@@ -729,7 +718,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
   private goToNextAnswerPending() {
     const lastAnsweredIndex = Math.max(...Array.from(this.answeredQuestions()).map(i => i), -1);
-    const nextPendingIndex = this.questions().findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
+    const nextPendingIndex = this.questions()
+      .findIndex((_, idx) => idx > lastAnsweredIndex && !this.answeredQuestions().has(idx));
 
     if (nextPendingIndex === -1) {
       this.currentQuestionIndex.set(this.questions().length - 1);

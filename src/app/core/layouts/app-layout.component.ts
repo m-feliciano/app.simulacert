@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, DestroyRef, inject, signal} from '@angular/core';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {AuthFacade} from '../auth/auth.facade';
@@ -19,6 +19,8 @@ import {
   Type
 } from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
+import {fromEvent} from 'rxjs';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-layout',
@@ -66,7 +68,7 @@ import {ThemeService} from '../theme/theme.service';
       </header>
       <div class="app-content">
         @if (isMobile() && !sidebarCollapsed()) {
-          <div class="sidebar-overlay" (click)="closeSidebar()"></div>
+          <div class="sidebar-overlay" (click)="onNavItemClick()"></div>
 
           <aside class="sidebar" [ngClass]="{'collapsed': sidebarCollapsed()}">
             <nav class="sidebar-nav">
@@ -464,20 +466,15 @@ export class AppLayoutComponent {
   sidebarCollapsed = signal(true);
   isMobile = signal(false);
   showSupportModal = false;
+  destroyRef = inject(DestroyRef);
 
-  public themeService = inject(ThemeService);
+  private readonly themeService = inject(ThemeService);
 
   constructor(
     protected readonly authFacade: AuthFacade,
     private readonly router: Router
   ) {
     this.checkIfMobile();
-  }
-
-  closeSidebar(): void {
-    if (this.isMobile()) {
-      this.sidebarCollapsed.set(true);
-    }
   }
 
   toggleSidebar(): void {
@@ -496,15 +493,19 @@ export class AppLayoutComponent {
       return;
     }
 
-    this.isMobile.set(window.innerWidth <= 768);
+    this.isMobile.set(globalThis.window.innerWidth <= 768);
 
-    window.addEventListener('resize', () => {
-      const wasMobile = this.isMobile();
-      this.isMobile.set(window.innerWidth <= 768);
+    fromEvent(globalThis.window, 'resize')
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        const checkMobile = globalThis.window.innerWidth <= 768;
+        const wasMobile = this.isMobile();
 
-      if (wasMobile !== this.isMobile()) {
-        this.sidebarCollapsed.set(this.isMobile());
-      }
+        this.isMobile.set(checkMobile);
+
+        if (wasMobile !== this.isMobile()) {
+          this.sidebarCollapsed.set(this.isMobile());
+        }
     });
   }
 

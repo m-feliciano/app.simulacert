@@ -20,7 +20,7 @@ export class AuthFacade {
   private readonly TOKEN_KEY = 'simulacert_token';
   private readonly REFRESH_KEY = 'refresh_token';
 
-  private state = signal<AuthState>({
+  private readonly state = signal<AuthState>({
     user: null,
     token: null,
     isAuthenticated: false
@@ -33,8 +33,8 @@ export class AuthFacade {
   readonly isAdmin = computed(() => this.state().user?.role === 'ADMIN');
 
   constructor(
-    private authApi: AuthApiService,
-    @Inject(LOCAL_STORAGE) private storage: Storage | null,
+    private readonly authApi: AuthApiService,
+    @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
   ) {
     const token = this.loadTokenFromStorage();
     const user = this.loadUserFromStorage();
@@ -66,13 +66,10 @@ export class AuthFacade {
     return this.authApi.register(request)
       .pipe(
         tap((response) => {
-          if (response && response.status === 200) {
+          if (response?.status === 200) {
             this.clearAuth();
           }
-        }),
-      catchError(error => {
-        return throwError(() => error);
-      })
+        })
     );
   }
 

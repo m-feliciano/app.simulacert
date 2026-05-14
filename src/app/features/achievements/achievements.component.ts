@@ -532,11 +532,11 @@ export class AchievementsComponent implements OnInit {
 
 
   constructor(
-    private authFacade: AuthFacade,
-    private statsApi: StatsApiService,
-    private reviewsService: ReviewsApiService,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly authFacade: AuthFacade,
+    private readonly statsApi: StatsApiService,
+    private readonly reviewsService: ReviewsApiService,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Conquistas | SimulaCert',
@@ -568,7 +568,10 @@ export class AchievementsComponent implements OnInit {
       this.loading.set(false);
       return;
     }
+    this.loadData(userId);
+  }
 
+  private loadData(userId: string) {
     forkJoin({
       stats: this.statsApi.getUserStatistics(userId),
       history: this.statsApi.getAttemptHistory(userId),
@@ -717,7 +720,7 @@ export class AchievementsComponent implements OnInit {
       if (!h.finishedAt) return;
 
       const d = new Date(h.finishedAt);
-      if (!isNaN(d.getTime())) {
+      if (!Number.isNaN(d.getTime())) {
         const key = d.toISOString().slice(0, 10); // YYYY-MM-DD
         daySet.add(key);
       }
