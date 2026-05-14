@@ -379,6 +379,8 @@ interface Achievement {
   `]
 })
 export class AchievementsComponent implements OnInit {
+  private readonly _pointsPerAchievement = 50;
+
   level = signal(0);
   totalPoints = signal(0);
   streakDays = signal(0);
@@ -676,8 +678,7 @@ export class AchievementsComponent implements OnInit {
         this.level.set(Math.max(1, levelBase + levelBonus + 1));
 
         const basePoints = (stats.completedAttempts ?? 0) * (stats.averageScore ?? 0);
-        const pointsPerAchievement = 50;
-        this.totalPoints.set(basePoints + (unlockedCount * pointsPerAchievement));
+        this.totalPoints.set(Math.floor(basePoints + (unlockedCount * this._pointsPerAchievement)));
 
         this.seoFacade.set(this.buildSeoMeta(updated));
 
