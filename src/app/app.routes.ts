@@ -40,7 +40,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'achievements', loadComponent: () => import('./features/achievements/achievements.component').then(m => m.AchievementsComponent) },
-      { path: 'exams', component: ExamsListComponent },
+      { path: 'exams', loadComponent: () => import('./features/exams/exams-list.component').then(m => m.ExamsListComponent) },
       { path: 'stats', loadComponent: () => import('./features/stats/stats.component').then(m => m.StatsComponent) },
       { matcher: examsIdMatcher, loadComponent: () => import('./features/exams/exam-detail.component').then(m => m.ExamDetailComponent) },
       { path: 'exams/:slug', resolve: { exam: ExamsSlugResolver }, loadComponent: () => import('./features/exams/exam-detail.component').then(m => m.ExamDetailComponent) },

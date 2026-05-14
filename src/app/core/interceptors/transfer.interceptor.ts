@@ -26,7 +26,7 @@ export class TransferStateInterceptor implements HttpInterceptor {
     }
 
     const key = req.context.get(CACHE_TRANSFER_STATE);
-    if (isPlatformBrowser(this.platformId)) {
+    if (key && isPlatformBrowser(this.platformId)) {
       const cached = this.transferStateManager.get(key);
       if (cached) {
         return of(
@@ -40,7 +40,7 @@ export class TransferStateInterceptor implements HttpInterceptor {
 
     return next.handle(req).pipe(
       tap(event => {
-        if (isPlatformServer(this.platformId) && event instanceof HttpResponse) {
+        if (key && isPlatformServer(this.platformId) && event instanceof HttpResponse) {
           this.transferStateManager.set(key, event.body);
         }
       })
