@@ -44,6 +44,6 @@ export class ExamsApiService {
 
   getExamBySlug(slug: string): Observable<ExamResponse> {
     const encoded = encodeURIComponent(slug);
-    return this.http.get<ExamResponse>(`${this.baseUrl}/slug/${encoded}`);
+    return this.http.get<ExamResponse>(`${this.baseUrl}/slug/${encoded}`, {context: withCacheState('exams_get_by_slug')});
   }
 }

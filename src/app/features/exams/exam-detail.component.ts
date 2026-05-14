@@ -115,7 +115,7 @@ import {FormsModule} from '@angular/forms';
                   <li><strong>Tipo:</strong> Simulado AWS</li>
                   <li><strong>Duração:</strong> {{ setup().durationMinutes }} minutos</li>
                   <li><strong>Questões:</strong> {{ questionCount() }}</li>
-                  <li><strong>Pontuação mínima:</strong> 72%</li>
+                  <li><strong>Pontuação mínima:</strong> 70%</li>
                 </ul>
               </div>
 
