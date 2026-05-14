@@ -1,4 +1,4 @@
-import {Component, Input, makeStateKey, OnInit, signal, TransferState} from '@angular/core';
+import {Component, Input, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
@@ -88,45 +88,29 @@ import {ExamResponse} from '../../api/domain';
 })
 export class RelatedExamsComponent implements OnInit {
   @Input({required: true}) currentExam!: ExamResponse;
-
   related = signal<ExamResponse[]>([]);
-  private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
-  constructor(private readonly examsApi: ExamsApiService,
-              private readonly transferState: TransferState
-  ) {
+  constructor(private readonly examsApi: ExamsApiService) {
   }
 
   ngOnInit(): void {
-    if (this.transferState.hasKey(this.examsKey)) {
-      const exams = this.transferState.get<ExamResponse[]>(this.examsKey, []);
-      this.setRelatedExams(exams);
-      this.transferState.remove(this.examsKey);
-
-    } else {
-      this.examsApi.getAllExams().subscribe({
-        next: (all) => {
-          this.setRelatedExams(all);
-          this.transferState.set(this.examsKey, all);
-        },
-        error: () => this.related.set([])
-      });
-    }
+    this.examsApi.getAllExams().subscribe({
+      next: (data) => this.setRelatedExams(data),
+      error: () => this.related.set([])
+    });
   }
 
   private setRelatedExams(all: ExamResponse[]) {
     const currentId = this.currentExam?.id;
     const currentSlug = this.currentExam?.slug;
 
-    const filtered = (all || []).filter(e => e && e.id !== currentId && e.slug !== currentSlug);
-
-    const scored = filtered
+    const filtered = all?.filter(e => e && e.id !== currentId && e.slug !== currentSlug)
       .map(e => ({exam: e, score: this.score(e)}))
       .sort((a, b) => b.score - a.score)
       .slice(0, 6)
       .map(x => x.exam);
 
-    this.related.set(scored);
+    this.related.set(filtered || []);
   }
 
   private score(exam: ExamResponse): number {

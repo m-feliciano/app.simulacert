@@ -1,17 +1,14 @@
-import {Inject, Injectable, makeStateKey, PLATFORM_ID, TransferState} from '@angular/core';
+import {Injectable} from '@angular/core';
 import {ActivatedRouteSnapshot, Resolve, RouterStateSnapshot} from '@angular/router';
-import {isPlatformBrowser, isPlatformServer} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {Observable, of} from 'rxjs';
-import {catchError, tap} from 'rxjs/operators';
 import {ExamResponse} from '../../api/domain';
 
 @Injectable({ providedIn: 'root' })
 export class ExamsSlugResolver implements Resolve<ExamResponse | null> {
+
   constructor(
-    private examsApi: ExamsApiService,
-    private transferState: TransferState,
-    @Inject(PLATFORM_ID) private platformId: object,
+    private readonly examsApi: ExamsApiService,
   ) {
   }
 
@@ -26,30 +23,6 @@ export class ExamsSlugResolver implements Resolve<ExamResponse | null> {
       return of(null);
     }
 
-    const key = makeStateKey<ExamResponse | null>(`exam:slug:${slug}`);
-
-    if (isPlatformBrowser(this.platformId) && this.transferState.hasKey(key)) {
-      const cached = this.transferState.get(key, null);
-      this.transferState.remove(key);
-      return of(cached);
-    }
-
-    return this.examsApi.getExamBySlug(slug).pipe(
-      tap((exam) => {
-        if (isPlatformServer(this.platformId)) {
-          if (exam) {
-            this.transferState.set(key, exam);
-          } else {
-            this.transferState.remove(key);
-          }
-        }
-      }),
-      catchError(() => {
-        if (isPlatformServer(this.platformId)) {
-          this.transferState.remove(key);
-        }
-        return of(null);
-      }),
-    );
+    return this.examsApi.getExamBySlug(slug);
   }
 }
