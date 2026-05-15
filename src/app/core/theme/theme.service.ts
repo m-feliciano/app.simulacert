@@ -132,7 +132,7 @@ export class ThemeService {
         if (confirm(message)) {
           this.i18nService.setLanguage(lang)
             .then(() => {
-              setTimeout(() => globalThis.location.reload(), 250);
+              setTimeout(() => globalThis.location.reload(), 500);
             })
         }
       });
