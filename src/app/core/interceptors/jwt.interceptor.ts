@@ -17,11 +17,11 @@ export class JwtInterceptor implements HttpInterceptor {
   ];
 
   private isRefreshing = false;
-  private refreshToken$ = new BehaviorSubject<string | null>(null);
+  private readonly refreshToken$ = new BehaviorSubject<string | null>(null);
 
   constructor(
-    private authFacade: AuthFacade,
-    private router: Router
+    private readonly authFacade: AuthFacade,
+    private readonly router: Router
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {

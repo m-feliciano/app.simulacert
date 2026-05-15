@@ -4,15 +4,21 @@
   @if (showThemeMenu()) {
     <div class="theme-dropdown sc-card sc-glass sc-glass--acrylic">
       <div class="dropdown-section">
-        <label>Modo</label>
+        <label>{{ 'theme.mode' | translate }}</label>
         <div class="options-grid">
-          <button (click)="themeService.setTheme('light')" [class.active]="themeService.themeMode() === 'light'">Luz</button>
-          <button (click)="themeService.setTheme('dark')" [class.active]="themeService.themeMode() === 'dark'">Trevas</button>
-          <button (click)="themeService.setTheme('warm')" [class.active]="themeService.themeMode() === 'warm'">Leitura</button>
+          <button (click)="themeService.setTheme('light')"
+                  [class.active]="themeService.themeMode() === 'light'">{{ 'theme.light' | translate }}
+          </button>
+          <button (click)="themeService.setTheme('dark')"
+                  [class.active]="themeService.themeMode() === 'dark'">{{ 'theme.dark' | translate }}
+          </button>
+          <button (click)="themeService.setTheme('warm')"
+                  [class.active]="themeService.themeMode() === 'warm'">{{ 'theme.warm' | translate }}
+          </button>
         </div>
       </div>
       <div class="dropdown-section">
-        <label>Tamanho da Fonte</label>
+        <label>{{ 'theme.fontSize' | translate }}</label>
         <div class="options-grid">
           <button (click)="themeService.setFontSize('extra-small')" [class.active]="themeService.fontSize() === 'extra-small'">PP</button>
           <button (click)="themeService.setFontSize('small')" [class.active]="themeService.fontSize() === 'small'">P</button>
@@ -22,7 +28,7 @@
         </div>
       </div>
       <div class="dropdown-section">
-        <label>Tipo de Fonte</label>
+        <label>{{ 'theme.fontFamily' | translate }}</label>
         <div class="options-grid">
           <button (click)="themeService.setFontFamily('sans')" [class.active]="themeService.fontFamily() === 'sans'"
                   style="font-family: var(--font-sans)">Sans</button>
@@ -39,19 +45,19 @@
         </div>
       </div>
       <div class="dropdown-section">
-        <label>Idioma</label>
+        <label>{{ 'theme.language' | translate }}</label>
         <div class="options-grid">
-          <button disabled
-                  style="cursor: not-allowed; opacity: 0.5;"
-                  [class.active]="themeService.language() === 'pt_br'">Português</button>
-          <button disabled
-                  style="cursor: not-allowed; opacity: 0.5;"
-                  [class.active]="themeService.language() === 'en'">English</button>
+          <button (click)="language = 'pt-BR'"
+                  [class.active]="language === 'pt-BR'">{{ 'theme.portuguese' | translate }}
+          </button>
+          <button (click)="language = 'en-US'"
+                  [class.active]="language === 'en-US'">{{ 'theme.english' | translate }}
+          </button>
         </div>
       </div>
     </div>
   }
-  <button class="floating-btn sc-glass" (click)="toggleThemeMenu()" title="Personalizar tema">
+  <button (click)="toggleThemeMenu()" [title]="'theme.customize' | translate" class="floating-btn sc-glass">
     <lucide-icon [img]="icons.palette" class="icon"></lucide-icon>
   </button>
 </div>

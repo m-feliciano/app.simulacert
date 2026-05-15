@@ -6,11 +6,11 @@ import {LOCAL_STORAGE} from '../storage/local-storage.token';
 @Injectable()
 export class LanguageInterceptor implements HttpInterceptor {
 
-  constructor(@Inject(LOCAL_STORAGE) private storage: Storage | null) {
+  constructor(@Inject(LOCAL_STORAGE) private readonly storage: Storage | null) {
   }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const language = this.storage?.getItem('language') || 'pt_br';
+    const language = this.storage?.getItem('language') || 'pt-BR';
     const modifiedReq = req.clone({
       setHeaders: {
         'x-content-language': language

@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
@@ -7,16 +7,18 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.component';
+import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent],
+  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent, TranslatePipe],
   template: `
     <div seoHead>
-      <app-breadcrumbs [items]="[{label: 'Home', url: '/'},{label: 'Exames'}]" />
+      <app-breadcrumbs [items]="[{label: 'Home', url: '/'},{label: 'exams.list.title' | translate }]"/>
 
-      <h1 class="page-title">Exames Disponíveis</h1>
+      <h1 class="page-title">{{ 'exams.list.title' | translate }}</h1>
       <div class="exams-container">
         @if (loading()) {
           <div class="skeleton-loader">
@@ -33,7 +35,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 
         @else if (error()) {
           <div class="error-state">
-            <p>{{ error() }}</p>
+            <p>{{ 'exams.list.error' | translate }}</p>
           </div>
         }
 
@@ -45,7 +47,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                   <h3>{{ exam.title }}</h3>
                   @if (exam.difficulty) {
                     <span class="difficulty-badge" [class]="'difficulty-' + exam.difficulty.toLowerCase()">
-                      {{ getDifficultyLabel(exam.difficulty) }}
+                      {{ ('exams.list.difficulty.' + exam.difficulty) | translate }}
                     </span>
                   }
                 </div>
@@ -66,10 +68,11 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                 }
 
                 @if (exam.incoming) {
-                  <a class="btn-primary disabled muted" aria-disabled="true" aria-label="Exame em breve">Em breve</a>
+                  <a class="btn-primary disabled muted" aria-disabled="true"
+                     [attr.aria-label]="'exams.list.comingSoon' | translate">{{ 'exams.list.comingSoon' | translate }}</a>
                 } @else {
                   <a class="btn-primary" (click)="handleClick(exam)"
-                     aria-label="Iniciar exame {{ exam.title }}">Iniciar</a>
+                     [attr.aria-label]="i18nService.instant('exams.list.start') + ' ' + exam.title">{{ 'exams.list.start' | translate }}</a>
                 }
               </div>
             }
@@ -78,7 +81,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
 
         @else {
           <div class="empty-state">
-            <p>Nenhum exame disponível no momento.</p>
+            <p>{{ 'exams.list.empty' | translate }}</p>
           </div>
         }
 
@@ -357,6 +360,8 @@ export class ExamsListComponent implements OnInit {
   loading = signal(true);
   error = signal('');
 
+  readonly i18nService = inject(I18nService);
+
   constructor(
     private readonly examsApi: ExamsApiService,
     private readonly router: Router,
@@ -398,20 +403,12 @@ export class ExamsListComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
+        this.error.set('loading-error');
         this.loading.set(false);
       }
     });
   }
 
-  getDifficultyLabel(difficulty: string): string {
-    const labels: { [key: string]: string } = {
-      'EASY': 'Fácil',
-      'MEDIUM': 'Médio',
-      'HARD': 'Difícil'
-    };
-    return labels[difficulty] || difficulty;
-  }
 
   handleClick(exam: ExamResponse): void {
     const slug = exam.slug;
