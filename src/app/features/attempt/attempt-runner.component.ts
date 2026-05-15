@@ -366,6 +366,9 @@ export class AttemptRunnerComponent implements OnInit {
             this.heartbeatOk.set(true);
             this.lastHeartbeatAt.set(Date.now());
             this.setTimingFromServer(timing);
+          },
+          error: () => {
+            this.heartbeatOk.set(false);
           }
         });
       });

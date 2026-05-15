@@ -5,6 +5,7 @@ import {AuthApiService} from '../../api/auth.service';
 import {AuthResponse, LoginRequest, RegisterRequest, UserResponse} from '../../api/domain';
 import {HttpResponse} from '@angular/common/http';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
+import {CacheService} from '../service/cache.service';
 
 interface AuthState {
   user: UserResponse | null;
@@ -35,6 +36,7 @@ export class AuthFacade {
   constructor(
     private readonly authApi: AuthApiService,
     @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
+    private readonly cacheService: CacheService
   ) {
     const token = this.loadTokenFromStorage();
     const user = this.loadUserFromStorage();
@@ -118,6 +120,7 @@ export class AuthFacade {
 
   logout(): void {
     this.clearAuth();
+    this.cacheService?.clear();
   }
 
   exchangeGoogleCode(code: string, state: string): Observable<AuthResponse> {

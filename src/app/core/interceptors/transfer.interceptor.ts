@@ -1,4 +1,4 @@
-import {HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse} from '@angular/common/http';
+import {HttpEvent, HttpEventType, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse} from '@angular/common/http';
 
 import {inject, Injectable, PLATFORM_ID} from '@angular/core';
 
@@ -7,27 +7,27 @@ import {isPlatformBrowser, isPlatformServer} from '@angular/common';
 import {Observable, of} from 'rxjs';
 import {tap} from 'rxjs/operators';
 
-import {CACHE_TRANSFER_STATE} from '../transfer/exam-state.transfer';
-import {TransferStateManagerService} from '../service/transfer-state-manager.service';
+import {CACHE_HTTP_RESPONSE} from '../transfer/exam-state.transfer';
+import {CacheService} from '../service/cache.service';
 
 @Injectable()
 export class TransferStateInterceptor implements HttpInterceptor {
 
   private readonly platformId = inject(PLATFORM_ID);
-  private readonly transferStateManager = inject(TransferStateManagerService);
+  private readonly storageService = inject(CacheService);
 
   intercept(
     req: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
 
-    if (req.method !== 'GET' || !req.context.has(CACHE_TRANSFER_STATE)) {
+    if (req.method !== 'GET' || !req.context.has(CACHE_HTTP_RESPONSE)) {
       return next.handle(req);
     }
 
-    const key = req.context.get(CACHE_TRANSFER_STATE);
+    const key = req.context.get(CACHE_HTTP_RESPONSE);
     if (key && isPlatformBrowser(this.platformId)) {
-      const cached = this.transferStateManager.get(key);
+      const cached = this.storageService.get(key);
       if (cached) {
         return of(
           new HttpResponse({
@@ -40,8 +40,8 @@ export class TransferStateInterceptor implements HttpInterceptor {
 
     return next.handle(req).pipe(
       tap(event => {
-        if (key && isPlatformServer(this.platformId) && event instanceof HttpResponse) {
-          this.transferStateManager.set(key, event.body);
+        if (key && event.type === HttpEventType.Response) {
+          this.storageService.set(key, event.body);
         }
       })
     );
