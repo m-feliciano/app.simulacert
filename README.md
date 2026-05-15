@@ -1,124 +1,58 @@
 # SimulaCert
 
-## Documentation language
+## Idiomas da documentação
 
-- 🇺🇸 English: see [README.en.md](./README.en.md)
 - 🇧🇷 Português (este arquivo)
+- 🇺🇸 English: veja [README.en.md](./README.en.md)
 
-Plataforma gratuita de simulados para certificações de tecnologia (AWS, Azure, Google Cloud, etc).
+## Sobre a Plataforma
 
-Descrição
+SimulaCert é uma **plataforma 100% gratuita** para simulados de certificações tecnológicas, como AWS, Azure e Google Cloud. Nossa missão é ajudar profissionais a se prepararem para exames de certificação com simulados realistas, explicações detalhadas e ferramentas de análise de desempenho.
 
-SimulaCert é uma plataforma destinada a apoiar profissionais na preparação para certificações de provedores de nuvem e outras certificações de TI. A aplicação fornece simulados, explicações, e ferramentas de análise de desempenho.
+> Experimente agora: [Acesse SimulaCert](https://simulacert.com)
 
-Status do projeto
+![Captura de tela da plataforma SimulaCert](./public/screenshot.png)
 
-- Framework frontend: Angular 21+
-- Estado: Em constante aprimoramento, com diversas funcionalidades implementadas e melhorias contínuas planejadas.
+## Destaques
 
-Resumo das funcionalidades
+- **Simulados Atualizados**: Questões no formato dos exames reais.
+- **Explicações Detalhadas**: Entenda cada resposta com explicações claras.
+- **Estatísticas de Desempenho**: Acompanhe seu progresso e identifique áreas de melhoria.
+- **Acessibilidade**: Interface responsiva e inclusiva.
+- **Internacionalização**: Suporte a múltiplos idiomas.
+- **Gratuito**: Todos os recursos essenciais estão disponíveis sem custo.
 
-- Simulados atualizados com questões no formato dos exames.
-- Explicações geradas para apoiar o estudo.
-- Estatísticas e análise de desempenho do usuário.
-- Interface responsiva com foco em acessibilidade.
-- Autenticação segura e gerenciamento de sessões.
-- Não é necessário cadastro para acessar simulados, mas funcionalidades avançadas podem exigir login.
+## Documentação da API
 
-Visão geral da estrutura do repositório
+A documentação da API está disponível em [docs/api](https://tinyurl.com/2s4kp83e).
 
-O frontend segue a seguinte organização principal:
+## Rodando localmente (desenvolvimento)
 
-```
-src/
-├── app/
-│   ├── api/              # Serviços de API e modelos
-│   ├── core/             # Funcionalidades core (auth, guards, interceptors, layouts)
-│   ├── features/         # Módulos/rotas por funcionalidade (auth, dashboard, exams, attempt, result, stats)
-│   └── shared/           # Componentes e utilitários compartilhados
-└── environments/         # Variáveis de ambiente
-```
-
-Pré-requisitos
-
-- Node.js 18 ou superior
-- npm 9 ou superior
-- Angular CLI compatível com Angular 17
-
-Instalação e execução em desenvolvimento
-
-1. Clonar repositório
-
-```bash
-git clone https://github.com/your-org/simulacert.git
-cd simulacert
-```
-
-2. Instalar dependências
+Pré-requisitos: Node.js (LTS recomendado) e npm.
 
 ```bash
 npm install
+npm run start
 ```
 
-3. Preparar variáveis de ambiente (copiar arquivo de exemplo)
+Outros comandos úteis:
 
 ```bash
-cp src/environments/environment.ts src/environments/environment.development.ts
-# editar src/environments/environment.development.ts conforme necessário
+npm test
+npm run build
 ```
 
-> Windows (PowerShell) alternative:
->
-> ```powershell
-> Copy-Item src\environments\environment.ts src\environments\environment.development.ts
-> ```
+## Contribuindo
 
-4. Executar em modo de desenvolvimento
+Contribuições são bem-vindas! Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes sobre como ajudar no desenvolvimento do SimulaCert.
 
-```bash
-npm start
-```
+## Licença
 
-Scripts úteis
+Este projeto está sob uma licença proprietária. Consulte o arquivo [LICENSE](./LICENSE) para mais detalhes.
 
-- npm start: Executa a aplicação em desenvolvimento (padrão: http://localhost:4200)
-- npm run build: Gera build de produção
-- npm test: Executa testes unitários
-- npm run lint: Executa linting
+## Contato
 
-Autenticação e segurança
+- **Website**: [simulacert.com](https://simulacert.com)
+- **E-mail**: marcelofeliciano@tutamail.com
 
-- A aplicação usa JWT para autenticação. O token é normalmente armazenado no localStorage.
-- Interceptors adicionam o header Authorization nas solicitações quando aplicável.
-- Rotas privadas são protegidas por guards configurados em `app/core/guards`.
-
-Observações de arquitetura e desenvolvimento
-
-- Componentes standalone e Signals do Angular são utilizados para reatividade e composição.
-- Evitar chamadas desnecessárias ao backend a partir de componentes de layout.
-- Preferir rotas sem bloquear indexação pública para páginas legais (Termos, Política de Privacidade).
-
-Guia rápido de contribuição
-
-1. Criar branch com escopo da feature/bugfix
-2. Fazer commits claros e atômicos
-3. Executar testes e lint localmente
-4. Abrir Pull Request com descrição e screenshots quando aplicável
-
-Padrões de commit recomendados
-
-- feat: Nova funcionalidade
-- fix: Correção de bug
-- docs: Documentação
-- refactor: Refatoração
-- test: Testes
-- chore: Tarefas de build/CI
-
-Licença e contato
-
-Proprietary - © 2026 SimulaCert - Marcelo Feliciano
-
-Website: https://simulacert.com
-API: https://api.simulacert.com
-
-Última atualização: 2026-04-10
+Última atualização: 2026-05-15

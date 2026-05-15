@@ -2,7 +2,7 @@ import {AfterViewInit, Component, Inject, OnInit, PLATFORM_ID, signal} from '@an
 import {CommonModule, isPlatformBrowser, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
-import {Router} from '@angular/router';
+import {Router, RouterLink} from '@angular/router';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
@@ -13,7 +13,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-exams-list',
   standalone: true,
-  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent, TranslatePipe],
+  imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent, TranslatePipe, RouterLink],
   template: `
     <div seoHead>
       <app-breadcrumbs [items]="[{ label: 'Home', url: '/' }, { label: 'exams.list.breadcrumbs' | translate }]"/>
@@ -86,7 +86,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
                   } @else {
                     <a class="btn-primary"
-                       (click)="handleClick(exam)"
+                       [routerLink]="['/exams', exam.slug]"
                        [attr.aria-label]="i18nService.instant('exams.list.start') + ' ' + exam.title">
                       {{ 'exams.list.start' | translate }}
                     </a>
@@ -443,22 +443,6 @@ export class ExamsListComponent implements OnInit, AfterViewInit {
         this.loading.set(false);
       }
     });
-  }
-
-
-  handleClick(exam: ExamResponse): void {
-    const slug = exam.slug;
-    if (slug && this.isTextualSlug(slug)) {
-      this.router.navigate(['/exams', slug]);
-    } else {
-      this.router.navigate(['/exams', exam.id]);
-    }
-  }
-
-  private isTextualSlug(slug: string): boolean {
-    if (!slug) return false;
-    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    return !uuidRegex.test(slug);
   }
 
   private incomingExams(): ExamResponse[] {
