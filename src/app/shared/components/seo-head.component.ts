@@ -1,23 +1,17 @@
-import {Directive, OnChanges, OnDestroy, OnInit} from '@angular/core';
+import {Directive, effect, inject, OnDestroy} from '@angular/core';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 
 @Directive({
   selector: '[seoHead]',
   standalone: true,
 })
-export class SeoHeadDirective implements OnInit, OnChanges, OnDestroy {
-  constructor(
-    private readonly seoFacade: SeoFacadeService,
-  ) {
-  }
+export class SeoHeadDirective implements OnDestroy {
 
-  ngOnChanges(): void {
-    this.seoFacade.update();
-  }
+  private readonly seoFacade = inject(SeoFacadeService);
 
-  ngOnInit(): void {
+  private readonly seoEffect = effect(() => {
     this.seoFacade.update();
-  }
+  });
 
   ngOnDestroy(): void {
     this.seoFacade.clearJsonLd();

@@ -5,6 +5,7 @@ import {AuthApiService} from '../../api/auth.service';
 import {AuthResponse, LoginRequest, RegisterRequest, UserResponse} from '../../api/domain';
 import {HttpResponse} from '@angular/common/http';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
+import {CacheService} from '../service/cache.service';
 
 interface AuthState {
   user: UserResponse | null;
@@ -20,7 +21,7 @@ export class AuthFacade {
   private readonly TOKEN_KEY = 'simulacert_token';
   private readonly REFRESH_KEY = 'refresh_token';
 
-  private state = signal<AuthState>({
+  private readonly state = signal<AuthState>({
     user: null,
     token: null,
     isAuthenticated: false
@@ -33,8 +34,9 @@ export class AuthFacade {
   readonly isAdmin = computed(() => this.state().user?.role === 'ADMIN');
 
   constructor(
-    private authApi: AuthApiService,
-    @Inject(LOCAL_STORAGE) private storage: Storage | null,
+    private readonly authApi: AuthApiService,
+    @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
+    private readonly cacheService: CacheService
   ) {
     const token = this.loadTokenFromStorage();
     const user = this.loadUserFromStorage();
@@ -66,13 +68,10 @@ export class AuthFacade {
     return this.authApi.register(request)
       .pipe(
         tap((response) => {
-          if (response && response.status === 200) {
+          if (response?.status === 200) {
             this.clearAuth();
           }
-        }),
-      catchError(error => {
-        return throwError(() => error);
-      })
+        })
     );
   }
 
@@ -121,6 +120,7 @@ export class AuthFacade {
 
   logout(): void {
     this.clearAuth();
+    this.cacheService?.clear();
   }
 
   exchangeGoogleCode(code: string, state: string): Observable<AuthResponse> {

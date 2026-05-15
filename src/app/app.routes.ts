@@ -1,20 +1,8 @@
-import {Routes, UrlMatchResult, UrlSegment} from '@angular/router';
+import {Routes} from '@angular/router';
 import {PublicLayoutComponent} from './core/layouts/public-layout.component';
 import {AppLayoutComponent} from './core/layouts/app-layout.component';
-import {ExamsListComponent} from './features/exams/exams-list.component';
 import {AttemptRunnerComponent} from './features/attempt/attempt-runner.component';
 import {authGuard} from './core/guards/auth.guard';
-import {ExamsSlugResolver} from './features/exams/exams-slug.resolver';
-
-const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-function examsIdMatcher(segments: UrlSegment[]): UrlMatchResult | null {
-  // Espera: ['exams', '<uuid>']
-  if (segments.length === 2 && segments[0].path === 'exams' && uuidRegex.test(segments[1].path)) {
-    return { consumed: segments, posParams: { id: segments[1] } } as UrlMatchResult;
-  }
-  return null;
-}
 
 export const routes: Routes = [
   { path: '', redirectTo: 'exams', pathMatch: 'full' },
@@ -40,10 +28,12 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard.component').then(m => m.DashboardComponent) },
       { path: 'achievements', loadComponent: () => import('./features/achievements/achievements.component').then(m => m.AchievementsComponent) },
-      { path: 'exams', component: ExamsListComponent },
-      { path: 'stats', loadComponent: () => import('./features/stats/stats.component').then(m => m.StatsComponent) },
-      { matcher: examsIdMatcher, loadComponent: () => import('./features/exams/exam-detail.component').then(m => m.ExamDetailComponent) },
-      { path: 'exams/:slug', resolve: { exam: ExamsSlugResolver }, loadComponent: () => import('./features/exams/exam-detail.component').then(m => m.ExamDetailComponent) },
+      {path: 'stats', loadComponent: () => import('./features/stats/stats.component').then(m => m.StatsComponent)},
+      { path: 'exams', loadComponent: () => import('./features/exams/exams-list.component').then(m => m.ExamsListComponent) },
+      {
+        path: 'exams/:slug',
+        loadComponent: () => import('./features/exams/exam-detail.component').then(m => m.ExamDetailComponent),
+      },
     ]
   },
   {

@@ -1,8 +1,9 @@
-import { Injectable, Inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { ExamResponse, CreateExamRequest, UpdateExamRequest } from './domain';
-import { API_CONFIG, ApiConfig } from './config/api.config';
+import {Inject, Injectable} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {CreateExamRequest, ExamResponse, UpdateExamRequest} from './domain';
+import {API_CONFIG, ApiConfig} from './config/api.config';
+import {withCacheState} from '../core/transfer/exam-state.transfer';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class ExamsApiService {
   }
 
   getAllExams(): Observable<ExamResponse[]> {
-    return this.http.get<ExamResponse[]>(this.baseUrl);
+    return this.http.get<ExamResponse[]>(this.baseUrl, {context: withCacheState('exams_get_all')});
   }
 
   getExam(examId: string): Observable<ExamResponse> {
@@ -43,6 +44,6 @@ export class ExamsApiService {
 
   getExamBySlug(slug: string): Observable<ExamResponse> {
     const encoded = encodeURIComponent(slug);
-    return this.http.get<ExamResponse>(`${this.baseUrl}/slug/${encoded}`);
+    return this.http.get<ExamResponse>(`${this.baseUrl}/slug/${encoded}`, {context: withCacheState(`exams_get_by_slug_${encoded}`)});
   }
 }

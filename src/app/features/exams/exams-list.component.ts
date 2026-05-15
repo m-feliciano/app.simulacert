@@ -1,4 +1,4 @@
-import {Component, makeStateKey, OnInit, signal, TransferState} from '@angular/core';
+import {Component, OnInit, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
@@ -65,21 +65,6 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
                   <p class="exam-description">{{ exam.description }}</p>
                 }
 
-                <!--                <div class="exam-meta">-->
-                <!--                  @if (exam.totalQuestions) {-->
-                <!--                    <div class="meta-item">-->
-                <!--                      <span class="meta-icon">📝</span>-->
-                <!--                      <span class="meta-text">{{ exam.totalQuestions }} questões</span>-->
-                <!--                    </div>-->
-                <!--                  }-->
-                <!--                  @if (exam.durationMinutes) {-->
-                <!--                    <div class="meta-item">-->
-                <!--                      <span class="meta-icon">⏱️</span>-->
-                <!--                      <span class="meta-text">{{ exam.durationMinutes }} min</span>-->
-                <!--                    </div>-->
-                <!--                  }-->
-                <!--                </div>-->
-
                 @if (exam.incoming) {
                   <a class="btn-primary disabled muted" aria-disabled="true" aria-label="Exame em breve">Em breve</a>
                 } @else {
@@ -91,7 +76,7 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
           </div>
         }
 
-        @if (!loading() && !error() && exams().length === 0) {
+        @else {
           <div class="empty-state">
             <p>Nenhum exame disponível no momento.</p>
           </div>
@@ -285,30 +270,6 @@ import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.componen
       font-size: 14px;
     }
 
-    .exam-meta {
-      display: flex;
-      gap: var(--spacing-md);
-      padding: var(--spacing-sm) 0;
-      border-top: 1px solid #e0e0e0;
-      border-bottom: 1px solid #e0e0e0;
-    }
-
-    .meta-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-
-    .meta-icon {
-      font-size: 16px;
-    }
-
-    .meta-text {
-      color: var(--color-text-secondary);
-      font-size: 13px;
-      font-weight: 500;
-    }
-
     .btn-primary {
       display: inline-block;
       padding: 10px 20px;
@@ -395,14 +356,12 @@ export class ExamsListComponent implements OnInit {
   exams = signal<ExamResponse[]>([]);
   loading = signal(true);
   error = signal('');
-  private readonly examsKey = makeStateKey<ExamResponse[]>(`exams`);
 
   constructor(
     private readonly examsApi: ExamsApiService,
     private readonly router: Router,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    private readonly transferState: TransferState,
   ) {
   }
 
@@ -436,12 +395,10 @@ export class ExamsListComponent implements OnInit {
     this.examsApi.getAllExams().subscribe({
       next: (exams) => {
         this.exams.set([...exams, ...this.incomingExams()]);
-        this.transferState.set(this.examsKey, exams);
+        this.loading.set(false);
       },
       error: () => {
         this.error.set('Erro ao carregar exames. Por favor, tente novamente.');
-        this.loading.set(false);
-      }, complete: () => {
         this.loading.set(false);
       }
     });

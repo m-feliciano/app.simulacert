@@ -69,8 +69,6 @@ export class ThemeService {
   }
 
   private applyTheme(mode: ThemeMode) {
-    if (!this.isBrowser) return;
-
     const root = this.document.documentElement;
     root.classList.remove('theme-light', 'theme-dark', 'theme-warm', 'theme-high-contrast');
     root.classList.add(`theme-${mode}`);
@@ -93,16 +91,12 @@ export class ThemeService {
   }
 
   private applyFontSize(size: FontSize) {
-    if (!this.isBrowser) return;
-
     const root = this.document.documentElement;
     root.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge', 'font-extra-small');
     root.classList.add(`font-${size}`);
   }
 
   private applyFontFamily(family: FontFamily) {
-    if (!this.isBrowser) return;
-
     const root = this.document.documentElement;
     root.classList.remove(
       'font-family-sans',
@@ -116,8 +110,6 @@ export class ThemeService {
   }
 
   private getStoredTheme(): ThemeMode {
-    if (!this.isBrowser) return 'dark';
-
     const stored = this.storage?.getItem(this.THEME_KEY) as ThemeMode;
     if (stored) return stored;
 
@@ -129,15 +121,11 @@ export class ThemeService {
   }
 
   private getStoredFontSize(): FontSize {
-    if (!this.isBrowser || !this.storage) return 'medium';
-
-    return (this.storage.getItem(this.FONT_SIZE_KEY) as FontSize) || 'medium';
+    return (this.storage?.getItem(this.FONT_SIZE_KEY) as FontSize) || 'medium';
   }
 
   private getStoredFontFamily(): FontFamily {
-    if (!this.isBrowser || !this.storage) return 'serif';
-
-    return (this.storage.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
+    return (this.storage?.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
   }
 
   setLanguage(lang: string) {

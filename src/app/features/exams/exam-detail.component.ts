@@ -115,7 +115,7 @@ import {FormsModule} from '@angular/forms';
                   <li><strong>Tipo:</strong> Simulado AWS</li>
                   <li><strong>Duração:</strong> {{ setup().durationMinutes }} minutos</li>
                   <li><strong>Questões:</strong> {{ questionCount() }}</li>
-                  <li><strong>Pontuação mínima:</strong> 72%</li>
+                  <li><strong>Pontuação mínima:</strong> 70%</li>
                 </ul>
               </div>
 
@@ -374,19 +374,19 @@ export class ExamDetailComponent implements OnInit {
 
     const examId = this.route.snapshot.paramMap.get('id');
     if (examId) {
-      this.loadExam(examId, true);
+      this.loadExam(examId);
     } else if (slug) {
       this.loadExamBySlug(slug);
     }
   }
 
-  loadExam(examId: string, redirectToSlug = false): void {
+  loadExam(examId: string): void {
     this.loadingExam.set(true);
     this.errorMessage.set('');
 
     this.examsApi.getExam(examId).subscribe({
       next: (exam) => {
-        if (redirectToSlug && exam.slug && this.isTextualSlug(exam.slug)) {
+        if (exam.slug && this.isTextualSlug(exam.slug)) {
           this.router.navigate(['/exams', exam.slug]);
         } else {
           this.exam.set(exam);

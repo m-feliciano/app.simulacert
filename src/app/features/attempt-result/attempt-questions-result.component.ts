@@ -1,4 +1,4 @@
-import {Component, effect, OnInit, signal} from '@angular/core';
+import {Component, effect, OnDestroy, OnInit, signal} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {ActivatedRoute, RouterLink} from '@angular/router';
 import {forkJoin} from 'rxjs';
@@ -8,7 +8,6 @@ import {ExamsApiService} from '../../api/exams.service';
 import {AttemptQuestionResponse} from '../../api/domain/attempt-question.model';
 import {AttemptResponse, ExamResponse, ExplanationResponse} from '../../api/domain';
 import {QuestionExplanationComponent} from '../../shared/components/question-explanation.component';
-import {QuestionsApiService} from '../../api/questions.service';
 
 @Component({
   selector: 'app-attempt-questions-result',
@@ -86,15 +85,16 @@ export class AttemptQuestionsResultComponent implements OnInit {
   filteredQuestions = signal<AttemptQuestionResponse[]>([]);
   explanations = signal<Record<string, ExplanationResponse>>({});
 
+  private readonly effectRef = effect(() => {
+    this.updateFilteredQuestions();
+  });
+
   constructor(
     protected route: ActivatedRoute,
-    private api: AttemptQuestionsApiService,
-    private attemptsApi: AttemptsApiService,
-    private examsApi: ExamsApiService
+    private readonly api: AttemptQuestionsApiService,
+    private readonly attemptsApi: AttemptsApiService,
+    private readonly examsApi: ExamsApiService
   ) {
-    effect(() => {
-      this.updateFilteredQuestions();
-    });
   }
 
   ngOnInit(): void {
@@ -135,25 +135,26 @@ export class AttemptQuestionsResultComponent implements OnInit {
     const all = this.questions();
     const f = this.filter();
 
-    if (f === 'all') {
-      this.filteredQuestions.set(all);
+    if (f === 'incorrect') {
+      this.filteredQuestions.set(all.filter(q => !this.isCorrect(q)));
 
     } else if (f === 'correct') {
       this.filteredQuestions.set(all.filter(q => this.isCorrect(q)));
 
     } else {
-      this.filteredQuestions.set(all.filter(q => !this.isCorrect(q)));
+      this.filteredQuestions.set(all);
     }
   }
 
   filterBy(f: 'all' | 'correct' | 'incorrect'): AttemptQuestionResponse[] {
-    const all = this.questions();
-    if (f === 'all') {
-      return all;
+    if (f === 'incorrect') {
+      return this.questions().filter(q => !this.isCorrect(q));
+
     } else if (f === 'correct') {
-      return all.filter(q => this.isCorrect(q));
+      return this.questions().filter(q => this.isCorrect(q));
+
     } else {
-      return all.filter(q => !this.isCorrect(q));
+      return this.questions();
     }
   }
 
@@ -161,11 +162,13 @@ export class AttemptQuestionsResultComponent implements OnInit {
     const correctOptions = q.options
       .filter(opt => opt.isCorrect)
       .map(opt => opt.key)
-      .sort()
+      .sort((a, b) => a.localeCompare(b))
       .join(',');
 
     const selectedOptions = q.selectedOption
-      ? q.selectedOption.split(',').map(s => s.trim()).sort().join(',')
+      ? q.selectedOption.split(',')
+        .map(s => s.trim())
+        .sort((a, b) => a.localeCompare(b)).join(',')
       : '';
 
     return selectedOptions === correctOptions;

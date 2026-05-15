@@ -46,7 +46,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
             <div class="score-value">{{ attempt()!.score ?? 0 }}%</div>
             <div class="score-status">{{ isPassed ? '✓ Aprovado' : '✗ Reprovado' }}</div>
             <div class="score-message">
-              {{ isPassed ? 'Parabéns! Você foi aprovado.' : 'Pontuação mínima: 72%' }}
+              {{ isPassed ? 'Parabéns! Você foi aprovado.' : 'Pontuação mínima: 70%' }}
             </div>
           </div>
 

@@ -6,7 +6,7 @@ import {SeoMeta} from './seo.model';
 export class SeoFactoryService {
 
   constructor(
-    @Inject(DOCUMENT) private document: Document,
+    @Inject(DOCUMENT) private readonly document: Document,
   ) {
   }
 

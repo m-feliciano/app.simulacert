@@ -10,6 +10,8 @@ import {provideLocalStorage} from './core/storage/local-storage.token';
 
 import {routes} from './app.routes';
 import {LanguageInterceptor} from './core/interceptors/language.interceptor';
+import {TransferStateInterceptor} from './core/interceptors/transfer.interceptor';
+import {provideSessionStorage} from './core/storage/session-storage.token';
 
 function getApiConfig(): ApiConfig {
   const baseUrl = environment.apiConfig.baseUrl;
@@ -25,9 +27,11 @@ export const appConfig: ApplicationConfig = {
       withInterceptorsFromDi()
     ),
     provideLocalStorage(),
+    provideSessionStorage(),
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: LanguageInterceptor, multi: true },
+    { provide: HTTP_INTERCEPTORS, useClass: TransferStateInterceptor, multi: true },
     {provide: API_CONFIG, useFactory: getApiConfig},
     Title,
     Meta, provideClientHydration(withEventReplay())

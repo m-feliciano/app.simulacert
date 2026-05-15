@@ -1,16 +1,15 @@
 import {Inject, Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
-import {Observable, throwError} from 'rxjs';
+import {map, Observable} from 'rxjs';
 import {
   AnswerResponse,
   AttemptQuestionResponse,
   AttemptResponse,
+  AttemptTimingResponse,
   StartAttemptRequest,
   SubmitAnswerRequest
 } from './domain';
-import {AttemptTimingResponse} from './domain';
 import {API_CONFIG, ApiConfig} from './config/api.config';
-import {catchError} from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -34,7 +33,14 @@ export class AttemptsApiService {
   }
 
   getAttemptsByUser(userId: string): Observable<AttemptResponse[]> {
-    return this.http.get<AttemptResponse[]>(`${this.baseUrl}/user/${userId}?page=0&size=5&sort=desc&sortBy=finishedAt`);
+    return this.http.get<{ content: object }>(`${this.baseUrl}/user/${userId}?page=0&size=5&sort=desc&sortBy=finishedAt`)
+      .pipe(
+        map(({content}) => {
+          return Object.values(content).map((attempt: any) => {
+            const {questionIds, ...rest} = attempt;
+            return rest as AttemptResponse;
+          });
+        }));
   }
 
   getAttemptQuestions(attemptId: string): Observable<AttemptQuestionResponse[]> {
