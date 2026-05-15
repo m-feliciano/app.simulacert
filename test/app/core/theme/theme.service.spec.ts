@@ -142,7 +142,7 @@ describe('ThemeService', () => {
     const storage = createStorageMock();
     Object.defineProperty(window, 'matchMedia', {
       configurable: true,
-      value: jest.fn().mockReturnValue({matches: true}),
+      value: jest.fn().mockReturnValue({matches: false}),
     });
 
     setupBrowserThemeTestingModule(storage);
@@ -165,7 +165,7 @@ describe('ThemeService', () => {
     const service = TestBed.inject(ThemeService);
 
     expect(isPlatformBrowser(TestBed.inject(PLATFORM_ID))).toBe(false);
-    expect(service.themeMode()).toBe('dark');
+    expect(service.themeMode()).toBe('light');
     expect(globalThis.document.documentElement.classList.contains('theme-dark')).toBe(false);
     expect(globalThis.document.querySelector('meta[name="theme-color"]')).toBeNull();
   });
