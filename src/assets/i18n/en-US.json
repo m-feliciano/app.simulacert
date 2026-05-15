@@ -166,7 +166,8 @@
     "changes_saved": "Changes saved successfully!",
     "error_occurred": "An error occurred. Please try again.",
     "no_data": "No data available.",
-    "change_language": "[BETA - i18n] Changing the language will reload the page. Do you want to continue?"
+    "change_language": "[BETA - i18n] Changing the language will reload the page. Do you want to continue?",
+    "language_changed": "Language changed successfully!"
   }
 }
 

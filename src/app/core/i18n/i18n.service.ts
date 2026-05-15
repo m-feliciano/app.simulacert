@@ -2,7 +2,7 @@ import {effect, Inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
 import {TranslateService} from '@ngx-translate/core';
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
-import {firstValueFrom} from 'rxjs';
+import {Observable, Subject} from 'rxjs';
 
 export type Language = 'pt-BR' | 'en-US';
 
@@ -13,6 +13,7 @@ export class I18nService {
   private readonly currentLanguage = signal<Language>('pt-BR');
   private readonly LANGUAGE_KEY = 'language';
   private readonly isBrowser: boolean;
+  private readonly languageSet$ = new Subject<Language>();
 
   constructor(
     private readonly translate: TranslateService,
@@ -41,18 +42,22 @@ export class I18nService {
         globalThis.document.documentElement.lang = language === 'pt-BR' ? 'pt-BR' : 'en-US';
       }
 
-      this.translate.use(language).subscribe();
+      this.translate.use(language).subscribe(() => {
+        this.languageSet$.next(language);
+      });
     });
   }
 
-  async setLanguage(language: Language): Promise<void> {
-    if (this.currentLanguage() === language) return;
-
-    try {
-      await firstValueFrom(this.translate.use(language));
-      this.currentLanguage.set(language);
-    } catch {
+  changeLanguage(language: Language): Observable<Language> {
+    if (this.currentLanguage() === language) {
+      return new Observable<Language>(subscriber => {
+        subscriber.next(language);
+        subscriber.complete();
+      });
     }
+
+    this.currentLanguage.set(language);
+    return this.languageSet$.asObservable();
   }
 
   getLanguage(): Language {

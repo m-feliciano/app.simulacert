@@ -166,6 +166,7 @@
     "exam_load_error": "Erro ao carregar detalhes do exame. Por favor, tente novamente.",
     "start_exam_error": "Erro ao iniciar o simulado. Por favor, tente novamente.",
     "change_language": "[BETA - i18n] Você tem certeza que deseja mudar o idioma? Isso pode afetar suas preferências de tema e outras configurações.",
+    "language_changed": "Idioma alterado com sucesso.",
     "confirm": "Confirmar",
     "cancel": "Cancelar"
   }

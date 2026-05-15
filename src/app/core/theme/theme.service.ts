@@ -130,10 +130,12 @@ export class ThemeService {
     this.i18nService.get('alerts.change_language')
       .subscribe((message) => {
         if (confirm(message)) {
-          this.i18nService.setLanguage(lang)
-            .then(() => {
-              setTimeout(() => globalThis.location.reload(), 500);
-            })
+
+          this.i18nService.changeLanguage(lang)
+            .subscribe(() => {
+              setTimeout(() => globalThis.location.reload(), 1000);
+              alert(this.i18nService.instant('alerts.language_changed'));
+            });
         }
       });
   }
