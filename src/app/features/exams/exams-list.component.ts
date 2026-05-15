@@ -1,4 +1,4 @@
-import {Component, inject, OnInit, signal} from '@angular/core';
+import {AfterViewInit, Component, OnInit, signal} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
@@ -16,70 +16,87 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
   imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent, TranslatePipe],
   template: `
     <div seoHead>
-      <app-breadcrumbs [items]="[{label: 'Home', url: '/'},{label: 'exams.list.title' | translate }]"/>
+      <app-breadcrumbs [items]="[{ label: 'Home', url: '/' }, { label: 'exams.list.breadcrumbs' | translate }]"/>
 
-      <h1 class="page-title">{{ 'exams.list.title' | translate }}</h1>
       <div class="exams-container">
         @if (loading()) {
           <div class="skeleton-loader">
-              @for (i of [1, 2, 3]; track $index) {
-                <div class="skeleton-card">
-                  <div class="skeleton-title"></div>
-                  <div class="skeleton-line"></div>
-                  <div class="skeleton-line short"></div>
-                  <div class="skeleton-btn"></div>
-                </div>
-              }
-          </div>
-        }
-
-        @else if (error()) {
-          <div class="error-state">
-            <p>{{ 'exams.list.error' | translate }}</p>
-          </div>
-        }
-
-        @else if (exams().length > 0) {
-          <div class="exams-grid">
-            @for (exam of exams(); track exam.id) {
-              <div class="exam-card">
-                <div class="exam-header">
-                  <h3>{{ exam.title }}</h3>
-                  @if (exam.difficulty) {
-                    <span class="difficulty-badge" [class]="'difficulty-' + exam.difficulty.toLowerCase()">
-                      {{ ('exams.list.difficulty.' + exam.difficulty) | translate }}
-                    </span>
-                  }
-                </div>
-
-                @if (exam.slug) {
-                  <img class="exam-icon"
-                       [ngSrc]="exam.slug + '.png'"
-                       [alt]="exam.title + ' ícone'"
-                       width="120"
-                       height="120"
-                       fetchpriority="high"
-                       decoding="sync"
-                       [priority]="$index < 2"/>
-                }
-
-                @if (exam.description) {
-                  <p class="exam-description">{{ exam.description }}</p>
-                }
-
-                @if (exam.incoming) {
-                  <a class="btn-primary disabled muted" aria-disabled="true"
-                     [attr.aria-label]="'exams.list.comingSoon' | translate">{{ 'exams.list.comingSoon' | translate }}</a>
-                } @else {
-                  <a class="btn-primary" (click)="handleClick(exam)"
-                     [attr.aria-label]="i18nService.instant('exams.list.start') + ' ' + exam.title">{{ 'exams.list.start' | translate }}</a>
-                }
+            @for (_ of [1, 2, 3]; track $index) {
+              <div class="skeleton-card">
+                <div class="skeleton-title"></div>
+                <div class="skeleton-line"></div>
+                <div class="skeleton-line short"></div>
+                <div class="skeleton-btn"></div>
               </div>
             }
           </div>
-        }
 
-        @else {
+        } @else if (error()) {
+          <div class="error-state">
+            <p>{{ 'exams.list.error' | translate }}</p>
+          </div>
+
+        } @else if (exams().length > 0) {
+
+          <div class="page-shell" [class.visible]="ready()">
+            <h1 class="page-title">
+              {{ 'exams.list.title' | translate }}
+            </h1>
+
+            <div class="exams-grid">
+              @for (exam of exams(); track exam.id) {
+
+                <div class="exam-card">
+
+                  <div class="exam-header">
+                    <h3>{{ exam.title }}</h3>
+
+                    @if (exam.difficulty) {
+                      <span
+                        class="difficulty-badge"
+                        [class]="'difficulty-' + exam.difficulty.toLowerCase()">
+                        {{ ('exams.list.difficulty.' + exam.difficulty) | translate }}
+                      </span>
+                    }
+                  </div>
+
+                  @if (exam.slug) {
+                    <img
+                      class="exam-icon"
+                      [ngSrc]="exam.slug + '.png'"
+                      [alt]="exam.title + ' ícone'"
+                      width="120"
+                      height="120"
+                      [priority]="$index < 1"
+                    />
+                  }
+
+                  @if (exam.description) {
+                    <p class="exam-description">
+                      {{ exam.description }}
+                    </p>
+                  }
+
+                  @if (exam.incoming) {
+                    <a class="btn-primary disabled muted"
+                       aria-disabled="true"
+                       [attr.aria-label]="'exams.list.comingSoon' | translate">
+                      {{ 'exams.list.comingSoon' | translate }}
+                    </a>
+
+                  } @else {
+                    <a class="btn-primary"
+                       (click)="handleClick(exam)"
+                       [attr.aria-label]="i18nService.instant('exams.list.start') + ' ' + exam.title">
+                      {{ 'exams.list.start' | translate }}
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+
+        } @else {
           <div class="empty-state">
             <p>{{ 'exams.list.empty' | translate }}</p>
           </div>
@@ -97,6 +114,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         height: 120px;
         object-fit: contain;
       }
+
       .page-title {
         text-align: center;
         margin: 32px 0 24px 0;
@@ -165,209 +183,224 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       }
 
       .muted {
-      opacity: 0.6;
-      cursor: not-allowed !important;
-      background: #ccc;
-    }
+        opacity: 0.6;
+        cursor: not-allowed !important;
+        background: #ccc;
+      }
 
-    .exams-container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+      .exams-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    h1 {
-      margin: 0 0 var(--spacing-xl);
-      color: var(--color-dark);
-      font-size: 28px;
-    }
-
-    @media (min-width: 768px) {
       h1 {
-        font-size: 32px;
+        margin: 0 0 var(--spacing-xl);
+        color: var(--color-dark);
+        font-size: 28px;
       }
-    }
 
-    .exams-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: var(--spacing-lg);
-    }
+      @media (min-width: 768px) {
+        h1 {
+          font-size: 32px;
+        }
+      }
 
-    @media (min-width: 768px) {
       .exams-grid {
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: var(--spacing-lg);
       }
-    }
 
-    .exam-card {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-xl);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-md);
-      transition: var(--transition-fast);
-    }
+      @media (min-width: 768px) {
+        .exams-grid {
+          grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+      }
 
-    .exam-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-md);
-    }
+      .exam-card {
+        background: var(--color-bg-secondary);
+        padding: var(--spacing-xl);
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        transition: var(--transition-fast);
+      }
 
-    @media (prefers-reduced-motion: reduce) {
       .exam-card:hover {
-        transform: none;
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-md);
       }
-    }
 
-    .exam-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: var(--spacing-sm);
-    }
+      @media (prefers-reduced-motion: reduce) {
+        .exam-card:hover {
+          transform: none;
+        }
+      }
 
-    h3 {
-      margin: 0;
-      color: var(--text);
-      font-size: 18px;
-      flex: 1;
-    }
+      .exam-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+      }
 
-    @media (min-width: 768px) {
       h3 {
-        font-size: 20px;
+        margin: 0;
+        color: var(--text);
+        font-size: 18px;
+        flex: 1;
       }
-    }
 
-    .difficulty-badge {
-      padding: 4px 12px;
-      border-radius: var(--border-radius-lg);
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      white-space: nowrap;
-    }
+      @media (min-width: 768px) {
+        h3 {
+          font-size: 20px;
+        }
+      }
 
-    .difficulty-easy {
-      background: #d4edda;
-      color: #155724;
-    }
+      .difficulty-badge {
+        padding: 4px 12px;
+        border-radius: var(--border-radius-lg);
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
 
-    .difficulty-medium {
-      background: #fff3cd;
-      color: #856404;
-    }
+      .difficulty-easy {
+        background: #d4edda;
+        color: #155724;
+      }
 
-    .difficulty-hard {
-      background: #f8d7da;
-      color: #721c24;
-    }
+      .difficulty-medium {
+        background: #fff3cd;
+        color: #856404;
+      }
 
-    .exam-description {
-      flex: 1;
-      margin: 0;
-      color: var(--color-text-secondary);
-      line-height: 1.6;
-      font-size: 14px;
-    }
+      .difficulty-hard {
+        background: #f8d7da;
+        color: #721c24;
+      }
 
-    .btn-primary {
-      display: inline-block;
-      padding: 10px 20px;
-      background: var(--color-primary);
-      color: white;
-      text-decoration: none;
-      border-radius: var(--border-radius-sm);
-      text-align: center;
-      font-weight: 500;
-      transition: var(--transition-fast);
-      border: none;
-      cursor: pointer;
-    }
+      .exam-description {
+        flex: 1;
+        margin: 0;
+        color: var(--color-text-secondary);
+        line-height: 1.6;
+        font-size: 14px;
+      }
 
-    .btn-primary:hover {
-      background: var(--color-primary-dark);
-      transform: translateY(-2px);
-    }
+      .btn-primary {
+        display: inline-block;
+        padding: 10px 20px;
+        background: var(--color-primary);
+        color: white;
+        text-decoration: none;
+        border-radius: var(--border-radius-sm);
+        text-align: center;
+        font-weight: 500;
+        transition: var(--transition-fast);
+        border: none;
+        cursor: pointer;
+      }
 
-    .btn-primary:active {
-      transform: translateY(0);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
       .btn-primary:hover {
-        transform: none;
+        background: var(--color-primary-dark);
+        transform: translateY(-2px);
       }
-    }
 
-    .empty-state {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-xxl);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-    }
+      .btn-primary:active {
+        transform: translateY(0);
+      }
 
-    @media (min-width: 768px) {
+      @media (prefers-reduced-motion: reduce) {
+        .btn-primary:hover {
+          transform: none;
+        }
+      }
+
       .empty-state {
-        padding: 60px;
+        background: var(--color-bg-secondary);
+        padding: var(--spacing-xxl);
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
       }
-    }
 
-    .empty-state p {
-      color: var(--color-text-light);
-      font-size: 15px;
-      margin: 0;
-      font-style: italic;
-    }
+      @media (min-width: 768px) {
+        .empty-state {
+          padding: 60px;
+        }
+      }
 
-    @media (min-width: 768px) {
       .empty-state p {
-        font-size: 16px;
+        color: var(--color-text-light);
+        font-size: 15px;
+        margin: 0;
+        font-style: italic;
       }
-    }
 
-    .loading-state, .error-state {
-      background: var(--color-bg-secondary);
-      padding: var(--spacing-xxl);
-      border-radius: var(--border-radius-md);
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-    }
+      @media (min-width: 768px) {
+        .empty-state p {
+          font-size: 16px;
+        }
+      }
 
-    .loading-state p {
-      color: var(--color-text-secondary);
-      font-size: 15px;
-      margin: 0;
-    }
+      .loading-state, .error-state {
+        background: var(--color-bg-secondary);
+        padding: var(--spacing-xxl);
+        border-radius: var(--border-radius-md);
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+      }
 
-    .error-state {
-      background: var(--color-bg-danger);
-    }
+      .loading-state p {
+        color: var(--color-text-secondary);
+        font-size: 15px;
+        margin: 0;
+      }
 
-    .error-state p {
-      color: #721c24;
-      font-size: 15px;
-      margin: 0;
-      font-weight: 500;
-    }
-  `]
+      .error-state {
+        background: var(--color-bg-danger);
+      }
+
+      .error-state p {
+        color: #721c24;
+        font-size: 15px;
+        margin: 0;
+        font-weight: 500;
+      }
+
+      .page-shell {
+        opacity: 0;
+        transition: opacity 120ms ease;
+      }
+
+      .page-shell.visible {
+        opacity: 1;
+      }
+    `]
 })
-export class ExamsListComponent implements OnInit {
+export class ExamsListComponent implements OnInit, AfterViewInit {
   exams = signal<ExamResponse[]>([]);
   loading = signal(true);
   error = signal('');
-
-  readonly i18nService = inject(I18nService);
+  ready = signal(false);
 
   constructor(
     private readonly examsApi: ExamsApiService,
     private readonly router: Router,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
+    readonly i18nService: I18nService
   ) {
+  }
+
+  ngAfterViewInit(): void {
+    requestAnimationFrame(() => {
+      this.ready.set(true);
+    });
   }
 
   ngOnInit(): void {

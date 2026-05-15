@@ -73,6 +73,7 @@
         "MEDIUM": "Médio",
         "HARD": "Difícil"
       },
+      "breadcrumbs": "Exames",
       "exams": {
         "clp_c02": {
           "title": "AWS Certified Cloud Practitioner (CLF-C02)",
@@ -161,9 +162,9 @@
     "close": "Fechar"
   },
   "alerts": {
-    "noExams": "Nenhum exame disponível no momento. Por favor, volte mais tarde.",
-    "examLoadError": "Erro ao carregar detalhes do exame. Por favor, tente novamente.",
-    "startExamError": "Erro ao iniciar o simulado. Por favor, tente novamente.",
+    "no_exams": "Nenhum exame disponível no momento. Por favor, volte mais tarde.",
+    "exam_load_error": "Erro ao carregar detalhes do exame. Por favor, tente novamente.",
+    "start_exam_error": "Erro ao iniciar o simulado. Por favor, tente novamente.",
     "change_language": "[BETA - i18n] Você tem certeza que deseja mudar o idioma? Isso pode afetar suas preferências de tema e outras configurações.",
     "confirm": "Confirmar",
     "cancel": "Cancelar"
