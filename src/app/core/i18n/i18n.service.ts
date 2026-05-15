@@ -10,7 +10,7 @@ export type Language = 'pt-BR' | 'en-US';
   providedIn: 'root'
 })
 export class I18nService {
-  currentLanguage = signal<Language>('pt-BR');
+  private readonly currentLanguage = signal<Language>('pt-BR');
   private readonly LANGUAGE_KEY = 'language';
   private readonly isBrowser: boolean;
 
@@ -50,11 +50,7 @@ export class I18nService {
 
     try {
       await firstValueFrom(this.translate.use(language));
-
       this.currentLanguage.set(language);
-
-      this.storage?.setItem(this.LANGUAGE_KEY, language);
-
     } catch {
     }
   }

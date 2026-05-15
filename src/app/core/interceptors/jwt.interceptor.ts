@@ -7,6 +7,7 @@ import {Router} from '@angular/router';
 
 @Injectable()
 export class JwtInterceptor implements HttpInterceptor {
+  private isRefreshing = false;
 
   private readonly publicUrls = [
     '/api/v1/auth/login',
@@ -15,8 +16,6 @@ export class JwtInterceptor implements HttpInterceptor {
     '/auth/oauth/google',
     '/auth/oauth/google/callback'
   ];
-
-  private isRefreshing = false;
   private readonly refreshToken$ = new BehaviorSubject<string | null>(null);
 
   constructor(
@@ -24,7 +23,7 @@ export class JwtInterceptor implements HttpInterceptor {
     private readonly router: Router
   ) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+  intercept = (req: HttpRequest<any>, next: HttpHandler) => {
     if (this.isPublicUrl(req.url)) {
       return next.handle(req);
     }
@@ -56,8 +55,7 @@ export class JwtInterceptor implements HttpInterceptor {
           this.isRefreshing = false;
           this.refreshToken$.next(token);
 
-          const retryReq = this.withToken(req, token);
-          return next.handle(retryReq);
+          return next.handle(this.withToken(req, token));
         }),
         finalize(() => {
           this.isRefreshing = false;
@@ -74,10 +72,7 @@ export class JwtInterceptor implements HttpInterceptor {
     return this.refreshToken$.pipe(
       filter(token => token !== null),
       take(1),
-      switchMap(token => {
-        const retryReq = this.withToken(req, token!);
-        return next.handle(retryReq);
-      })
+      switchMap(token => next.handle(this.withToken(req, token)))
     );
   }
 

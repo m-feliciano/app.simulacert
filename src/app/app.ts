@@ -17,7 +17,8 @@ export class App {
   };
 
   showThemeMenu = signal(false);
-  public themeService = inject(ThemeService);
+
+  protected readonly themeService = inject(ThemeService);
 
   toggleThemeMenu(): void {
     this.showThemeMenu.set(!this.showThemeMenu());

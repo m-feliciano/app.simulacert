@@ -4,7 +4,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
 @Pipe({
   name: 'translate',
   standalone: true,
-  pure: false
+  pure: false // allow dynamic updates when translations are loaded
 })
 export class TranslatePipe implements PipeTransform {
   private readonly i18nService = inject(I18nService);
@@ -34,9 +34,10 @@ export class TranslatePipe implements PipeTransform {
             this.cdr.markForCheck();
           }
         });
+    } else {
+      this.cacheRecord[language] = {lastKey: key, lastValue: value};
     }
 
-    this.cacheRecord[language] = {lastKey: key, lastValue: value};
     return value;
   }
 }
