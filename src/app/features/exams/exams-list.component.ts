@@ -1,5 +1,5 @@
-import {AfterViewInit, Component, OnInit, signal} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {AfterViewInit, Component, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
+import {CommonModule, isPlatformBrowser, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
 import {Router} from '@angular/router';
@@ -393,14 +393,17 @@ export class ExamsListComponent implements OnInit, AfterViewInit {
     private readonly router: Router,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    readonly i18nService: I18nService
+    readonly i18nService: I18nService,
+    @Inject(PLATFORM_ID) public readonly platformId: string
   ) {
   }
 
   ngAfterViewInit(): void {
-    requestAnimationFrame(() => {
-      this.ready.set(true);
-    });
+    if (isPlatformBrowser(this.platformId)) {
+      requestAnimationFrame(() => {
+        this.ready.set(true);
+      });
+    }
   }
 
   ngOnInit(): void {
