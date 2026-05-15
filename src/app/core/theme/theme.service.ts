@@ -15,7 +15,7 @@ export class ThemeService {
   private readonly FONT_SIZE_KEY = 'sc_font_size';
   private readonly FONT_FAMILY_KEY = 'sc_font_family';
 
-  themeMode = signal<ThemeMode>('dark');
+  themeMode = signal<ThemeMode>('light');
   fontSize = signal<FontSize>('medium');
   fontFamily = signal<FontFamily>('serif');
 
@@ -109,11 +109,11 @@ export class ThemeService {
     const stored = this.storage?.getItem(this.THEME_KEY) as ThemeMode;
     if (stored) return stored;
 
-    if (globalThis.window !== undefined && globalThis.matchMedia) {
-      return globalThis.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    if (globalThis.window && globalThis.matchMedia) {
+      return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 
-    return 'dark';
+    return 'light';
   }
 
   private getStoredFontSize(): FontSize {
