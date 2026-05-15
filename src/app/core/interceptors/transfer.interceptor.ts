@@ -2,7 +2,7 @@ import {HttpEvent, HttpEventType, HttpHandler, HttpInterceptor, HttpRequest, Htt
 
 import {inject, Injectable, PLATFORM_ID} from '@angular/core';
 
-import {isPlatformBrowser, isPlatformServer} from '@angular/common';
+import {isPlatformBrowser} from '@angular/common';
 
 import {Observable, of} from 'rxjs';
 import {tap} from 'rxjs/operators';

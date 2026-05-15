@@ -1,0 +1,174 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "exams": "Exames",
+    "stats": "Estatísticas",
+    "achievements": "Conquistas",
+    "admin": "Console",
+    "news": "Novidades",
+    "support": "Apoie"
+  },
+  "auth": {
+    "login": "Entrar",
+    "logout": "Sair",
+    "email": "Email",
+    "password": "Senha",
+    "emailRequired": "Email é obrigatório",
+    "passwordRequired": "Senha é obrigatória",
+    "forgotPassword": "Esqueci minha senha",
+    "signUp": "Crie sua conta grátis",
+    "howItWorks": "Como funciona?",
+    "tagline": "Comece a estudar em menos de 30 segundos",
+    "signInTitle": "Faça login",
+    "continueWithGoogle": "Continuar com Google",
+    "connecting": "Conectando...",
+    "loginError": "Erro ao fazer login"
+  },
+  "dashboard": {
+    "welcome": "Bem-vindo de volta!",
+    "loading": "Carregando...",
+    "trainLikeLive": "Treine como na prova oficial",
+    "trainDescription": "Pratique com simulados reais e aumente suas chances de aprovação em certificações de Cloud.",
+    "benefits": {
+      "officialFormat": "Questões no formato oficial",
+      "immediateFeedback": "Feedback imediato",
+      "free": "100% gratuito para começar"
+    },
+    "startNow": "Começar agora",
+    "lessthan1Min": "Leva menos de 1 minuto",
+    "recommendations": "Recomendação para você",
+    "stats": {
+      "totalAttempts": "Total de Tentativas",
+      "completedAttempts": "Tentativas Completas",
+      "averageScore": "Média de Pontuação",
+      "bestScore": "Melhor Pontuação"
+    },
+    "recentAttempts": "Tentativas Recentes",
+    "newSimulation": "Fazer Novo Simulado",
+    "fullStats": "Ver Estatísticas Completas",
+    "recommendations": {
+      "lowScore": "Sua média está abaixo de 50%. Que tal revisar os conceitos básicos antes de fazer mais simulados?",
+      "viewStatsDetail": "Ver Estatísticas Detalhadas",
+      "mediumScore": "Você está progredindo bem! Continue praticando para alcançar a nota de aprovação (70%).",
+      "highScore": "Excelente! Você está acima da nota de aprovação. Continue praticando para consolidar seu conhecimento.",
+      "excellentScore": "Parabéns! Sua média é excelente. Você está pronto para o exame real!",
+      "viewAchievements": "Ver Conquistas",
+      "fewAttempts": "Complete mais simulados para ter uma visão melhor do seu desempenho e identificar pontos de melhoria.",
+      "incompleteAttempts": "Você tem {count} simulados incompletos. Termine-os para ter estatísticas mais precisas.",
+      "viewAttempts": "Ver Tentativas"
+    }
+  },
+  "exams": {
+    "title": "Exames",
+    "loading": "Carregando detalhes do exame...",
+    "list": {
+      "title": "Exames Disponíveis",
+      "loading": "Carregando exames...",
+      "error": "Erro ao carregar exames. Por favor, tente novamente.",
+      "empty": "Nenhum exame disponível no momento.",
+      "start": "Iniciar",
+      "comingSoon": "Em breve",
+      "difficulty": {
+        "EASY": "Fácil",
+        "MEDIUM": "Médio",
+        "HARD": "Difícil"
+      },
+      "breadcrumbs": "Exames",
+      "exams": {
+        "clp_c02": {
+          "title": "AWS Certified Cloud Practitioner (CLF-C02)",
+          "description": "Simulado prático para a certificação AWS Certified Cloud Practitioner, com questões atualizadas conforme o conteúdo oficial do exame."
+        },
+        "dva_c02": {
+          "title": "AWS Certified Developer - Associate (DVA-C02)",
+          "description": "Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão."
+        },
+        "ai_practitioner": {
+          "title": "AWS Certified AI Practitioner",
+          "description": "Exame prático focado em inteligência artificial e machine learning na AWS, com questões alinhadas ao conteúdo da certificação AWS Certified AI Practitioner, ideal para quem busca se aprofundar nessa área."
+        },
+        "az_900": {
+          "title": "Microsoft Certified Azure Fundamentals (AZ-900)",
+          "description": "Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação."
+        },
+        "ai_900": {
+          "title": "Microsoft Certified Azure AI Fundamentals (AI-900)",
+          "description": "Exame prático para avaliar conhecimentos nos conceitos fundamentais de inteligência artificial e machine learning no Microsoft Azure, conforme os tópicos cobrados na certificação."
+        }
+      }
+    },
+    "back": "Voltar para lista de exames",
+    "studyMode": "Modo de estudo",
+    "practiceMode": "Modo Prática",
+    "practiceCaption": "Feedback imediato, ideal para aprendizado",
+    "practiceFeatures": {
+      "seeExplanations": "Veja explicações durante o simulado",
+      "noTimeLimit": "Sem limite de tempo",
+      "idealToLearn": "Ideal para aprender"
+    },
+    "examMode": "Modo Exame",
+    "examCaption": "Simulação fiel, resultado ao final",
+    "examFeatures": {
+      "noExplanations": "Veja explicações apenas ao final",
+      "withTimeLimit": "Com limite de tempo",
+      "likeReal": "Teste realista"
+    },
+    "difficulty": "Dificuldade",
+    "duration": "Duração",
+    "numQuestions": "Número de questões",
+    "startSimulation": "Iniciar Simulado",
+    "selectDifficulty": "Selecione uma dificuldade"
+  },
+  "stats": {
+    "title": "Estatísticas",
+    "backToDashboard": "Voltar ao Dashboard",
+    "status": {
+      "in_progress": "Em Andamento",
+      "completed": "Concluído",
+      "abandoned": "Cancelado"
+    }
+  },
+  "attempt": {
+    "inProgress": "Em Andamento",
+    "completed": "Concluído",
+    "abandoned": "Cancelado"
+  },
+  "theme": {
+    "mode": "Modo",
+    "light": "Luz",
+    "dark": "Trevas",
+    "warm": "Leitura",
+    "fontSize": "Tamanho da Fonte",
+    "fontFamily": "Tipo de Fonte",
+    "language": "Idioma",
+    "portuguese": "Português",
+    "english": "English",
+    "customize": "Personalizar tema"
+  },
+  "footer": {
+    "copyright": "© {year} SimulaCert. Todos os direitos reservados.",
+    "contact": "Contato",
+    "terms": "Termos de Uso",
+    "privacy": "Privacidade"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Erro",
+    "success": "Sucesso",
+    "cancel": "Cancelar",
+    "save": "Salvar",
+    "delete": "Deletar",
+    "edit": "Editar",
+    "close": "Fechar"
+  },
+  "alerts": {
+    "no_exams": "Nenhum exame disponível no momento. Por favor, volte mais tarde.",
+    "exam_load_error": "Erro ao carregar detalhes do exame. Por favor, tente novamente.",
+    "start_exam_error": "Erro ao iniciar o simulado. Por favor, tente novamente.",
+    "change_language": "[BETA - i18n] Você tem certeza que deseja mudar o idioma? Isso pode afetar suas preferências de tema e outras configurações.",
+    "language_changed": "Idioma alterado com sucesso.",
+    "confirm": "Confirmar",
+    "cancel": "Cancelar"
+  }
+}
+

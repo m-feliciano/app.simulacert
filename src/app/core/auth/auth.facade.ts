@@ -88,10 +88,6 @@ export class AuthFacade {
   }
 
   generateRefreshToken() {
-    if (!this.token()) {
-      return throwError(() => new Error('No token available for refresh'));
-    }
-
     const currentRefreshToken = this.refreshToken();
     if (!currentRefreshToken) {
       return throwError(() => new Error('No refresh token available'));

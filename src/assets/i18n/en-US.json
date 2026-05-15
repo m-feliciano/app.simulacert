@@ -1,0 +1,173 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "exams": "Exams",
+    "stats": "Statistics",
+    "achievements": "Achievements",
+    "admin": "Console",
+    "news": "News",
+    "support": "Support"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "forgotPassword": "Forgot my password",
+    "signUp": "Create your free account",
+    "howItWorks": "How it works?",
+    "tagline": "Start studying in less than 30 seconds",
+    "signInTitle": "Sign In",
+    "continueWithGoogle": "Continue with Google",
+    "connecting": "Connecting...",
+    "loginError": "Login error"
+  },
+  "dashboard": {
+    "welcome": "Welcome Back!",
+    "loading": "Loading...",
+    "trainLikeLive": "Train Like the Real Exam",
+    "trainDescription": "Practice with real simulations and increase your chances of passing Cloud certifications.",
+    "benefits": {
+      "officialFormat": "Official format questions",
+      "immediateFeedback": "Immediate feedback",
+      "free": "100% free to start"
+    },
+    "startNow": "Start Now",
+    "lessthan1Min": "Takes less than 1 minute",
+    "recommendations": "Recommendation for you",
+    "stats": {
+      "totalAttempts": "Total Attempts",
+      "completedAttempts": "Completed Attempts",
+      "averageScore": "Average Score",
+      "bestScore": "Best Score"
+    },
+    "recentAttempts": "Recent Attempts",
+    "newSimulation": "Take New Simulation",
+    "fullStats": "View Full Statistics",
+    "recommendations": {
+      "lowScore": "Your average is below 50%. How about reviewing the basics before taking more simulations?",
+      "viewStatsDetail": "View Detailed Statistics",
+      "mediumScore": "You're making good progress! Keep practicing to reach the passing score (70%).",
+      "highScore": "Excellent! You're above the passing score. Keep practicing to consolidate your knowledge.",
+      "excellentScore": "Congratulations! Your average is excellent. You're ready for the real exam!",
+      "viewAchievements": "View Achievements",
+      "fewAttempts": "Complete more simulations to get a better view of your performance and identify improvement points.",
+      "incompleteAttempts": "You have {count} incomplete simulations. Finish them for more accurate statistics.",
+      "viewAttempts": "View Attempts"
+    }
+  },
+  "exams": {
+    "title": "Exams",
+    "loading": "Loading exam details...",
+    "list": {
+      "title": "Available Exams",
+      "loading": "Loading exams...",
+      "error": "Error loading exams. Please try again.",
+      "empty": "No exams available at the moment.",
+      "start": "Start",
+      "comingSoon": "Coming Soon",
+      "difficulty": {
+        "EASY": "Easy",
+        "MEDIUM": "Medium",
+        "HARD": "Hard"
+      },
+      "breadcrumbs": "Exams",
+      "exams": {
+        "clp_c02": {
+          "title": "AWS Certified Cloud Practitioner (CLF-C02)",
+          "description": "Practice exam for AWS Certified Cloud Practitioner certification with updated questions aligned to official exam content."
+        },
+        "dva_c02": {
+          "title": "AWS Certified Developer - Associate (DVA-C02)",
+          "description": "Practice exam with questions aligned to the content and difficulty level of the AWS Certified Developer – Associate certification for training and review."
+        },
+        "ai_practitioner": {
+          "title": "AWS Certified AI Practitioner",
+          "description": "Practice exam focused on artificial intelligence and machine learning on AWS, with questions aligned to the AWS Certified AI Practitioner certification content, ideal for those seeking to specialize in this field."
+        },
+        "az_900": {
+          "title": "Microsoft Certified Azure Fundamentals (AZ-900)",
+          "description": "Practice exam to assess knowledge of the fundamental concepts of Microsoft Azure, according to the topics covered in the certification."
+        },
+        "ai_900": {
+          "title": "Microsoft Certified Azure AI Fundamentals (AI-900)",
+          "description": "Practice exam to assess knowledge of fundamental concepts of artificial intelligence and machine learning on Microsoft Azure, according to the topics covered in the certification."
+        }
+      }
+    },
+    "back": "Back to exam list",
+    "studyMode": "Study Mode",
+    "practiceMode": "Practice Mode",
+    "practiceCaption": "Immediate feedback, ideal for learning",
+    "practiceFeatures": {
+      "seeExplanations": "See explanations during the simulation",
+      "noTimeLimit": "No time limit",
+      "idealToLearn": "Ideal for learning"
+    },
+    "examMode": "Exam Mode",
+    "examCaption": "Realistic simulation, result at the end",
+    "examFeatures": {
+      "noExplanations": "See explanations only at the end",
+      "withTimeLimit": "With time limit",
+      "likeReal": "Realistic test"
+    },
+    "difficulty": "Difficulty",
+    "duration": "Duration",
+    "numQuestions": "Number of questions",
+    "startSimulation": "Start Simulation",
+    "selectDifficulty": "Select a difficulty"
+  },
+  "stats": {
+    "title": "Statistics",
+    "backToDashboard": "Back to Dashboard",
+    "status": {
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "abandoned": "Abandoned"
+    }
+  },
+  "attempt": {
+    "inProgress": "In Progress",
+    "completed": "Completed",
+    "abandoned": "Abandoned"
+  },
+  "theme": {
+    "mode": "Mode",
+    "light": "Light",
+    "dark": "Dark",
+    "warm": "Reading",
+    "fontSize": "Font Size",
+    "fontFamily": "Font Type",
+    "language": "Language",
+    "portuguese": "Português",
+    "english": "English",
+    "customize": "Customize theme"
+  },
+  "footer": {
+    "copyright": "© {year} SimulaCert. All rights reserved.",
+    "contact": "Contact",
+    "terms": "Terms of Use",
+    "privacy": "Privacy"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close"
+  },
+  "alerts": {
+    "confirm_delete": "Are you sure you want to delete this item?",
+    "changes_saved": "Changes saved successfully!",
+    "error_occurred": "An error occurred. Please try again.",
+    "no_data": "No data available.",
+    "change_language": "[BETA - i18n] Changing the language will reload the page. Do you want to continue?",
+    "language_changed": "Language changed successfully!"
+  }
+}
+

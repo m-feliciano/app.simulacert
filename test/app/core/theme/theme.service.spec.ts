@@ -4,6 +4,7 @@ import {TestBed} from '@angular/core/testing';
 import {afterEach, describe, expect, it, jest} from '@jest/globals';
 import {LOCAL_STORAGE} from '../../../../src/app/core/storage/local-storage.token';
 import {ThemeService} from '../../../../src/app/core/theme/theme.service';
+import {I18nService} from '../../../../src/app/core/i18n/i18n.service';
 
 type StorageMock = Storage & {
   data: Record<string, string>;
@@ -39,6 +40,14 @@ function createStorageMock(initial: Record<string, string> = {}): StorageMock {
   } as StorageMock;
 }
 
+function mockI18nService() {
+  return {
+    get currentLanguage() {
+      return 'en';
+    }
+  } as any;
+}
+
 function resetDom() {
   globalThis.document.documentElement.className = '';
   globalThis.document.head.querySelector('meta[name="theme-color"]')?.remove();
@@ -50,6 +59,7 @@ function setupBrowserThemeTestingModule(storage: StorageMock) {
     imports: [ThemeServiceHostComponent],
     providers: [
       {provide: DOCUMENT, useValue: globalThis.document},
+      {provide: I18nService, useValue: mockI18nService()},
       {provide: LOCAL_STORAGE, useValue: storage},
       {provide: PLATFORM_ID, useValue: 'browser'},
     ],
@@ -62,6 +72,7 @@ function setupServerThemeTestingModule(storage: StorageMock | null) {
     providers: [
       {provide: DOCUMENT, useValue: globalThis.document},
       {provide: LOCAL_STORAGE, useValue: storage},
+      {provide: I18nService, useValue: mockI18nService()},
       {provide: PLATFORM_ID, useValue: 'server'},
     ],
   });
@@ -131,7 +142,7 @@ describe('ThemeService', () => {
     const storage = createStorageMock();
     Object.defineProperty(window, 'matchMedia', {
       configurable: true,
-      value: jest.fn().mockReturnValue({matches: true}),
+      value: jest.fn().mockReturnValue({matches: false}),
     });
 
     setupBrowserThemeTestingModule(storage);
@@ -154,7 +165,7 @@ describe('ThemeService', () => {
     const service = TestBed.inject(ThemeService);
 
     expect(isPlatformBrowser(TestBed.inject(PLATFORM_ID))).toBe(false);
-    expect(service.themeMode()).toBe('dark');
+    expect(service.themeMode()).toBe('light');
     expect(globalThis.document.documentElement.classList.contains('theme-dark')).toBe(false);
     expect(globalThis.document.querySelector('meta[name="theme-color"]')).toBeNull();
   });

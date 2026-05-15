@@ -1,6 +1,7 @@
-import {DOCUMENT, effect, Inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
+import {DOCUMENT, effect, Inject, inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
+import {I18nService, Language} from '../i18n/i18n.service';
 
 export type ThemeMode = 'light' | 'dark' | 'warm' | 'high-contrast';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge' | 'extra-small';
@@ -14,16 +15,12 @@ export class ThemeService {
   private readonly FONT_SIZE_KEY = 'sc_font_size';
   private readonly FONT_FAMILY_KEY = 'sc_font_family';
 
-  themeMode = signal<ThemeMode>('dark');
+  themeMode = signal<ThemeMode>('light');
   fontSize = signal<FontSize>('medium');
   fontFamily = signal<FontFamily>('serif');
 
-  alertChangeLanguage = signal<Record<string, string>>({
-      'pt_br': 'Você está prestes a mudar o idioma para Português.\n\n A tela será recarregada para aplicar as mudanças. Deseja continuar?',
-      'en': 'You are about to change the language to English.\n\n The screen will reload to apply the changes. Do you want to continue?'
-  });
-
   private readonly isBrowser: boolean;
+  private readonly i18nService = inject(I18nService);
 
   constructor(
     @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
@@ -51,7 +48,6 @@ export class ThemeService {
         this.storage?.setItem(this.THEME_KEY, mode);
         this.storage?.setItem(this.FONT_SIZE_KEY, size);
         this.storage?.setItem(this.FONT_FAMILY_KEY, family);
-        this.storage?.setItem('language', this.language());
       }
     });
   }
@@ -113,11 +109,11 @@ export class ThemeService {
     const stored = this.storage?.getItem(this.THEME_KEY) as ThemeMode;
     if (stored) return stored;
 
-    if (globalThis.window !== undefined && globalThis.matchMedia) {
-      return globalThis.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+    if (globalThis.window && globalThis.matchMedia) {
+      return globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
 
-    return 'dark';
+    return 'light';
   }
 
   private getStoredFontSize(): FontSize {
@@ -128,19 +124,23 @@ export class ThemeService {
     return (this.storage?.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
   }
 
-  setLanguage(lang: string) {
-    if (!this.isBrowser || !this.storage) return;
+  setLanguage(lang: Language) {
+    if (!this.isBrowser) return;
 
-    if (confirm(this.alertChangeLanguage()[this.language()])) {
-      this.storage.setItem('language', lang);
+    this.i18nService.get('alerts.change_language')
+      .subscribe((message) => {
+        if (confirm(message)) {
 
-      setTimeout(() => globalThis.location.reload(), 200);
-    }
+          this.i18nService.changeLanguage(lang)
+            .subscribe(() => {
+              setTimeout(() => globalThis.location.reload(), 1000);
+              alert(this.i18nService.instant('alerts.language_changed'));
+            });
+        }
+      });
   }
 
-  language() {
-    if (!this.isBrowser || !this.storage) return 'pt_br';
-
-    return this.storage.getItem('language') || 'pt_br';
+  getLanguage(): Language {
+    return this.i18nService.getLanguage();
   }
 }

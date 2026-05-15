@@ -35,12 +35,8 @@ export class AttemptsApiService {
   getAttemptsByUser(userId: string): Observable<AttemptResponse[]> {
     return this.http.get<{ content: object }>(`${this.baseUrl}/user/${userId}?page=0&size=5&sort=desc&sortBy=finishedAt`)
       .pipe(
-        map(({content}) => {
-          return Object.values(content).map((attempt: any) => {
-            const {questionIds, ...rest} = attempt;
-            return rest as AttemptResponse;
-          });
-        }));
+        map(({content}) => content as AttemptResponse[])
+      );
   }
 
   getAttemptQuestions(attemptId: string): Observable<AttemptQuestionResponse[]> {
@@ -49,10 +45,6 @@ export class AttemptsApiService {
 
   submitAnswer(attemptId: string, questionId: string, request: SubmitAnswerRequest): Observable<void> {
     return this.http.post<void>(`${this.baseUrl}/${attemptId}/answers/${questionId}`, request);
-  }
-
-  deleteAnswer(attemptId: string, questionId: string): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${attemptId}/answers/${questionId}`);
   }
 
   getAnswers(attemptId: string): Observable<AnswerResponse[]> {
@@ -73,10 +65,6 @@ export class AttemptsApiService {
 
   heartbeatAttempt(attemptId: string): Observable<AttemptTimingResponse> {
     return this.http.post<AttemptTimingResponse>(`${this.baseUrl}/${attemptId}/heartbeat`, {});
-  }
-
-  cancelAttempt(attemptId: string): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${attemptId}/cancel`, {});
   }
 
   retakeAttempt(id: string): Observable<AttemptResponse> {
