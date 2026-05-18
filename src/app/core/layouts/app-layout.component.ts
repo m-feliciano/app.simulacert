@@ -35,7 +35,12 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
               <lucide-icon [img]="icons.menu" class="icon" aria-hidden="true"></lucide-icon>
             </button>
           }
-          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120"/>
+          <img priority ngSrc="/simulacert-logo.svg"
+               alt="simulacert"
+               class="logo"
+               height="32" width="120"
+               (click)="router.navigate(['/'])"
+               style="cursor: pointer"/>
         </div>
 
         @if (!isMobile()) {
@@ -368,7 +373,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     .main-content {
       flex: 1;
       overflow-y: auto;
-      overflow-x: hidden;
       background: var(--bg);
       padding-top: 64px;
     }
@@ -463,16 +467,17 @@ export class AppLayoutComponent {
     type: Type
   };
 
+  showSupportModal = false;
+
   sidebarCollapsed = signal(true);
   isMobile = signal(false);
-  showSupportModal = false;
-  destroyRef = inject(DestroyRef);
 
-  private readonly themeService = inject(ThemeService);
+  readonly destroyRef = inject(DestroyRef);
 
   constructor(
     protected readonly authFacade: AuthFacade,
-    private readonly router: Router
+    protected readonly router: Router,
+    private readonly themeService: ThemeService, // init component
   ) {
     this.checkIfMobile();
   }
