@@ -1,4 +1,4 @@
-import {Component, DestroyRef, effect, OnInit, signal, ViewEncapsulation} from '@angular/core';
+import {Component, DestroyRef, effect, OnDestroy, OnInit, signal, ViewEncapsulation} from '@angular/core';
 import {CommonModule, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -241,14 +241,14 @@ import {QuestionExplanationComponent} from '../../shared/components/question-exp
     </div>
   `
 })
-export class AttemptRunnerComponent implements OnInit {
+export class AttemptRunnerComponent implements OnInit, OnDestroy {
   attemptId!: string;
   exam = signal<ExamResponse | null>(null);
   questions = signal<AttemptQuestionResponse[]>([]);
   selectedAnswers = signal<{ [index: number]: string[] }>({});
   answeredQuestions = signal(new Set<number>());
   currentQuestionIndex = signal(0);
-  timeRemaining = signal(1);
+  timeRemaining = signal(5);
   startedAtMs = signal<number | null>(null);
   showPopover = signal(false);
   popoverPinned = signal(false);
@@ -308,6 +308,12 @@ export class AttemptRunnerComponent implements OnInit {
   ngOnInit(): void {
     this.attemptId = this.route.snapshot.paramMap.get('id')!;
     this.loadAttempt();
+  }
+
+  ngOnDestroy(): void {
+    if (!this.isPaused()) {
+      this.pauseAttempt();
+    }
   }
 
   private updateRemainingFromEndsAt(): void {
@@ -381,6 +387,7 @@ export class AttemptRunnerComponent implements OnInit {
       next: (timing) => {
         this.setTimingFromServer(timing);
         this.showPauseModal.set(true);
+        this.isPaused.set(true);
         this.unsubscribe();
       },
       error: () => {
@@ -430,7 +437,7 @@ export class AttemptRunnerComponent implements OnInit {
       } else {
         currentAnswers = [optionKey];
       }
-    } else if (currentAnswers.indexOf(optionKey) > -1) {
+    } else if (currentAnswers.includes(optionKey)) {
       currentAnswers = currentAnswers.filter(a => a !== optionKey);
 
     } else if (currentAnswers.length < expectedCount) {
