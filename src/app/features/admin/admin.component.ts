@@ -276,7 +276,7 @@ export class AdminComponent implements OnInit {
   }
 
   loadExams(): void {
-    this.examsApi.getAllExams().subscribe({
+    this.examsApi.getAllAvailable().subscribe({
       next: (exams) => {
         this.exams.set(exams);
       }

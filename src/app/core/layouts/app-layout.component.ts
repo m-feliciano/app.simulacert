@@ -19,13 +19,14 @@ import {
   Type
 } from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
+import {NavbarComponent} from '../../shared/components/navbar.component';
 import {fromEvent} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule, NavbarComponent],
   template: `
     <div class="app-layout" seoHead>
       <header class="topbar sc-glass sc-glass--acrylic">
@@ -39,23 +40,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
         </div>
 
         @if (!isMobile()) {
-          <nav class="topbar-nav">
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
-            <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
-            <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
-            <a routerLink="/achievements" routerLinkActive="active" class="nav-item">Conquistas</a>
-
-            @if (authFacade.isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
-            }
-
-            <a routerLink="/news" routerLinkActive="false" class="nav-item muted">Novidades</a>
-
-            <button class="nav-item support-btn" (click)="showSupportModal = true">
-              <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
-              Apoie
-            </button>
-          </nav>
+          <app-navbar/>
         }
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
@@ -475,6 +460,12 @@ export class AppLayoutComponent {
     private readonly router: Router
   ) {
     this.checkIfMobile();
+
+    if (globalThis.document) {
+      fromEvent(globalThis.document, 'open-support')
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.showSupportModal = true);
+    }
   }
 
   toggleSidebar(): void {

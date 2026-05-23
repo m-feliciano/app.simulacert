@@ -94,7 +94,7 @@ export class RelatedExamsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.examsApi.getAllExams().subscribe({
+    this.examsApi.getAllAvailable().subscribe({
       next: (data) => this.setRelatedExams(data),
       error: () => this.related.set([])
     });

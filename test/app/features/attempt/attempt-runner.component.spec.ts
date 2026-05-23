@@ -78,7 +78,7 @@ function createAttemptsApiMock() {
     getAttemptQuestions: jest.fn(),
     getAnswers: jest.fn(),
     heartbeatAttempt: jest.fn(),
-    pauseAttempt: jest.fn(),
+    pauseAttempt: jest.fn().mockImplementation(() => of({})),
     resumeAttempt: jest.fn(),
     submitAnswer: jest.fn(),
     finishAttempt: jest.fn(),
@@ -88,6 +88,9 @@ function createAttemptsApiMock() {
 function createExamsApiMock() {
   return {
     getExam: jest.fn(),
+    getAll: jest.fn(),
+    getAllAvailable: jest.fn(),
+    getAllIncoming: jest.fn(),
   } as unknown as jest.Mocked<Pick<ExamsApiService, 'getExam'>>;
 }
 
