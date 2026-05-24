@@ -15,6 +15,8 @@ export class I18nService {
   private readonly isBrowser: boolean;
   private readonly languageSet$ = new Subject<Language>();
 
+  public readonly onLanguageChange: Observable<Language> = this.languageSet$.asObservable();
+
   constructor(
     private readonly translate: TranslateService,
     @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
