@@ -20,13 +20,14 @@ import {
 } from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
 import {NavbarComponent} from '../../shared/components/navbar.component';
+import {SupportButtonComponent} from '../../shared/components/support-button.component';
 import {fromEvent} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule, NavbarComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule, NavbarComponent, SupportButtonComponent],
   template: `
     <div class="app-layout" seoHead>
       <header class="topbar sc-glass sc-glass--acrylic">
@@ -89,10 +90,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
                   <span class="nav-label">Console</span>
                 </a>
               }
-              <button class="nav-item support-btn" (click)="showSupportModal = true">
-                <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
-                <span class="nav-label">Apoie</span>
-              </button>
+              <app-support-button></app-support-button>
             </nav>
           </aside>
         }
@@ -379,29 +377,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
       .content-wrapper {
         padding: var(--spacing-xl) var(--spacing-xl) 0;
       }
-    }
-
-    .support-btn {
-      background: none;
-      border: none;
-      color: var(--text-2);
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      padding: var(--spacing-md) var(--spacing-lg);
-      transition: background 0.2s;
-      width: 100%;
-      text-align: left;
-    }
-    .support-btn:hover {
-      background: rgba(17, 24, 39, 0.06);
-      color: var(--text);
-    }
-
-    .support-btn .nav-icon {
-      color: hotpink;
     }
 
     .topbar-nav {

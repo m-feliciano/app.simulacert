@@ -18,11 +18,12 @@ import {
   Trophy
 } from 'lucide-angular';
 import {ExamResponse} from '../../api/domain';
+import {SupportButtonComponent} from './support-button.component';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule],
+  imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule, SupportButtonComponent],
   template: `
     <nav class="topbar-nav" (mouseleave)="closeDropdown()">
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
@@ -82,10 +83,7 @@ import {ExamResponse} from '../../api/domain';
       <a routerLink="/news" routerLinkActive="false" class="nav-item muted disabled"
          style="cursor: not-allowed">Novidades</a>
 
-      <button class="nav-item support-btn" (click)="openSupport()">
-        <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
-        Apoie
-      </button>
+      <app-support-button></app-support-button>
     </nav>
   `,
   styles: [
@@ -315,8 +313,5 @@ export class NavbarComponent implements OnInit {
     this.hover$.next(false);
   }
 
-  openSupport(): void {
-    const ev = new CustomEvent('open-support', {bubbles: true});
-    globalThis.document?.dispatchEvent(ev);
-  }
+  // support action is provided by the reusable <app-support-button />
 }
