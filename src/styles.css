@@ -40,6 +40,13 @@
   --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
   --shadow-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+  /* Scrollbar */
+  --scrollbar-size: 12px;
+  --scrollbar-radius: 999px;
+  --scrollbar-track: rgba(15, 23, 42, 0.06);
+  --scrollbar-thumb: rgba(15, 23, 42, 0.28);
+  --scrollbar-thumb-hover: rgba(15, 23, 42, 0.42);
 }
 
 /* --- THEMES --- */
@@ -81,6 +88,12 @@
   --input-border: var(--border-strong);
   --input-radius: var(--radius-md);
   --sc-premium-gradient: linear-gradient(135deg, var(--brand-secondary) 0%, #1a232e 100%);
+
+  /* Scrollbar (theme) */
+  --scrollbar-track: rgba(15, 23, 42, 0.06);
+  /* Use brand-secondary so it actually changes with the theme */
+  --scrollbar-thumb: rgba(var(--brand-secondary-rgb), 0.38);
+  --scrollbar-thumb-hover: rgba(var(--brand-secondary-rgb), 0.55);
 }
 
 .theme-dark {
@@ -115,6 +128,11 @@
   --input-border: var(--border-strong);
   --input-radius: var(--radius-md);
   --sc-premium-gradient: linear-gradient(135deg, #121212 0%, #2d2d2d 100%);
+
+  /* Scrollbar (theme) */
+  --scrollbar-track: rgba(255, 255, 255, 0.08);
+  --scrollbar-thumb: rgba(var(--brand-secondary-rgb), 0.70);
+  --scrollbar-thumb-hover: rgba(var(--brand-secondary-rgb), 0.88);
 }
 
 .theme-warm {
@@ -142,6 +160,18 @@
   --input-border: var(--border-strong);
   --input-radius: var(--radius-md);
   --sc-premium-gradient: linear-gradient(135deg, #859900 0%, #586e75 100%);
+
+  /* Scrollbar (theme) */
+  --scrollbar-track: rgba(88, 110, 117, 0.12);
+  --scrollbar-thumb: rgba(var(--brand-secondary-rgb), 0.55);
+  --scrollbar-thumb-hover: rgba(var(--brand-secondary-rgb), 0.72);
+}
+
+/* Optional mode supported by ThemeService */
+.theme-high-contrast {
+  --scrollbar-track: rgba(255, 255, 255, 0.18);
+  --scrollbar-thumb: rgba(255, 255, 255, 0.92);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 1);
 }
 
 /* --- Typography Scaling --- */
@@ -182,6 +212,36 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Chrome / Edge / Safari (WebKit) */
+*::-webkit-scrollbar {
+  width: var(--scrollbar-size);
+  height: var(--scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+  border-radius: var(--scrollbar-radius);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: var(--scrollbar-radius);
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 body {

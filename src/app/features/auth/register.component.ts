@@ -98,13 +98,12 @@ export class RegisterComponent {
   loading = signal(false);
   loadingGoogle = signal(false);
   errorMessage = signal('');
-  private readonly baseUrl: string;
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly authFacade: AuthFacade,
     private readonly router: Router,
-    @Inject(API_CONFIG) private config: ApiConfig,
+    @Inject(API_CONFIG) private readonly config: ApiConfig,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
   ) {
@@ -112,7 +111,6 @@ export class RegisterComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]]
     });
-    this.baseUrl = this.config.baseUrl;
 
     const seo = this.seoFactory.website({
       title: 'Cadastro | SimulaCert',
@@ -129,7 +127,7 @@ export class RegisterComponent {
     this.loadingGoogle.set(true);
     this.errorMessage.set('');
 
-    globalThis.location.href = `${this.baseUrl}/api/v1/auth/oauth/google`;
+    globalThis.location.href = `${this.config.baseUrl}/api/v1/auth/oauth/google`;
   }
 
   onSubmit(): void {
