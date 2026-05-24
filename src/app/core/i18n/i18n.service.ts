@@ -59,7 +59,7 @@ export class I18nService {
     }
 
     this.currentLanguage.set(language);
-    return this.languageSet$.asObservable();
+    return this.onLanguageChange;
   }
 
   getLanguage(): Language {
