@@ -62,5 +62,8 @@ jobs:
           distribution-id: E1F2G7KCZXOOIL
           paths: "/*"
         env:
+          DISTRIBUTION: E1F2G7KCZXOOIL
+          PATHS: "/*"
+          AWS_REGION: us-east-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
