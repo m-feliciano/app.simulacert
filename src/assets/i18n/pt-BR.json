@@ -106,7 +106,7 @@
     "difficultyAll": "Todas",
     "difficultyEasy": "Fácil",
     "difficultyMedium": "Médio",
-    "difficultyHard": "Desafiador",
+    "difficultyHard": "Difícil",
     "recommendedTime": "Usar tempo sugerido",
     "resetButton": "Limpar",
     "startExam": "Iniciar com {{count}} questões",
@@ -123,8 +123,8 @@
       "comingSoon": "Em breve",
       "difficulty": {
         "EASY": "Fácil",
-        "MEDIUM": "Intermediária",
-        "HARD": "Desafiador"
+        "MEDIUM": "Médio",
+        "HARD": "Difícil"
       },
       "breadcrumbs": "Exames",
       "exams": {
