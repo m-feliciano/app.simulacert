@@ -1,4 +1,3 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {ActivatedRoute, Router} from '@angular/router';
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
 import {of, throwError} from 'rxjs';
@@ -6,6 +5,8 @@ import {AttemptRunnerComponent} from '../../../../src/app/features/attempt/attem
 import {AttemptsApiService} from '../../../../src/app/api/attempts.service';
 import {ExamsApiService} from '../../../../src/app/api/exams.service';
 import {AttemptQuestionResponse, AttemptResponse, AttemptStatus, ExamResponse} from '../../../../src/app/api/domain';
+import {I18nService} from '../../../../src/app/core/i18n/i18n.service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 function createAttempt(overrides: Partial<AttemptResponse> = {}): AttemptResponse {
   return {
@@ -78,7 +79,7 @@ function createAttemptsApiMock() {
     getAttemptQuestions: jest.fn(),
     getAnswers: jest.fn(),
     heartbeatAttempt: jest.fn(),
-    pauseAttempt: jest.fn(),
+    pauseAttempt: jest.fn().mockImplementation(() => of({})),
     resumeAttempt: jest.fn(),
     submitAnswer: jest.fn(),
     finishAttempt: jest.fn(),
@@ -88,6 +89,9 @@ function createAttemptsApiMock() {
 function createExamsApiMock() {
   return {
     getExam: jest.fn(),
+    getAll: jest.fn(),
+    getAllAvailable: jest.fn(),
+    getAllIncoming: jest.fn(),
   } as unknown as jest.Mocked<Pick<ExamsApiService, 'getExam'>>;
 }
 
@@ -95,6 +99,14 @@ function createRouterMock() {
   return {
     navigate: jest.fn(() => Promise.resolve(true)),
   } as any;
+}
+
+function mockI18nService() {
+  return {
+    getLanguage: jest.fn(() => 'pt-BR'),
+    instant: jest.fn((key: string) => {}),
+    get: jest.fn((key: string) => of('')),
+  }
 }
 
 describe('AttemptRunnerComponent', () => {
@@ -118,6 +130,7 @@ describe('AttemptRunnerComponent', () => {
         {provide: Router, useValue: router},
         {provide: AttemptsApiService, useValue: attemptsApi},
         {provide: ExamsApiService, useValue: examsApi},
+        {provide: I18nService, useValue: mockI18nService()},
       ],
     });
 

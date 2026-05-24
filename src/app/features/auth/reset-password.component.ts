@@ -206,10 +206,10 @@ export class ResetPasswordComponent implements OnInit {
   token = '';
 
   constructor(
-    private fb: FormBuilder,
-    private route: ActivatedRoute,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly fb: FormBuilder,
+    private readonly route: ActivatedRoute,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     this.resetPasswordForm = this.fb.group({
       password: ['', [Validators.required, Validators.minLength(6)]],

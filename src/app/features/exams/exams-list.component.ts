@@ -2,7 +2,7 @@ import {AfterViewInit, Component, Inject, OnInit, PLATFORM_ID, signal} from '@an
 import {CommonModule, isPlatformBrowser, NgOptimizedImage} from '@angular/common';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
-import {Router, RouterLink} from '@angular/router';
+import {RouterLink} from '@angular/router';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
@@ -390,7 +390,6 @@ export class ExamsListComponent implements OnInit, AfterViewInit {
 
   constructor(
     private readonly examsApi: ExamsApiService,
-    private readonly router: Router,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
     readonly i18nService: I18nService,
@@ -433,9 +432,9 @@ export class ExamsListComponent implements OnInit, AfterViewInit {
   }
 
   loadExams(): void {
-    this.examsApi.getAllExams().subscribe({
+    this.examsApi.getAll().subscribe({
       next: (exams) => {
-        this.exams.set([...exams, ...this.incomingExams()]);
+        this.exams.set(exams);
         this.loading.set(false);
       },
       error: () => {
@@ -443,46 +442,5 @@ export class ExamsListComponent implements OnInit, AfterViewInit {
         this.loading.set(false);
       }
     });
-  }
-
-  private incomingExams(): ExamResponse[] {
-    return [
-      {
-        id: '1f0ecad5-1bcb-63e8-8ec7-4b60a5d7c8e8',
-        title: 'AWS Certified Developer - Associate (DVA-C02)',
-        description: 'Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão.',
-        difficulty: 'MEDIUM',
-        totalQuestions: 235,
-        incoming: true,
-        slug: 'aws-certified-developer-dva-c02'
-      },
-      {
-        id: '4d3f6a89-4b2c-5e7d-9f8a-7c9d0e1f2a3b',
-        title: 'AWS Certified AI Practitioner',
-        description: 'Exame prático focado em inteligência artificial e machine learning na AWS, com questões alinhadas ao conteúdo da certificação AWS Certified AI Practitioner, ideal para quem busca se aprofundar nessa área.',
-        difficulty: 'EASY',
-        totalQuestions: 150,
-        incoming: true,
-        slug: 'aws-certified-ai-practitioner'
-      },
-      {
-        id: '2a1bdc34-2d4f-4c3b-9f7e-5b1e6d9f7c9f',
-        title: 'Microsoft Certified Azure Fundamentals (AZ-900)',
-        description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação.',
-        difficulty: 'EASY',
-        totalQuestions: 174,
-        incoming: true,
-        slug: 'azure-certified-fundamentals-az-900'
-      },
-      {
-        id: '3c5e7a89-4b2c-5e7d-9f8a-7c9d0e1f2a3c',
-        title: 'Microsoft Certified Azure AI Fundamentals (AI-900)',
-        description: 'Exame prático para avaliar conhecimentos nos conceitos fundamentais de inteligência artificial e machine learning no Microsoft Azure, conforme os tópicos cobrados na certificação.',
-        difficulty: 'EASY',
-        totalQuestions: 120,
-        incoming: true,
-        slug: 'azure-certified-fundamentals-ai-900'
-      }
-    ];
   }
 }

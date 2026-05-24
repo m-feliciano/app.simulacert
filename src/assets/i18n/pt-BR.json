@@ -1,12 +1,18 @@
 {
   "nav": {
-    "dashboard": "Dashboard",
+    "dashboard": "Painel",
     "exams": "Exames",
     "stats": "Estatísticas",
     "achievements": "Conquistas",
-    "admin": "Console",
+    "admin": "Admin",
     "news": "Novidades",
-    "support": "Apoie"
+    "support": "Suporte",
+    "dropdown": {
+      "loading": "Carregando...",
+      "noExams": "Nenhum exame disponível",
+      "viewAll": "Ver todos os exames",
+      "comingSoon": "(em breve)"
+    }
   },
   "auth": {
     "login": "Entrar",
@@ -16,19 +22,19 @@
     "emailRequired": "Email é obrigatório",
     "passwordRequired": "Senha é obrigatória",
     "forgotPassword": "Esqueci minha senha",
-    "signUp": "Crie sua conta grátis",
-    "howItWorks": "Como funciona?",
-    "tagline": "Comece a estudar em menos de 30 segundos",
-    "signInTitle": "Faça login",
+    "signUp": "Criar conta grátis",
+    "howItWorks": "Como funciona",
+    "tagline": "Comece em menos de 30 segundos",
+    "signInTitle": "Faça seu login",
     "continueWithGoogle": "Continuar com Google",
     "connecting": "Conectando...",
     "loginError": "Erro ao fazer login"
   },
   "dashboard": {
-    "welcome": "Bem-vindo de volta!",
+    "welcome": "Bem-vindo de volta",
     "loading": "Carregando...",
-    "trainLikeLive": "Treine como na prova oficial",
-    "trainDescription": "Pratique com simulados reais e aumente suas chances de aprovação em certificações de Cloud.",
+    "trainLikeLive": "Treine na condição real",
+    "trainDescription": "Pratique com simulados que replicam o exame oficial e aumente suas chances de aprovação em certificações de Cloud.",
     "benefits": {
       "officialFormat": "Questões no formato oficial",
       "immediateFeedback": "Feedback imediato",
@@ -38,117 +44,252 @@
     "lessthan1Min": "Leva menos de 1 minuto",
     "recommendations": "Recomendação para você",
     "stats": {
-      "totalAttempts": "Total de Tentativas",
-      "completedAttempts": "Tentativas Completas",
-      "averageScore": "Média de Pontuação",
-      "bestScore": "Melhor Pontuação"
+      "totalAttempts": "Total de Simulados",
+      "completedAttempts": "Simulados Concluídos",
+      "averageScore": "Média de Desempenho",
+      "bestScore": "Melhor Resultado"
     },
-    "recentAttempts": "Tentativas Recentes",
+    "recentAttempts": "Últimos Simulados",
     "newSimulation": "Fazer Novo Simulado",
     "fullStats": "Ver Estatísticas Completas",
     "recommendations": {
-      "lowScore": "Sua média está abaixo de 50%. Que tal revisar os conceitos básicos antes de fazer mais simulados?",
-      "viewStatsDetail": "Ver Estatísticas Detalhadas",
-      "mediumScore": "Você está progredindo bem! Continue praticando para alcançar a nota de aprovação (70%).",
-      "highScore": "Excelente! Você está acima da nota de aprovação. Continue praticando para consolidar seu conhecimento.",
-      "excellentScore": "Parabéns! Sua média é excelente. Você está pronto para o exame real!",
-      "viewAchievements": "Ver Conquistas",
-      "fewAttempts": "Complete mais simulados para ter uma visão melhor do seu desempenho e identificar pontos de melhoria.",
-      "incompleteAttempts": "Você tem {count} simulados incompletos. Termine-os para ter estatísticas mais precisas.",
-      "viewAttempts": "Ver Tentativas"
+      "lowScore": "Sua média está em {{score}}%. Recomendamos revisar os conceitos fundamentais para consolidar o aprendizado antes dos próximos simulados.",
+      "viewStatsDetail": "Ver Detalhes",
+      "mediumScore": "Bom progresso! Você está na trilha certa. Mantenha o ritmo para ultrapassar os 70% de aprovação.",
+      "highScore": "Excelente! Você está acima da pontuação de aprovação. Continue praticando para dominar todos os tópicos.",
+      "excellentScore": "Parabéns! Seu desempenho está excepcional. Você tem tudo para conquistar essa certificação!",
+      "viewAchievements": "Explorar Conquistas",
+      "fewAttempts": "Complete mais simulados para ter insights mais precisos do seu desempenho e identificar áreas para melhoria.",
+      "incompleteAttempts": "Você tem {{count}} simulados em pausa. Finalize-os para análises mais completas de suas estatísticas.",
+      "viewAttempts": "Ver Simulados"
     }
   },
   "exams": {
     "title": "Exames",
-    "loading": "Carregando detalhes do exame...",
+    "loading": "Carregando detalhes...",
+    "back": "Voltar",
+    "modeSelection": "Escolha seu modo de estudo",
+    "practiceMode": "Modo Treinamento",
+    "practiceModeCaption": "Aprenda enquanto pratica, com feedback instantâneo",
+    "practiceFeatures": {
+      "seeExplanations": "Acesso a explicações detalhadas",
+      "noTimeLimit": "Sem limite de tempo",
+      "idealToLearn": "Perfeito para aprender"
+    },
+    "examMode": "Modo Prova",
+    "examModeCaption": "Simule a prova real e conheça seu resultado",
+    "examFeatures": {
+      "likesReal": "Replica o exame oficial",
+      "timedExam": "Com limite de tempo",
+      "noExplanations": "Sem explicações durante a prova"
+    },
+    "examInfo": "Sobre o Exame",
+    "examInfoType": "Tipo:",
+    "examInfoType_value": "Simulado AWS",
+    "examInfoDuration": "Duração:",
+    "examInfoQuestions": "Total de Questões:",
+    "examInfoMinScore": "Para Aprovação:",
+    "examInfoMinScore_value": "70%",
+    "examRules": "Como Funciona",
+    "examRule1": "Você terá {{minutes}} minutos para responder todas as questões",
+    "examRule2": "Total de {{count}} questões de múltipla escolha",
+    "examRule3": "Pausar e retomar a qualquer momento",
+    "examRule4": "Revisar suas respostas antes de finalizar",
+    "customizeExam": "Customize seu simulado",
+    "questionCount": "Quantas questões?",
+    "questionCountLabel": "{{count}} questões",
+    "questionCountCustom": "Personalizado",
+    "minutesLabel": "minutos",
+    "selectDifficulty": "Nível de dificuldade",
+    "durationLabel": "Tempo (minutos)",
+    "difficultyLabel": "Dificuldade",
+    "difficultyAll": "Todas",
+    "difficultyEasy": "Fácil",
+    "difficultyMedium": "Médio",
+    "difficultyHard": "Desafiador",
+    "recommendedTime": "Usar tempo sugerido",
+    "resetButton": "Limpar",
+    "startExam": "Iniciar com {{count}} questões",
+    "startingExam": "Iniciando...",
+    "printButton": "Imprimir (em breve)",
+    "startSimulation": "Iniciar Simulado",
+    "returningToExams": "Retornando aos exames...",
     "list": {
       "title": "Exames Disponíveis",
       "loading": "Carregando exames...",
-      "error": "Erro ao carregar exames. Por favor, tente novamente.",
-      "empty": "Nenhum exame disponível no momento.",
+      "error": "Não conseguimos carregar os exames. Tente novamente.",
+      "empty": "Nenhum exame disponível por enquanto.",
       "start": "Iniciar",
       "comingSoon": "Em breve",
       "difficulty": {
         "EASY": "Fácil",
-        "MEDIUM": "Médio",
-        "HARD": "Difícil"
+        "MEDIUM": "Intermediária",
+        "HARD": "Desafiador"
       },
       "breadcrumbs": "Exames",
       "exams": {
         "clp_c02": {
           "title": "AWS Certified Cloud Practitioner (CLF-C02)",
-          "description": "Simulado prático para a certificação AWS Certified Cloud Practitioner, com questões atualizadas conforme o conteúdo oficial do exame."
+          "description": "Domine os fundamentos de Cloud com a AWS. Simulados alinhados com o conteúdo oficial e sua dificuldade real."
         },
         "dva_c02": {
           "title": "AWS Certified Developer - Associate (DVA-C02)",
-          "description": "Exame prático com questões alinhadas ao conteúdo e ao nível de dificuldade da certificação AWS Certified Developer – Associate, voltado para treino e revisão."
+          "description": "Preparação completa para desenvolvedores. Questões que cobrem integração, deployment e desenvolvimento com AWS."
         },
         "ai_practitioner": {
           "title": "AWS Certified AI Practitioner",
-          "description": "Exame prático focado em inteligência artificial e machine learning na AWS, com questões alinhadas ao conteúdo da certificação AWS Certified AI Practitioner, ideal para quem busca se aprofundar nessa área."
+          "description": "Mergulhe em IA e Machine Learning na AWS. Simulados focados em práticas de implementação e otimização de modelos."
         },
         "az_900": {
           "title": "Microsoft Certified Azure Fundamentals (AZ-900)",
-          "description": "Exame prático para avaliar conhecimentos nos conceitos fundamentais do Microsoft Azure, conforme os tópicos cobrados na certificação."
+          "description": "Seus primeiros passos com Azure. Conheça os conceitos essenciais e a plataforma Microsoft de nuvem."
         },
         "ai_900": {
           "title": "Microsoft Certified Azure AI Fundamentals (AI-900)",
-          "description": "Exame prático para avaliar conhecimentos nos conceitos fundamentais de inteligência artificial e machine learning no Microsoft Azure, conforme os tópicos cobrados na certificação."
+          "description": "IA simplificada. Entenda machine learning, visão computacional e processamento de linguagem natural no Azure."
         }
       }
     },
-    "back": "Voltar para lista de exames",
-    "studyMode": "Modo de estudo",
-    "practiceMode": "Modo Prática",
-    "practiceCaption": "Feedback imediato, ideal para aprendizado",
-    "practiceFeatures": {
-      "seeExplanations": "Veja explicações durante o simulado",
-      "noTimeLimit": "Sem limite de tempo",
-      "idealToLearn": "Ideal para aprender"
-    },
-    "examMode": "Modo Exame",
-    "examCaption": "Simulação fiel, resultado ao final",
-    "examFeatures": {
-      "noExplanations": "Veja explicações apenas ao final",
-      "withTimeLimit": "Com limite de tempo",
-      "likeReal": "Teste realista"
-    },
-    "difficulty": "Dificuldade",
-    "duration": "Duração",
-    "numQuestions": "Número de questões",
-    "startSimulation": "Iniciar Simulado",
-    "selectDifficulty": "Selecione uma dificuldade"
+    "relatedExams": "Exames relacionados",
+    "relatedExamsHint": "Continue praticando com outros simulados semelhantes para aumentar sua cobertura de tópicos."
+  },
+  "seo": {
+    "ariaLabel": "Simulado e guia completo",
+    "simuladoTitle": "Simulado {{exam}} gratuito com questões comentadas",
+    "searchIntention": "Se você está procurando por {{keyword}}, este simulador foi feito para acelerar sua aprovação com prática direcionada.",
+    "howHelps": "Como este simulado ajuda você a passar",
+    "howHelpsContent": "Diferente de conteúdos genéricos, aqui você pratica com foco no formato real da prova, entendendo o motivo de cada resposta. Isso reduz erros recorrentes e melhora sua tomada de decisão.",
+    "mainTopics": "Principais tópicos cobrados na prova",
+    "strategy": "Estratégia para aumentar sua taxa de acertos",
+    "exampleQuestion": "Exemplo de questão do {{exam}}",
+    "correctAnswer": "Resposta correta",
+    "useEfficiently": "Como usar o simulado de forma eficiente",
+    "useEfficientlyContent": "Use ciclos curtos de prática e revisão: simulado → análise de erros → reforço → novo simulado.",
+    "continueLearning": "Continue seus estudos",
+    "continueLearningContent": "Explore outros simulados disponíveis em",
+    "fullExamList": "lista completa de exames",
+    "continueLearningContent2": "e aumente sua cobertura de tópicos.",
+    "faq": "Perguntas frequentes sobre {{exam}}",
+    "aboutContent": "Sobre este conteúdo",
+    "aboutContentBody": "Este material foi estruturado com base nos tópicos oficiais da certificação e nos padrões mais comuns de questões cobradas em provas de cloud computing."
   },
   "stats": {
     "title": "Estatísticas",
-    "backToDashboard": "Voltar ao Dashboard",
-    "status": {
-      "in_progress": "Em Andamento",
-      "completed": "Concluído",
-      "abandoned": "Cancelado"
+    "loading": "Carregando suas estatísticas...",
+    "averageScore": "Média de Desempenho",
+    "domainPerformance": "Desempenho por Domínio",
+    "generalDomain": "Geral",
+    "correct": "certas",
+    "noData": "Sem dados",
+    "emptyMessage": "Nenhum dado disponível ainda. Complete alguns simulados para ver suas estatísticas detalhadas.",
+    "attemptHistory": "Histórico de Simulados",
+    "columnDate": "Data",
+    "columnExam": "Exame",
+    "columnStatus": "Status",
+    "columnScore": "Resultado",
+    "newExam": "Novo Simulado",
+    "backToDashboard": "Voltar ao Dashboard"
+  },
+  "achievements": {
+    "title": "Conquistas",
+    "subtitle": "Siga seu progresso e desbloqueie marcos de estudo.",
+    "level": "Nível",
+    "points": "pontos",
+    "streakDays": "dias de sequência",
+    "streakMessage": "Consistência é a chave do sucesso. Mantenha esse ritmo!",
+    "loading": "Carregando conquistas...",
+    "unlocked": "Desbloqueado",
+    "inProgress": "Em progresso",
+    "progress": "Progresso",
+    "aria": {
+      "summary": "Resumo de progresso",
+      "streak": "Sequência de estudo",
+      "list": "Lista de conquistas"
+    },
+    "items": {
+      "firstStep": {
+        "title": "Primeiro Passo",
+        "description": "Você iniciou sua jornada de aprendizado. Explore o que a SimulaCert oferece!"
+      },
+      "persistent": {
+        "title": "Persistente",
+        "description": "10 simulados completados! Você está adquirindo confiança e conhecimento."
+      },
+      "studious": {
+        "title": "Estudioso",
+        "description": "50 simulados completados! Sua dedicação é impressionante."
+      },
+      "approved": {
+        "title": "Aprovado",
+        "description": "Você atingiu 70% e passou! O caminho para a certificação está aberto."
+      },
+      "perfectionist": {
+        "title": "Perfeccionista",
+        "description": "90% ou mais? Você domina esse conteúdo completamente!"
+      },
+      "fireStreak": {
+        "title": "Sequência de Fogo",
+        "description": "7 dias estudando consecutivamente! Esse é o tipo de consistência que leva à aprovação."
+      },
+      "marathoner": {
+        "title": "Maratonista",
+        "description": "30 dias de estudo ininterrupto! Você é um modelo de disciplina."
+      },
+      "awsSpecialist": {
+        "title": "Especialista AWS",
+        "description": "Todos os exames AWS conquistados. Você é uma autoridade em AWS!"
+      },
+      "cloudMaster": {
+        "title": "Mestre da Nuvem",
+        "description": "Você domina múltiplos provedores de nuvem. Você é verdadeiramente um expert!"
+      },
+      "helpfulCommunity": {
+        "title": "Comunidade Prestativa",
+        "description": "5 feedbacks aprovados pela comunidade. Seu conhecimento ajuda outros!"
+      },
+      "questionSearch": {
+        "title": "Explorador",
+        "description": "100 questões diferentes exploradas. Você conhece bien a profundidade do material."
+      },
+      "feedback100": {
+        "title": "Colaborador Ativo",
+        "description": "100 feedbacks fornecidos! Você é um pilar da comunidade SimulaCert."
+      },
+      "amazonRecommender": {
+        "title": "Voz Influente",
+        "description": "100 curtidas nos seus feedbacks. Sua visão é valiosa para a comunidade."
+      },
+      "feedbackLeader": {
+        "title": "Líder da Comunidade",
+        "description": "25 feedbacks aprovados. Você inspira e guia outros estudantes."
+      },
+      "contentInfluencer": {
+        "title": "Influenciador",
+        "description": "Seu conteúdo é referência. Você molda como outros estudam."
+      }
     }
   },
-  "attempt": {
+  "attempts": {
     "inProgress": "Em Andamento",
     "completed": "Concluído",
     "abandoned": "Cancelado"
   },
   "theme": {
     "mode": "Modo",
-    "light": "Luz",
-    "dark": "Trevas",
+    "light": "Claro",
+    "dark": "Escuro",
     "warm": "Leitura",
-    "fontSize": "Tamanho da Fonte",
-    "fontFamily": "Tipo de Fonte",
+    "fontSize": "Tamanho",
+    "fontFamily": "Fonte",
     "language": "Idioma",
     "portuguese": "Português",
     "english": "English",
-    "customize": "Personalizar tema"
+    "customize": "Personalizar"
   },
   "footer": {
-    "copyright": "© {year} SimulaCert. Todos os direitos reservados.",
+    "copyright": "© {{year}} SimulaCert. Todos os direitos reservados.",
     "contact": "Contato",
-    "terms": "Termos de Uso",
+    "terms": "Termos",
     "privacy": "Privacidade"
   },
   "common": {
@@ -157,15 +298,73 @@
     "success": "Sucesso",
     "cancel": "Cancelar",
     "save": "Salvar",
-    "delete": "Deletar",
+    "delete": "Excluir",
     "edit": "Editar",
     "close": "Fechar"
   },
+  "seoContent": {
+    "generic": {
+      "intro1": "Este simulado foi pensado para quem quer praticar com foco em certificações cloud, com questões objetivas, feedback e revisão rápida dos principais tópicos.",
+      "intro2": "Ao longo desta página você encontra um guia prático de estudo, uma visão do que costuma ser cobrado e uma seção de perguntas frequentes para tirar dúvidas comuns antes do exame.",
+      "topic1": "Fundamentos de computação em nuvem (IaaS, PaaS, SaaS, responsabilidade compartilhada).",
+      "topic2": "Identidade e segurança: IAM, permissões, autenticação e boas práticas básicas.",
+      "topic3": "Serviços core (compute, storage, networking) e casos de uso comuns.",
+      "topic4": "Custos e billing: como estimar, otimizar e interpretar cobranças.",
+      "topic5": "Boas práticas de arquitetura: alta disponibilidade, resiliência e observabilidade.",
+      "strategy1": "Faça 1 simulado curto por dia e revise as explicações das questões erradas.",
+      "strategy2": "Acompanhe seu progresso: reduza o tempo por questão sem perder precisão.",
+      "strategy3": "Releia o enunciado procurando palavras-chave (sempre, nunca, melhor opção, mais barato).",
+      "strategy4": "Antes de finalizar, revise respostas com baixa confiança.",
+      "faq1Question": "Este simulado é gratuito?",
+      "faq1Answer": "Sim. Você pode iniciar um simulado e praticar. Em alguns fluxos pode existir cadastro opcional para salvar histórico/estatísticas.",
+      "faq2Question": "Quantas questões devo fazer por sessão?",
+      "faq2Answer": "Para consistência, 20–40 questões por sessão costuma funcionar bem. Para simular prova real, use 50–100 questões e mantenha o foco em tempo.",
+      "faq3Question": "As questões são iguais às do exame oficial?",
+      "faq3Answer": "Não. O objetivo é treinar os mesmos temas e o mesmo estilo de raciocínio — não replicar banco oficial.",
+      "faq4Question": "O que fazer depois do simulado?",
+      "faq4Answer": "Revise as explicações, anote os tópicos recorrentes e refaça um simulado focado nesses pontos até estabilizar seu desempenho."
+    },
+    "clfC02": {
+      "intro1": "O simulado AWS Certified Cloud Practitioner CLF-C02 é uma das formas mais eficientes de se preparar para a certificação AWS de nível iniciante. Aqui você pratica com questões no estilo da prova real, focadas em conceitos fundamentais de cloud, segurança e custos.",
+      "intro2": "Se você está buscando questões AWS Cloud Practitioner comentadas e quer entender como a prova realmente cobra os conteúdos, este simulado foi estruturado para desenvolver raciocínio e não apenas memorização.",
+      "topic1": "Modelo de responsabilidade compartilhada da AWS: o que é responsabilidade do cliente vs da AWS.",
+      "topic2": "IAM na prática: diferença entre usuários, grupos, roles e políticas — e erros comuns em permissões.",
+      "topic3": "EC2 vs Lambda: quando usar computação sob demanda vs serverless.",
+      "topic4": "S3, EBS e EFS: diferenças entre armazenamento de objetos, blocos e arquivos.",
+      "topic5": "Custos na AWS: como funciona o modelo pay-as-you-go e como evitar cobranças inesperadas.",
+      "topic6": "Alta disponibilidade: uso de múltiplas AZs e conceitos básicos de resiliência.",
+      "topic7": "CloudFront e CDN: quando usar distribuição de conteúdo para reduzir latência.",
+      "topic8": "Ferramentas de billing: Cost Explorer, Budgets e Trusted Advisor.",
+      "strategy1": "Leia o enunciado procurando o objetivo principal: custo, performance, segurança ou simplicidade.",
+      "strategy2": "Elimine alternativas claramente erradas antes de escolher a melhor resposta.",
+      "strategy3": "Quando a pergunta falar de menor custo, priorize serviços gerenciados e serverless.",
+      "strategy4": "Evite \"overengineering\": a AWS costuma cobrar a solução mais simples que resolve o problema.",
+      "strategy5": "Se estiver em dúvida entre duas opções, escolha a que exige menos gerenciamento manual.",
+      "exampleQuestion": "Uma aplicação precisa armazenar arquivos raramente acessados com o menor custo possível. Qual serviço é mais adequado?",
+      "exampleExplanation": "O S3 Glacier é ideal para armazenamento de longo prazo com baixo custo. As outras opções não são otimizadas para armazenamento de arquivos raramente acessados.",
+      "faq1Question": "O simulado AWS CLF-C02 é gratuito?",
+      "faq1Answer": "Sim. Você pode fazer o simulado AWS Cloud Practitioner gratuitamente e praticar com questões similares às da prova real.",
+      "faq2Question": "Quantas questões tem a prova AWS Cloud Practitioner?",
+      "faq2Answer": "A prova oficial possui cerca de 65 questões, com duração de aproximadamente 90 minutos.",
+      "faq3Question": "Qual a pontuação mínima para passar no CLF-C02?",
+      "faq3Answer": "A pontuação mínima é 700 em uma escala de 100 a 1000.",
+      "faq4Question": "Este simulado AWS Cloud Practitioner tem questões comentadas?",
+      "faq4Answer": "Sim. O objetivo é que você entenda o motivo das respostas corretas e incorretas, acelerando seu aprendizado.",
+      "faq5Question": "Quanto tempo leva para se preparar para o CLF-C02?",
+      "faq5Answer": "Para iniciantes, entre 2 a 4 semanas de estudo consistente com prática diária em simulados costuma ser suficiente.",
+      "keyword1": "simulado aws clf-c02 gratuito",
+      "keyword2": "simulado aws cloud practitioner gratuito",
+      "keyword3": "questões aws cloud practitioner comentadas",
+      "keyword4": "prova aws cloud practitioner simulador",
+      "keyword5": "exame aws iniciante perguntas",
+      "keyword6": "simulado certificação aws básico"
+    }
+  },
   "alerts": {
-    "no_exams": "Nenhum exame disponível no momento. Por favor, volte mais tarde.",
-    "exam_load_error": "Erro ao carregar detalhes do exame. Por favor, tente novamente.",
-    "start_exam_error": "Erro ao iniciar o simulado. Por favor, tente novamente.",
-    "change_language": "[BETA - i18n] Você tem certeza que deseja mudar o idioma? Isso pode afetar suas preferências de tema e outras configurações.",
+    "no_exams": "Nenhum exame disponível agora. Volte em breve!",
+    "exam_load_error": "Não conseguimos carregar o exame. Tente novamente.",
+    "start_exam_error": "Erro ao iniciar o simulado. Tente novamente.",
+    "change_language": "[BETA] Tem certeza que quer mudar o idioma? Suas preferências de tema podem ser afetadas.",
     "language_changed": "Idioma alterado com sucesso.",
     "confirm": "Confirmar",
     "cancel": "Cancelar"

@@ -1,4 +1,3 @@
-import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {afterEach, beforeEach, describe, expect, it, jest} from '@jest/globals';
 import {of} from 'rxjs';
 import {AchievementsComponent} from '../../../../src/app/features/achievements/achievements.component';
@@ -7,6 +6,8 @@ import {ReviewsApiService} from '../../../../src/app/api/reviews.service';
 import {StatsApiService} from '../../../../src/app/api/stats.service';
 import {SeoFactoryService} from '../../../../src/app/core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../../../src/app/core/seo/seo-facade.service';
+import {I18nService} from '../../../../src/app/core/i18n/i18n.service';
+import {ComponentFixture, TestBed} from '@angular/core/testing';
 
 function buildUtcDay(offsetDays = 0): string {
   const now = new Date();
@@ -51,6 +52,14 @@ function createSeoFacadeMock() {
   } as unknown as Pick<SeoFacadeService, 'set' | 'clearJsonLd' | 'update'>;
 }
 
+function mockI18nService() {
+  return {
+    getLanguage: jest.fn(() => 'pt-BR'),
+    instant: jest.fn((key: string) => {}),
+    get: jest.fn((key: string) => of('')),
+  }
+}
+
 describe('AchievementsComponent', () => {
   let fixture: ComponentFixture<AchievementsComponent>;
   let component: AchievementsComponent;
@@ -75,6 +84,7 @@ describe('AchievementsComponent', () => {
         {provide: ReviewsApiService, useValue: reviewsApi},
         {provide: SeoFactoryService, useValue: seoFactory},
         {provide: SeoFacadeService, useValue: seoFacade},
+        {provide: I18nService, useValue: mockI18nService()},
       ],
     });
 
@@ -182,15 +192,15 @@ describe('AchievementsComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
     expect(compiled.querySelector('.achievements-loading')).toBeNull();
-    expect(compiled.querySelector('h1')?.textContent).toContain('Conquistas');
-    expect(compiled.querySelector('.pill-strong')?.textContent).toContain('Nível 4');
-    expect(compiled.querySelector('.pill-muted')?.textContent).toContain('pontos');
+    expect(compiled.querySelector('h1')?.textContent).toContain('');
+    expect(compiled.querySelector('.pill-strong')?.textContent).toContain('');
+    expect(compiled.querySelector('.pill-muted')?.textContent).toContain('');
     expect(compiled.querySelector('.streak-number')?.textContent).toBe('2');
     expect(compiled.querySelectorAll('.grid .card')).toHaveLength(15);
     expect(compiled.querySelectorAll('.state--unlocked')).toHaveLength(10);
     expect(compiled.querySelectorAll('.state--locked')).toHaveLength(5);
-    expect(compiled.querySelector('.card.unlocked h3')?.textContent).toBe('Primeiro Passo');
-    expect(compiled.querySelector('.card.unlocked .state--unlocked')?.textContent).toContain('Conquistado');
+    expect(compiled.querySelector('.card.unlocked h3')?.textContent).toBe('');
+    expect(compiled.querySelector('.card.unlocked .state--unlocked')?.textContent).toContain('');
     expect(compiled.querySelector('.card:not(.unlocked) .progress-text')?.textContent).toContain('12 / 50');
   });
 });

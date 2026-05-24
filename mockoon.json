@@ -1,7 +1,7 @@
 {
   "uuid": "89392562-4b4f-45c9-a2a0-ac8b1b14cee6",
   "lastMigration": 33,
-  "name": "Demo API",
+  "name": "Simulacert Mock API",
   "endpointPrefix": "dev",
   "latency": 300,
   "port": 3000,

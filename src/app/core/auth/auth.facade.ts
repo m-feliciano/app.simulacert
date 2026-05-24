@@ -116,7 +116,7 @@ export class AuthFacade {
 
   logout(): void {
     this.clearAuth();
-    this.cacheService?.clear();
+    this.cacheService?.clearAll();
   }
 
   exchangeGoogleCode(code: string, state: string): Observable<AuthResponse> {

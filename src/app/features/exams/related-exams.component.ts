@@ -3,17 +3,18 @@ import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {ExamResponse} from '../../api/domain';
+import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-related-exams',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     @if (related().length > 0) {
       <section class="related">
-        <h2>Exames relacionados</h2>
+        <h2>{{ 'exams.relatedExams' | translate }}</h2>
         <p class="hint">
-          Continue praticando com outros simulados semelhantes. Linkagem interna ajuda você a navegar e ajuda o Google a descobrir as páginas.
+          {{ 'exams.relatedExamsHint' | translate }}
         </p>
 
         <ul class="list">
@@ -94,7 +95,7 @@ export class RelatedExamsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.examsApi.getAllExams().subscribe({
+    this.examsApi.getAllAvailable().subscribe({
       next: (data) => this.setRelatedExams(data),
       error: () => this.related.set([])
     });

@@ -19,13 +19,15 @@ import {
   Type
 } from 'lucide-angular';
 import {ThemeService} from '../theme/theme.service';
+import {NavbarComponent} from '../../shared/components/navbar.component';
+import {SupportButtonComponent} from '../../shared/components/support-button.component';
 import {fromEvent} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule, NavbarComponent, SupportButtonComponent],
   template: `
     <div class="app-layout" seoHead>
       <header class="topbar sc-glass sc-glass--acrylic">
@@ -35,27 +37,16 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
               <lucide-icon [img]="icons.menu" class="icon" aria-hidden="true"></lucide-icon>
             </button>
           }
-          <img priority ngSrc="/simulacert-logo.svg" alt="simulacert" class="logo" height="32" width="120"/>
+          <img priority ngSrc="/simulacert-logo.svg"
+               alt="simulacert"
+               class="logo"
+               height="32" width="120"
+               (click)="router.navigate(['/'])"
+               style="cursor: pointer"/>
         </div>
 
         @if (!isMobile()) {
-          <nav class="topbar-nav">
-            <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
-            <a routerLink="/exams" routerLinkActive="active" class="nav-item">Exames</a>
-            <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
-            <a routerLink="/achievements" routerLinkActive="active" class="nav-item">Conquistas</a>
-
-            @if (authFacade.isAdmin()) {
-              <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
-            }
-
-            <a routerLink="/news" routerLinkActive="false" class="nav-item muted">Novidades</a>
-
-            <button class="nav-item support-btn" (click)="showSupportModal = true">
-              <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
-              Apoie
-            </button>
-          </nav>
+          <app-navbar/>
         }
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
@@ -99,10 +90,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
                   <span class="nav-label">Console</span>
                 </a>
               }
-              <button class="nav-item support-btn" (click)="showSupportModal = true">
-                <lucide-icon [img]="icons.support" class="nav-icon" aria-hidden="true"></lucide-icon>
-                <span class="nav-label">Apoie</span>
-              </button>
+              <app-support-button></app-support-button>
             </nav>
           </aside>
         }
@@ -368,7 +356,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     .main-content {
       flex: 1;
       overflow-y: auto;
-      overflow-x: hidden;
       background: var(--bg);
       padding-top: 64px;
     }
@@ -390,29 +377,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
       .content-wrapper {
         padding: var(--spacing-xl) var(--spacing-xl) 0;
       }
-    }
-
-    .support-btn {
-      background: none;
-      border: none;
-      color: var(--text-2);
-      font-size: 1rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      padding: var(--spacing-md) var(--spacing-lg);
-      transition: background 0.2s;
-      width: 100%;
-      text-align: left;
-    }
-    .support-btn:hover {
-      background: rgba(17, 24, 39, 0.06);
-      color: var(--text);
-    }
-
-    .support-btn .nav-icon {
-      color: hotpink;
     }
 
     .topbar-nav {
@@ -463,18 +427,25 @@ export class AppLayoutComponent {
     type: Type
   };
 
+  showSupportModal = false;
+
   sidebarCollapsed = signal(true);
   isMobile = signal(false);
-  showSupportModal = false;
-  destroyRef = inject(DestroyRef);
 
-  private readonly themeService = inject(ThemeService);
+  readonly destroyRef = inject(DestroyRef);
 
   constructor(
     protected readonly authFacade: AuthFacade,
-    private readonly router: Router
+    protected readonly router: Router,
+    private readonly themeService: ThemeService, // init component
   ) {
     this.checkIfMobile();
+
+    if (globalThis.document) {
+      fromEvent(globalThis.document, 'open-support')
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.showSupportModal = true);
+    }
   }
 
   toggleSidebar(): void {

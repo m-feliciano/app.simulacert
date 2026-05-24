@@ -112,14 +112,14 @@ export class AuthCallbackComponent implements OnInit {
   status = signal<'processing' | 'success' | 'error'>('processing');
   errorMessage = signal('');
 
-  private destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private authFacade: AuthFacade,
-    private seoFactory: SeoFactoryService,
-    private seoFacade: SeoFacadeService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly authFacade: AuthFacade,
+    private readonly seoFactory: SeoFactoryService,
+    private readonly seoFacade: SeoFacadeService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Autenticando... | SimulaCert',
