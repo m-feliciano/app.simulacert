@@ -63,7 +63,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
                     <lucide-icon [img]="Lightbulb" class="icon-premium"></lucide-icon>
                   </div>
                   <div class="recommendation-content">
-                    <h3>{{ 'dashboard.recommendations' | translate }}</h3>
+                    <h3>{{ 'dashboard.recommendation' | translate }}</h3>
                     <p>{{ recommendation() }}</p>
                     <a [routerLink]="recommendationLink()" class="btn-recommendation" aria-label="Ver recomendação">
                       {{ recommendationCTA() }}
@@ -270,9 +270,9 @@ export class DashboardComponent implements OnInit {
 
   formatStatus(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'IN_PROGRESS': this.i18n.instant('attempt.inProgress'),
-      'COMPLETED': this.i18n.instant('attempt.completed'),
-      'ABANDONED': this.i18n.instant('attempt.abandoned')
+      'IN_PROGRESS': this.i18n.instant('attempts.inProgress'),
+      'COMPLETED': this.i18n.instant('attempts.completed'),
+      'ABANDONED': this.i18n.instant('attempts.abandoned')
     };
     return statusMap[status] || status;
   }

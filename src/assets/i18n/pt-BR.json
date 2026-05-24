@@ -42,7 +42,7 @@
     },
     "startNow": "Começar agora",
     "lessthan1Min": "Leva menos de 1 minuto",
-    "recommendations": "Recomendação para você",
+    "recommendation": "Recomendação para você",
     "stats": {
       "totalAttempts": "Total de Simulados",
       "completedAttempts": "Simulados Concluídos",
