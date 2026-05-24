@@ -1,19 +1,21 @@
-import {Component, Input, computed} from '@angular/core';
+import {Component, Input, computed, inject} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamResponse} from '../../api/domain';
 import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry';
+import {TranslatePipe} from '../pipes/translate.pipe';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-seo-rich-template',
   standalone: true,
-  imports: [CommonModule, RouterLink],
+  imports: [CommonModule, RouterLink, TranslatePipe],
   template: `
     @if (exam) {
-      <section class="seo" aria-label="Simulado e guia completo">
+      <section class="seo" [attr.aria-label]="'seo.ariaLabel' | translate">
 
         <h1>
-          Simulado {{ exam.title }} gratuito com questões comentadas
+          {{ 'seo.simuladoTitle' | translate: {exam: exam.title} }}
         </h1>
 
         <div class="lead">
@@ -21,25 +23,23 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
             <p>{{ p }}</p>
           }
           <p>
-            Se você está procurando por <strong>{{ primaryKeyword() }}</strong>,
-            este simulador foi feito para acelerar sua aprovação com prática direcionada.
+            {{ 'seo.searchIntention' | translate: {keyword: primaryKeyword()} }}
           </p>
         </div>
 
-        <h2>Como este simulado ajuda você a passar</h2>
+        <h2>{{ 'seo.howHelps' | translate }}</h2>
         <p>
-          Diferente de conteúdos genéricos, aqui você pratica com foco no formato real da prova,
-          entendendo o motivo de cada resposta. Isso reduz erros recorrentes e melhora sua tomada de decisão.
+          {{ 'seo.howHelpsContent' | translate }}
         </p>
 
-        <h2>Principais tópicos cobrados na prova</h2>
+        <h2>{{ 'seo.mainTopics' | translate }}</h2>
         <ul>
           @for (topic of content().studyTopics; track $index) {
             <li>{{ topic }}</li>
           }
         </ul>
 
-        <h2>Estratégia para aumentar sua taxa de acertos</h2>
+        <h2>{{ 'seo.strategy' | translate }}</h2>
         <ol>
           @for (tip of content().examStrategies; track $index) {
             <li>{{ tip }}</li>
@@ -47,7 +47,7 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
         </ol>
 
         @if (content().exampleQuestion) {
-          <h2>Exemplo de questão do {{ exam.title }}</h2>
+          <h2>{{ 'seo.exampleQuestion' | translate: {exam: exam.title} }}</h2>
 
           <div class="question-box">
             <p>{{ content().exampleQuestion?.question }}</p>
@@ -59,7 +59,7 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
             </ul>
 
             <p>
-              <strong>Resposta correta:</strong>
+              <strong>{{ 'seo.correctAnswer' | translate }}:</strong>
               {{ content().exampleQuestion?.correctAnswer }}
             </p>
 
@@ -68,20 +68,19 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
             </p>
           </div>
         }
-        <h2>Como usar o simulado de forma eficiente</h2>
+        <h2>{{ 'seo.useEfficiently' | translate }}</h2>
         <p>
-          Use ciclos curtos de prática e revisão:
-          <strong>simulado → análise de erros → reforço → novo simulado</strong>.
+          {{ 'seo.useEfficientlyContent' | translate }}
         </p>
 
-        <h2>Continue seus estudos</h2>
+        <h2>{{ 'seo.continueLearning' | translate }}</h2>
         <p>
-          Explore outros simulados disponíveis em
-          <a routerLink="/exams">lista completa de exames</a>
-          e aumente sua cobertura de tópicos.
+          {{ 'seo.continueLearningContent' | translate: {link: 'exams'} }}
+          <a routerLink="/exams">{{ 'seo.fullExamList' | translate }}</a>
+          {{ 'seo.continueLearningContent2' | translate }}
         </p>
 
-        <h2>Perguntas frequentes sobre {{ exam.title }}</h2>
+        <h2>{{ 'seo.faq' | translate: {exam: exam.title} }}</h2>
 
         <div class="faq">
           @for (item of content().faq; track $index) {
@@ -94,10 +93,9 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
           }
         </div>
 
-        <h2>Sobre este conteúdo</h2>
+        <h2>{{ 'seo.aboutContent' | translate }}</h2>
         <p>
-          Este material foi estruturado com base nos tópicos oficiais da certificação e nos padrões mais comuns
-          de questões cobradas em provas de cloud computing.
+          {{ 'seo.aboutContentBody' | translate }}
         </p>
 
       </section>
@@ -182,8 +180,9 @@ import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry'
 })
 export class SeoRichTemplateComponent {
   @Input({required: true}) exam!: ExamResponse;
+  private readonly i18n = inject(I18nService);
 
-  content = computed(() => getExamSeoContent(this.exam));
+  content = computed(() => getExamSeoContent(this.exam, this.i18n));
 
   primaryKeyword = computed(() => {
     const c = this.content();

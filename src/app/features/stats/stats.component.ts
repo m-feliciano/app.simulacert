@@ -10,20 +10,22 @@ import {FormatPercentilePipe} from '../../shared/pipes/format-percentile.pipe';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
+import {TranslatePipe} from '../../shared/pipes/translate.pipe';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe, TranslatePipe],
   template: `
     <div seoHead>
       <div class="stats-container">
-        <h1>Estatísticas</h1>
+        <h1>{{ 'stats.title' | translate }}</h1>
 
         @if (loading()) {
           <div class="loading-state">
             <div class="spinner"></div>
-            <p>Carregando estatísticas...</p>
+            <p>{{ 'stats.loading' | translate }}</p>
           </div>
         } @else {
 
@@ -31,12 +33,12 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
           <div class="stats-overview">
             <div class="stat-card">
               <div class="stat-value">{{ userStats()!.totalAttempts }}</div>
-              <div class="stat-label">Total de Tentativas</div>
+              <div class="stat-label">{{ 'dashboard.stats.totalAttempts' | translate }}</div>
             </div>
 
             <div class="stat-card">
               <div class="stat-value">{{ userStats()!.completedAttempts }}</div>
-              <div class="stat-label">Tentativas Completas</div>
+              <div class="stat-label">{{ 'dashboard.stats.completedAttempts' | translate }}</div>
             </div>
 
             <div class="stat-card">
@@ -45,7 +47,7 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
                   {{ userStats()!.averageScore | formatPercentile }}%
                 </app-score-status>
               </div>
-              <div class="stat-label">Pontuação Média</div>
+              <div class="stat-label">{{ 'stats.averageScore' | translate }}</div>
             </div>
 
             <div class="stat-card">
@@ -54,28 +56,28 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
                   {{ userStats()!.bestScore || 0 | formatPercentile }}%
                 </app-score-status>
               </div>
-              <div class="stat-label">Melhor Pontuação</div>
+              <div class="stat-label">{{ 'dashboard.stats.bestScore' | translate }}</div>
             </div>
           </div>
         }
 
         @if (domainStats().length > 0) {
           <div class="section">
-            <h2>Performance por Domínio</h2>
+            <h2>{{ 'stats.domainPerformance' | translate }}</h2>
             <div class="domain-stats">
               @for (domain of domainStats(); track domain.awsDomain) {
                 <div class="domain-item">
                   <div class="domain-header">
-                    <span class="domain-name">{{ domain.awsDomain || 'Domínio Geral' }}</span>
+                    <span class="domain-name">{{ domain.awsDomain || ('stats.generalDomain' | translate) }}</span>
                     <span class="domain-accuracy">{{ domain.accuracyRate | formatPercentile }}%</span>
                   </div>
                   <div class="domain-bar">
                     <div class="domain-fill" [style.width.%]="domain.accuracyRate"></div>
                   </div>
                   <div class="domain-details">
-                    {{ domain.correctAnswers }} / {{ domain.totalQuestions }} corretas
+                    {{ domain.correctAnswers }} / {{ domain.totalQuestions }} {{ 'stats.correct' | translate }}
                     @if (domain.totalQuestions === 0) {
-                      <span class="no-data"> - Sem dados disponíveis</span>
+                      <span class="no-data"> - {{ 'stats.noData' | translate }}</span>
                     }
                   </div>
                 </div>
@@ -84,21 +86,20 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
           </div>
         } @else {
           <div class="section empty-section">
-            <h2>Performance por Domínio</h2>
-            <p class="empty-message">Nenhum dado de domínio disponível. Complete alguns exames para ver suas
-              estatísticas por domínio.</p>
+            <h2>{{ 'stats.domainPerformance' | translate }}</h2>
+            <p class="empty-message">{{ 'stats.emptyMessage' | translate }}</p>
           </div>
         }
 
         @if (attemptHistory().length > 0) {
           <div class="section">
-            <h2>Histórico de Tentativas</h2>
+            <h2>{{ 'stats.attemptHistory' | translate }}</h2>
             <div class="history-table" style="overflow: hidden">
               <div class="history-header">
-                <div class="col-date">Data</div>
-                <div class="col-exam">Exame</div>
-                <div class="col-status">Status</div>
-                <div class="col-score">Pontuação</div>
+                <div class="col-date">{{ 'stats.columnDate' | translate }}</div>
+                <div class="col-exam">{{ 'stats.columnExam' | translate }}</div>
+                <div class="col-status">{{ 'stats.columnStatus' | translate }}</div>
+                <div class="col-score">{{ 'stats.columnScore' | translate }}</div>
               </div>
               @for (attempt of attemptHistory(); track attempt.attemptId) {
                 <a class="history-row" [routerLink]="['/attempt', attempt.attemptId, attempt.status === 'IN_PROGRESS' ? 'run' : 'result']">
@@ -127,8 +128,8 @@ import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
         }
 
         <div class="actions">
-          <a routerLink="/exams" class="btn-primary">Fazer Novo Exame</a>
-          <a routerLink="/dashboard" class="btn-secondary">Voltar ao Dashboard</a>
+          <a routerLink="/exams" class="btn-primary">{{ 'stats.newExam' | translate }}</a>
+          <a routerLink="/dashboard" class="btn-secondary">{{ 'stats.backToDashboard' | translate }}</a>
         </div>
         }
       </div>
@@ -148,6 +149,7 @@ export class StatsComponent implements OnInit {
     private readonly statsApi: StatsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
+    private readonly i18n: I18nService,
   ) {
     const meta = this.seoFactory.website({
       title: 'Estatísticas | SimulaCert',
@@ -206,9 +208,9 @@ export class StatsComponent implements OnInit {
 
   formatStatus(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'IN_PROGRESS': 'Em Andamento',
-      'COMPLETED': 'Concluído',
-      'ABANDONED': 'Cancelado'
+      'IN_PROGRESS': this.i18n.instant('attempt.inProgress'),
+      'COMPLETED': this.i18n.instant('attempt.completed'),
+      'ABANDONED': this.i18n.instant('attempt.abandoned')
     };
     return statusMap[status] || status;
   }

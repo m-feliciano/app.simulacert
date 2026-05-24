@@ -19,14 +19,15 @@ import {
 } from 'lucide-angular';
 import {ExamResponse} from '../../api/domain';
 import {SupportButtonComponent} from './support-button.component';
+import {TranslatePipe} from '../pipes/translate.pipe';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule, SupportButtonComponent],
+  imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule, SupportButtonComponent, TranslatePipe],
   template: `
     <nav class="topbar-nav" (mouseleave)="closeDropdown()">
-      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">Dashboard</a>
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">{{ 'nav.dashboard' | translate }}</a>
 
       <div class="exams-dropdown"
            [class.open]="dropdownOpen()"
@@ -34,13 +35,13 @@ import {SupportButtonComponent} from './support-button.component';
            (mouseleave)="closeDropdown()">
         <a class="nav-item dropdown-toggle" routerLink="/exams" routerLinkActive="active"
            (mouseenter)="openDropdown()">
-          Exames
+          {{ 'nav.exams' | translate }}
         </a>
 
         @if (dropdownOpen()) {
           <div class="dropdown-menu" (mouseenter)="openDropdown()" (mouseleave)="closeDropdown()">
             @if (loading()) {
-              <div class="dropdown-loading">Carregando...</div>
+              <div class="dropdown-loading">{{ 'nav.dropdown.loading' | translate }}</div>
             }
 
             @if (!loading() && exams().length > 0) {
@@ -55,7 +56,7 @@ import {SupportButtonComponent} from './support-button.component';
                   <span class="exam-meta">
                     <span class="exam-title">{{ exam.title }}</span>
                     @if (exam.incoming) {
-                      <span class="coming">(em breve)</span>
+                      <span class="coming">{{ 'nav.dropdown.comingSoon' | translate }}</span>
                     }
                   </span>
                 </a>
@@ -63,25 +64,25 @@ import {SupportButtonComponent} from './support-button.component';
             }
 
             @if (!loading() && exams().length === 0) {
-              <div class="dropdown-empty">Nenhum exame disponível</div>
+              <div class="dropdown-empty">{{ 'nav.dropdown.noExams' | translate }}</div>
             }
 
             <div class="dropdown-footer">
-              <a routerLink="/exams" (click)="closeDropdown()">Ver todos</a>
+              <a routerLink="/exams" (click)="closeDropdown()">{{ 'nav.dropdown.viewAll' | translate }}</a>
             </div>
           </div>
         }
       </div>
 
-      <a routerLink="/stats" routerLinkActive="active" class="nav-item">Estatísticas</a>
-      <a routerLink="/achievements" routerLinkActive="active" class="nav-item">Conquistas</a>
+      <a routerLink="/stats" routerLinkActive="active" class="nav-item">{{ 'nav.stats' | translate }}</a>
+      <a routerLink="/achievements" routerLinkActive="active" class="nav-item">{{ 'nav.achievements' | translate }}</a>
 
       @if (authFacade.isAdmin()) {
-        <a routerLink="/admin" routerLinkActive="active" class="nav-item">Console</a>
+        <a routerLink="/admin" routerLinkActive="active" class="nav-item">{{ 'nav.admin' | translate }}</a>
       }
 
       <a routerLink="/news" routerLinkActive="false" class="nav-item muted disabled"
-         style="cursor: not-allowed">Novidades</a>
+         style="cursor: not-allowed">{{ 'nav.news' | translate }}</a>
 
       <app-support-button></app-support-button>
     </nav>
@@ -312,6 +313,4 @@ export class NavbarComponent implements OnInit {
   closeDropdown(): void {
     this.hover$.next(false);
   }
-
-  // support action is provided by the reusable <app-support-button />
 }

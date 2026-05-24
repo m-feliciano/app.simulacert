@@ -4,9 +4,15 @@
     "exams": "Exams",
     "stats": "Statistics",
     "achievements": "Achievements",
-    "admin": "Console",
+    "admin": "Admin",
     "news": "News",
-    "support": "Support"
+    "support": "Support",
+    "dropdown": {
+      "loading": "Loading...",
+      "noExams": "No exams available",
+      "viewAll": "View all exams",
+      "comingSoon": "(coming soon)"
+    }
   },
   "auth": {
     "login": "Sign In",
@@ -15,120 +21,255 @@
     "password": "Password",
     "emailRequired": "Email is required",
     "passwordRequired": "Password is required",
-    "forgotPassword": "Forgot my password",
-    "signUp": "Create your free account",
-    "howItWorks": "How it works?",
-    "tagline": "Start studying in less than 30 seconds",
-    "signInTitle": "Sign In",
+    "forgotPassword": "Forgot password?",
+    "signUp": "Create free account",
+    "howItWorks": "How it works",
+    "tagline": "Start in less than 30 seconds",
+    "signInTitle": "Sign in to your account",
     "continueWithGoogle": "Continue with Google",
     "connecting": "Connecting...",
-    "loginError": "Login error"
+    "loginError": "Sign in failed"
   },
   "dashboard": {
-    "welcome": "Welcome Back!",
+    "welcome": "Welcome back",
     "loading": "Loading...",
-    "trainLikeLive": "Train Like the Real Exam",
-    "trainDescription": "Practice with real simulations and increase your chances of passing Cloud certifications.",
+    "trainLikeLive": "Train in real exam conditions",
+    "trainDescription": "Practice with authentic simulations that replicate the official exam and boost your odds of passing cloud certifications.",
     "benefits": {
       "officialFormat": "Official format questions",
-      "immediateFeedback": "Immediate feedback",
+      "immediateFeedback": "Get instant feedback",
       "free": "100% free to start"
     },
     "startNow": "Start Now",
     "lessthan1Min": "Takes less than 1 minute",
     "recommendations": "Recommendation for you",
     "stats": {
-      "totalAttempts": "Total Attempts",
-      "completedAttempts": "Completed Attempts",
-      "averageScore": "Average Score",
-      "bestScore": "Best Score"
+      "totalAttempts": "Total Simulations",
+      "completedAttempts": "Completed Simulations",
+      "averageScore": "Average Performance",
+      "bestScore": "Best Result"
     },
-    "recentAttempts": "Recent Attempts",
+    "recentAttempts": "Recent Simulations",
     "newSimulation": "Take New Simulation",
     "fullStats": "View Full Statistics",
     "recommendations": {
-      "lowScore": "Your average is below 50%. How about reviewing the basics before taking more simulations?",
-      "viewStatsDetail": "View Detailed Statistics",
-      "mediumScore": "You're making good progress! Keep practicing to reach the passing score (70%).",
-      "highScore": "Excellent! You're above the passing score. Keep practicing to consolidate your knowledge.",
-      "excellentScore": "Congratulations! Your average is excellent. You're ready for the real exam!",
-      "viewAchievements": "View Achievements",
-      "fewAttempts": "Complete more simulations to get a better view of your performance and identify improvement points.",
-      "incompleteAttempts": "You have {count} incomplete simulations. Finish them for more accurate statistics.",
-      "viewAttempts": "View Attempts"
+      "lowScore": "Your average is {{score}}%. We recommend reviewing fundamental concepts to strengthen your learning before the next simulations.",
+      "viewStatsDetail": "View Details",
+      "mediumScore": "Great progress! You're on the right track. Keep at it to break the 70% passing score.",
+      "highScore": "Excellent! You're above the passing score. Keep practicing to master all topics.",
+      "excellentScore": "Congratulations! Your performance is outstanding. You're all set for the real exam!",
+      "viewAchievements": "Explore Achievements",
+      "fewAttempts": "Complete more simulations to get precise insights into your performance and identify areas for growth.",
+      "incompleteAttempts": "You have {{count}} paused simulations. Complete them for more comprehensive statistics.",
+      "viewAttempts": "View Simulations"
     }
   },
   "exams": {
     "title": "Exams",
-    "loading": "Loading exam details...",
+    "loading": "Loading details...",
+    "back": "Back",
+    "modeSelection": "Choose your study mode",
+    "practiceMode": "Practice Mode",
+    "practiceModeCaption": "Learn while you practice with instant feedback",
+    "practiceFeatures": {
+      "seeExplanations": "Access detailed explanations",
+      "noTimeLimit": "No time limit",
+      "idealToLearn": "Perfect for learning"
+    },
+    "examMode": "Exam Mode",
+    "examModeCaption": "Simulate the real exam and see your results",
+    "examFeatures": {
+      "likesReal": "Replicates the official exam",
+      "timedExam": "With time limit",
+      "noExplanations": "No explanations during exam"
+    },
+    "examInfo": "About the Exam",
+    "examInfoType": "Type:",
+    "examInfoType_value": "AWS Simulation",
+    "examInfoDuration": "Duration:",
+    "examInfoQuestions": "Total Questions:",
+    "examInfoMinScore": "To Pass:",
+    "examInfoMinScore_value": "70%",
+    "examRules": "How It Works",
+    "examRule1": "You'll have {{minutes}} minutes to answer all questions",
+    "examRule2": "Total of {{count}} multiple choice questions",
+    "examRule3": "Pause and resume anytime",
+    "examRule4": "Review your answers before submitting",
+    "customizeExam": "Customize your simulation",
+    "questionCount": "How many questions?",
+    "questionCountLabel": "{{count}} questions",
+    "questionCountCustom": "Custom",
+    "minutesLabel": "minutes",
+    "selectDifficulty": "Difficulty level",
+    "durationLabel": "Time (minutes)",
+    "difficultyLabel": "Difficulty",
+    "difficultyAll": "All",
+    "difficultyEasy": "Easy",
+    "difficultyMedium": "Medium",
+    "difficultyHard": "Challenging",
+    "recommendedTime": "Use suggested time",
+    "resetButton": "Clear",
+    "startExam": "Start with {{count}} questions",
+    "startingExam": "Starting...",
+    "printButton": "Print (coming soon)",
+    "startSimulation": "Start Simulation",
+    "returningToExams": "Returning to exams...",
     "list": {
       "title": "Available Exams",
       "loading": "Loading exams...",
-      "error": "Error loading exams. Please try again.",
+      "error": "Failed to load exams. Please try again.",
       "empty": "No exams available at the moment.",
       "start": "Start",
       "comingSoon": "Coming Soon",
       "difficulty": {
         "EASY": "Easy",
-        "MEDIUM": "Medium",
-        "HARD": "Hard"
+        "MEDIUM": "Intermediate",
+        "HARD": "Challenging"
       },
       "breadcrumbs": "Exams",
       "exams": {
         "clp_c02": {
           "title": "AWS Certified Cloud Practitioner (CLF-C02)",
-          "description": "Practice exam for AWS Certified Cloud Practitioner certification with updated questions aligned to official exam content."
+          "description": "Master cloud fundamentals with AWS. Simulations aligned with official content and real difficulty."
         },
         "dva_c02": {
           "title": "AWS Certified Developer - Associate (DVA-C02)",
-          "description": "Practice exam with questions aligned to the content and difficulty level of the AWS Certified Developer – Associate certification for training and review."
+          "description": "Complete preparation for developers. Questions covering integration, deployment, and AWS development."
         },
         "ai_practitioner": {
           "title": "AWS Certified AI Practitioner",
-          "description": "Practice exam focused on artificial intelligence and machine learning on AWS, with questions aligned to the AWS Certified AI Practitioner certification content, ideal for those seeking to specialize in this field."
+          "description": "Dive into AI and Machine Learning on AWS. Simulations focused on implementation practices and model optimization."
         },
         "az_900": {
           "title": "Microsoft Certified Azure Fundamentals (AZ-900)",
-          "description": "Practice exam to assess knowledge of the fundamental concepts of Microsoft Azure, according to the topics covered in the certification."
+          "description": "Your first steps with Azure. Learn essential concepts and the Microsoft cloud platform."
         },
         "ai_900": {
           "title": "Microsoft Certified Azure AI Fundamentals (AI-900)",
-          "description": "Practice exam to assess knowledge of fundamental concepts of artificial intelligence and machine learning on Microsoft Azure, according to the topics covered in the certification."
+          "description": "AI simplified. Understand machine learning, computer vision, and natural language processing on Azure."
         }
       }
     },
-    "back": "Back to exam list",
-    "studyMode": "Study Mode",
-    "practiceMode": "Practice Mode",
-    "practiceCaption": "Immediate feedback, ideal for learning",
-    "practiceFeatures": {
-      "seeExplanations": "See explanations during the simulation",
-      "noTimeLimit": "No time limit",
-      "idealToLearn": "Ideal for learning"
-    },
-    "examMode": "Exam Mode",
-    "examCaption": "Realistic simulation, result at the end",
-    "examFeatures": {
-      "noExplanations": "See explanations only at the end",
-      "withTimeLimit": "With time limit",
-      "likeReal": "Realistic test"
-    },
-    "difficulty": "Difficulty",
-    "duration": "Duration",
-    "numQuestions": "Number of questions",
-    "startSimulation": "Start Simulation",
-    "selectDifficulty": "Select a difficulty"
+    "relatedExams": "Related Exams",
+    "relatedExamsHint": "Keep practicing with similar simulations to expand your topic coverage."
+  },
+  "seo": {
+    "ariaLabel": "Exam simulation and complete guide",
+    "simuladoTitle": "Free {{exam}} simulation with explained questions",
+    "searchIntention": "If you're looking for {{keyword}}, this simulator is designed to accelerate your success with targeted practice.",
+    "howHelps": "How this simulation helps you pass",
+    "howHelpsContent": "Unlike generic content, here you practice focused on the real exam format, understanding why each answer is correct. This reduces recurring errors and improves your decision-making.",
+    "mainTopics": "Main topics covered on the exam",
+    "strategy": "Strategy to increase your accuracy rate",
+    "exampleQuestion": "Example question from {{exam}}",
+    "correctAnswer": "Correct answer",
+    "useEfficiently": "How to use the simulation effectively",
+    "useEfficientlyContent": "Use short cycles of practice and review: simulation → error analysis → reinforcement → new simulation.",
+    "continueLearning": "Continue your learning",
+    "continueLearningContent": "Explore other simulations available in",
+    "fullExamList": "complete list of exams",
+    "continueLearningContent2": "and increase your topic coverage.",
+    "faq": "Frequently asked questions about {{exam}}",
+    "aboutContent": "About this content",
+    "aboutContentBody": "This material is structured based on the official certification topics and the most common patterns of questions asked in cloud computing exams."
   },
   "stats": {
     "title": "Statistics",
-    "backToDashboard": "Back to Dashboard",
-    "status": {
-      "in_progress": "In Progress",
-      "completed": "Completed",
-      "abandoned": "Abandoned"
+    "loading": "Loading your statistics...",
+    "averageScore": "Average Performance",
+    "domainPerformance": "Performance by Domain",
+    "generalDomain": "General",
+    "correct": "correct",
+    "noData": "No data",
+    "emptyMessage": "No data available yet. Complete some simulations to see your detailed statistics.",
+    "attemptHistory": "Simulation History",
+    "columnDate": "Date",
+    "columnExam": "Exam",
+    "columnStatus": "Status",
+    "columnScore": "Result",
+    "newExam": "New Simulation",
+    "backToDashboard": "Back to Dashboard"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "subtitle": "Track your progress and unlock study milestones.",
+    "level": "Level",
+    "points": "points",
+    "streakDays": "day streak",
+    "streakMessage": "Consistency is the secret to success. Keep this pace!",
+    "loading": "Loading achievements...",
+    "unlocked": "Unlocked",
+    "inProgress": "In progress",
+    "progress": "Progress",
+    "aria": {
+      "summary": "Progress summary",
+      "streak": "Study streak",
+      "list": "Achievements list"
+    },
+    "items": {
+      "firstStep": {
+        "title": "First Step",
+        "description": "You've started your learning journey. Explore what SimulaCert has to offer!"
+      },
+      "persistent": {
+        "title": "Persistent",
+        "description": "10 simulations completed! You're building confidence and knowledge."
+      },
+      "studious": {
+        "title": "Studious",
+        "description": "50 simulations completed! Your dedication is impressive."
+      },
+      "approved": {
+        "title": "Approved",
+        "description": "You scored 70% and passed! The path to certification is open."
+      },
+      "perfectionist": {
+        "title": "Perfectionist",
+        "description": "90% or more? You've completely mastered this content!"
+      },
+      "fireStreak": {
+        "title": "Fire Streak",
+        "description": "7 consecutive days of studying! This is the consistency that leads to success."
+      },
+      "marathoner": {
+        "title": "Marathoner",
+        "description": "30 non-stop days of study! You're a model of discipline."
+      },
+      "awsSpecialist": {
+        "title": "AWS Specialist",
+        "description": "All AWS exams conquered. You're an AWS authority!"
+      },
+      "cloudMaster": {
+        "title": "Cloud Master",
+        "description": "You master multiple cloud providers. You're truly an expert!"
+      },
+      "helpfulCommunity": {
+        "title": "Community Helper",
+        "description": "5 community-approved feedbacks. Your knowledge helps others!"
+      },
+      "questionSearch": {
+        "title": "Explorer",
+        "description": "100 different questions explored. You know the material inside out."
+      },
+      "feedback100": {
+        "title": "Active Contributor",
+        "description": "100 feedbacks provided! You're a pillar of the SimulaCert community."
+      },
+      "amazonRecommender": {
+        "title": "Influential Voice",
+        "description": "100 likes on your feedbacks. Your insights are valuable to the community."
+      },
+      "feedbackLeader": {
+        "title": "Community Leader",
+        "description": "25 community-approved feedbacks. You inspire and guide other students."
+      },
+      "contentInfluencer": {
+        "title": "Influencer",
+        "description": "Your content is a reference. You shape how others study."
+      }
     }
   },
-  "attempt": {
+  "attempts":{
     "inProgress": "In Progress",
     "completed": "Completed",
     "abandoned": "Abandoned"
@@ -138,17 +279,17 @@
     "light": "Light",
     "dark": "Dark",
     "warm": "Reading",
-    "fontSize": "Font Size",
-    "fontFamily": "Font Type",
+    "fontSize": "Size",
+    "fontFamily": "Font",
     "language": "Language",
     "portuguese": "Português",
     "english": "English",
-    "customize": "Customize theme"
+    "customize": "Customize"
   },
   "footer": {
-    "copyright": "© {year} SimulaCert. All rights reserved.",
+    "copyright": "© {{year}} SimulaCert. All rights reserved.",
     "contact": "Contact",
-    "terms": "Terms of Use",
+    "terms": "Terms",
     "privacy": "Privacy"
   },
   "common": {
@@ -161,13 +302,72 @@
     "edit": "Edit",
     "close": "Close"
   },
+  "seoContent": {
+    "generic": {
+      "intro1": "This simulation is designed for those who want to practice with a focus on cloud certifications, with objective questions, immediate feedback and quick review of main topics.",
+      "intro2": "Throughout this page you'll find a practical study guide, an overview of what is typically tested, and a frequently asked questions section to clarify common doubts before the exam.",
+      "topic1": "Cloud computing fundamentals (IaaS, PaaS, SaaS, shared responsibility model).",
+      "topic2": "Identity and Security: IAM, permissions, authentication and basic best practices.",
+      "topic3": "Core services (compute, storage, networking) and common use cases.",
+      "topic4": "Costs and billing: how to estimate, optimize and interpret charges.",
+      "topic5": "Architecture best practices: high availability, resilience and observability.",
+      "strategy1": "Take 1 short simulation per day and review explanations for wrong answers.",
+      "strategy2": "Track your progress: reduce time per question without losing accuracy.",
+      "strategy3": "Re-read the question looking for keywords (always, never, best option, cheapest).",
+      "strategy4": "Before submitting, review answers you're not confident about.",
+      "faq1Question": "Is this simulation free?",
+      "faq1Answer": "Yes. You can start a simulation and practice. In some flows there may be optional registration to save history/statistics.",
+      "faq2Question": "How many questions should I do per session?",
+      "faq2Answer": "For consistency, 20–40 questions per session usually works well. To simulate a real exam, use 50–100 questions and maintain focus on time.",
+      "faq3Question": "Are the questions the same as the official exam?",
+      "faq3Answer": "No. The goal is to train the same topics and reasoning style — not replicate the official question bank.",
+      "faq4Question": "What should I do after the simulation?",
+      "faq4Answer": "Review the explanations, note recurring topics, and retake a simulation focused on those points until you stabilize your performance."
+    },
+    "clfC02": {
+      "intro1": "The AWS Certified Cloud Practitioner CLF-C02 simulation is one of the most effective ways to prepare for AWS entry-level certification. Here you practice with questions in the style of the real exam, focused on fundamental cloud, security and cost concepts.",
+      "intro2": "If you're looking for commented AWS Cloud Practitioner questions and want to understand how the exam really tests the content, this simulation is structured to develop reasoning, not just memorization.",
+      "topic1": "AWS shared responsibility model: what is customer responsibility vs AWS responsibility.",
+      "topic2": "IAM in practice: difference between users, groups, roles and policies — and common permission errors.",
+      "topic3": "EC2 vs Lambda: when to use on-demand computing vs serverless.",
+      "topic4": "S3, EBS and EFS: differences between object, block and file storage.",
+      "topic5": "Costs on AWS: how the pay-as-you-go model works and how to avoid unexpected charges.",
+      "topic6": "High availability: using multiple AZs and basic resilience concepts.",
+      "topic7": "CloudFront and CDN: when to use content distribution to reduce latency.",
+      "topic8": "Billing tools: Cost Explorer, Budgets and Trusted Advisor.",
+      "strategy1": "Read the question looking for the main objective: cost, performance, security or simplicity.",
+      "strategy2": "Eliminate clearly wrong alternatives before choosing the best answer.",
+      "strategy3": "When the question is about lowest cost, prioritize managed services and serverless.",
+      "strategy4": "Avoid \"overengineering\": AWS usually tests the simplest solution that solves the problem.",
+      "strategy5": "If unsure between two options, choose the one requiring less manual management.",
+      "exampleQuestion": "An application needs to store rarely accessed files with the lowest possible cost. Which service is most suitable?",
+      "exampleExplanation": "S3 Glacier is ideal for long-term storage with low cost. Other options are not optimized for rarely accessed file storage.",
+      "faq1Question": "Is the AWS CLF-C02 simulation free?",
+      "faq1Answer": "Yes. You can take the AWS Cloud Practitioner simulation for free and practice with questions similar to the real exam.",
+      "faq2Question": "How many questions are on the AWS Cloud Practitioner exam?",
+      "faq2Answer": "The official exam has approximately 65 questions, with a duration of approximately 90 minutes.",
+      "faq3Question": "What is the minimum passing score for CLF-C02?",
+      "faq3Answer": "The minimum score is 700 on a scale of 100 to 1000.",
+      "faq4Question": "Does this AWS Cloud Practitioner simulation have explained questions?",
+      "faq4Answer": "Yes. The goal is for you to understand why correct and incorrect answers are right, accelerating your learning.",
+      "faq5Question": "How long does it take to prepare for the CLF-C02?",
+      "faq5Answer": "For beginners, 2 to 4 weeks of consistent study with daily simulation practice is usually sufficient.",
+      "keyword1": "free aws clf-c02 simulation",
+      "keyword2": "free aws cloud practitioner simulation",
+      "keyword3": "explained aws cloud practitioner questions",
+      "keyword4": "aws cloud practitioner exam simulator",
+      "keyword5": "aws entry-level exam questions",
+      "keyword6": "aws certification simulation basic"
+    }
+  },
   "alerts": {
-    "confirm_delete": "Are you sure you want to delete this item?",
-    "changes_saved": "Changes saved successfully!",
-    "error_occurred": "An error occurred. Please try again.",
-    "no_data": "No data available.",
-    "change_language": "[BETA - i18n] Changing the language will reload the page. Do you want to continue?",
-    "language_changed": "Language changed successfully!"
+    "no_exams": "No exams available now. Check back soon!",
+    "exam_load_error": "Failed to load the exam. Please try again.",
+    "start_exam_error": "Error starting the simulation. Please try again.",
+    "change_language": "[BETA] Are you sure you want to change the language? Your theme preferences may be affected.",
+    "language_changed": "Language changed successfully.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   }
 }
 

@@ -25,6 +25,8 @@ import {
   Trophy,
 } from 'lucide-angular';
 import {ReviewsApiService} from '../../api/reviews.service';
+import {TranslatePipe} from '../../shared/pipes/translate.pipe';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 interface Achievement {
   id: string;
@@ -39,48 +41,48 @@ interface Achievement {
 @Component({
   selector: 'app-achievements',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, SeoHeadDirective],
+  imports: [CommonModule, LucideAngularModule, SeoHeadDirective, TranslatePipe],
   template: `
     <div seoHead>
       <div class="sc-container achievements">
         <header class="header">
           <div class="title">
-            <h1>Conquistas</h1>
-            <p class="subtitle">Acompanhe seu progresso e desbloqueie marcos de estudo.</p>
+            <h1>{{ 'achievements.title' | translate }}</h1>
+            <p class="subtitle">{{ 'achievements.subtitle' | translate }}</p>
           </div>
 
-          <div class="summary" role="group" aria-label="Resumo de progresso">
+          <div class="summary" role="group" [attr.aria-label]="'achievements.aria.summary' | translate">
             <div class="pill">
               <lucide-icon class="pill-icon" [img]="icons.level" aria-hidden="true"></lucide-icon>
-              <span class="pill-strong">Nível {{ level() }}</span>
+              <span class="pill-strong">{{ 'achievements.level' | translate }}: {{ level() }}</span>
             </div>
             <div class="pill">
               <lucide-icon class="pill-icon" [img]="icons.points" aria-hidden="true"></lucide-icon>
               <span class="pill-strong">{{ totalPoints() }}</span>
-              <span class="pill-muted">pontos</span>
+              <span class="pill-muted">{{ 'achievements.points' | translate }}</span>
             </div>
           </div>
         </header>
 
-        <section class="streak sc-card" aria-label="Sequência de estudo">
+        <section class="streak sc-card" [attr.aria-label]="'achievements.aria.streak' | translate">
           <div class="streak-left">
             <div class="streak-badge" aria-hidden="true">
               <lucide-icon [img]="icons.streak" class="streak-icon"></lucide-icon>
             </div>
             <div>
               <div class="streak-number">{{ streakDays() }}</div>
-              <div class="streak-label">dias de sequência</div>
+              <div class="streak-label">{{ 'achievements.streakDays' | translate }}</div>
             </div>
           </div>
           <div class="streak-right">
-            <p class="streak-message">Consistência vence intensidade. Continue assim.</p>
+            <p class="streak-message">{{ 'achievements.streakMessage' | translate }}</p>
           </div>
         </section>
 
         @if (loading()) {
-          <div class="sc-card achievements-loading">Carregando conquistas...</div>
+          <div class="sc-card achievements-loading">{{ 'achievements.loading' | translate }}</div>
         } @else {
-          <section class="grid" aria-label="Lista de conquistas">
+          <section class="grid" [attr.aria-label]="'achievements.aria.list' | translate">
             @for (achievement of achievements(); track achievement.id) {
               <article class="card sc-card" [class.unlocked]="achievement.unlocked">
                 <div class="card-top">
@@ -88,9 +90,9 @@ interface Achievement {
                     <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
                   </div>
                   @if (achievement.unlocked) {
-                    <span class="state state--unlocked">Conquistado</span>
+                    <span class="state state--unlocked">{{ 'achievements.unlocked' | translate }}</span>
                   } @else {
-                    <span class="state state--locked">Em progresso</span>
+                    <span class="state state--locked">{{ 'achievements.inProgress' | translate }}</span>
                   }
                 </div>
 
@@ -102,7 +104,7 @@ interface Achievement {
                        [attr.aria-valuenow]="achievement.progress"
                        [attr.aria-valuemin]="0"
                        [attr.aria-valuemax]="achievement.target"
-                       [attr.aria-label]="'Progresso: ' + achievement.progress + ' de ' + achievement.target">
+                       [attr.aria-label]="'achievements.progress' | translate">
                     <div class="progress-track">
                       <div class="progress-fill"
                            [style.width.%]="((achievement!.progress || 0) / achievement.target) * 100"></div>
@@ -539,6 +541,7 @@ export class AchievementsComponent implements OnInit {
     private readonly reviewsService: ReviewsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
+    private readonly i18n: I18nService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Conquistas | SimulaCert',
@@ -564,6 +567,7 @@ export class AchievementsComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.translateAchievements();
     const user = this.authFacade.currentUser();
     const userId = user?.id;
     if (!userId) {
@@ -571,6 +575,22 @@ export class AchievementsComponent implements OnInit {
       return;
     }
     this.loadData(userId);
+  }
+
+  private translateAchievements(): void {
+    const achievementKeys = ['firstStep', 'persistent', 'studious', 'approved', 'perfectionist', 'fireStreak', 'marathoner', 'awsSpecialist', 'cloudMaster', 'helpfulCommunity', 'questionSearch', 'feedback100', 'amazonRecommender', 'feedbackLeader', 'contentInfluencer'];
+
+    const updated = this.achievements().map((a, idx) => {
+      const copy = {...a} as Achievement;
+      const key = achievementKeys[idx];
+      if (key) {
+        copy.title = this.i18n.instant(`achievements.items.${key}.title`);
+        copy.description = this.i18n.instant(`achievements.items.${key}.description`);
+      }
+      return copy;
+    });
+
+    this.achievements.set(updated);
   }
 
   private loadData(userId: string) {

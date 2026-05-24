@@ -1,5 +1,5 @@
-import {Component, computed, OnInit, signal} from '@angular/core';
-import {CommonModule, NgOptimizedImage} from '@angular/common';
+import {AfterViewInit, Component, computed, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
+import {CommonModule, isPlatformBrowser, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptsApiService} from '../../api/attempts.service';
@@ -17,225 +17,228 @@ import {AttemptDifficulty, AttemptSetup, DEFAULT_ATTEMPT_SETUP} from './exam-att
 import {ExamAttemptSetupPreferencesService} from './exam-attempt-setup-preferences.service';
 import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angular';
 import {FormsModule} from '@angular/forms';
+import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-exam-detail',
   standalone: true,
-  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent, LucideAngularModule, NgOptimizedImage, FormsModule],
+  imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent, LucideAngularModule, NgOptimizedImage, FormsModule, TranslatePipe],
   template: `
     <div seoHead>
-      @if (showRegisterPrompt()) {
-        <app-register-prompt-modal (register)="goToRegister()"
-                                   (anonymous)="createAnonymousAndStart()"
-                                   (close)="showRegisterPrompt.set(false)"
-                                   [loading]="loadingAnonymous()">
-        </app-register-prompt-modal>
-      }
-
-      <div class="exam-detail sc-page">
-        <div class="sc-container">
-          <app-breadcrumbs [items]="breadcrumbs()"/>
-
-          <div class="breadcrumb" style="display:none">
-            <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
-          </div>
-
-          @if (loadingExam()) {
-            <div class="loading-state sc-card">
-              <p>Carregando detalhes do exame...</p>
-            </div>
-          }
-
-          @if (!loadingExam() && exam()) {
-            <section class="exam-header sc-card sc-card--padded">
-              <div class="exam-header-content">
-                <div class="exam-header-logo">
-                  <img class="exam-icon"
-                       [ngSrc]="exam()?.slug + '.png'"
-                       [alt]="exam()?.title + ' ícone'"
-                       width="150" height="150"
-                       priority/>
-                </div>
-
-                <div class="exam-header-text">
-                  <h1>{{ exam()!.title }}</h1>
-                  <p class="exam-description">{{ exam()!.description }}</p>
-                </div>
-              </div>
-            </section>
-
-            <section class="mode-selection">
-              <h2>Modo de estudo</h2>
-              <div class="mode-cards">
-
-                <div type="button"
-                     class="mode-card"
-                     (click)="selectMode('practice')"
-                     [class.selected]="selectedMode() === 'practice'"
-                     aria-label="Modo prática">
-                  <div class="mode-icon" aria-hidden="true">
-                    <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
-                  </div>
-                  <div>
-                    <h3>Modo Prática</h3>
-                    <p class="mode-caption">Feedback imediato, ideal para aprendizado</p>
-                    <ul class="mode-features">
-                      <li>Veja explicações durante o simulado</li>
-                      <li>Sem limite de tempo</li>
-                      <li>Ideal para aprender</li>
-                    </ul>
-                  </div>
-                </div>
-
-                <div type="button"
-                     class="mode-card"
-                     [class.selected]="selectedMode() === 'exam'"
-                     (click)="selectMode('exam')"
-                     aria-label="Selecionar modo exame">
-                  <div class="mode-icon" aria-hidden="true">
-                    <lucide-icon [img]="icons.exam" class="mode-icon-svg"></lucide-icon>
-                  </div>
-                  <div>
-                    <h3>Modo Exame</h3>
-                    <p class="mode-caption">Simulação fiel, resultado ao final</p>
-                    <ul class="mode-features">
-                      <li>Simula o exame real</li>
-                      <li>Tempo cronometrado</li>
-                      <li>Sem explicações durante</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <div class="exam-info">
-              <div class="info-card sc-card sc-card--padded">
-                <h3>Informações do Exame</h3>
-                <ul>
-                  <li><strong>Tipo:</strong> Simulado AWS</li>
-                  <li><strong>Duração:</strong> {{ setup().durationMinutes }} minutos</li>
-                  <li><strong>Questões:</strong> {{ questionCount() }}</li>
-                  <li><strong>Pontuação mínima:</strong> 70%</li>
-                </ul>
-              </div>
-
-              <div class="info-card sc-card sc-card--padded">
-                <h3>Regras</h3>
-                <ul>
-                  <li>Você terá {{ setup().durationMinutes }} minutos para completar o exame</li>
-                  <li>São {{ questionCount() }} questões de múltipla escolha</li>
-                  <li>Você pode pausar e retomar o exame a qualquer momento</li>
-                  <li>Você pode revisar suas respostas antes de finalizar</li>
-                </ul>
-              </div>
-            </div>
-
-            <div class="question-selector sc-card sc-card--padded">
-              <h3>Personalize seu simulado</h3>
-
-              <div class="setup-row">
-                <div class="setup-field">
-                  <label class="setup-label">Quantidade de questões</label>
-                  <div class="question-options">
-
-                    @if (isCustomQuestionCountSelected()) {
-                      <div style="margin-top: 5px">Personalizado</div>
-
-                  } @else {
-                    <select class="setup-select"
-                            [value]="questionCount()"
-                            (change)="selectQuestionCount($any($event.target).value)">
-
-                        @for (count of questionCountOptions; track count) {
-                          <option [value]="count" [selected]="questionCount() === count">{{ count }} questões</option>
-                        }
-
-                        <option value="custom" selected>Personalizado</option>
-                      </select>
-                    }
-
-                    @if (isCustomQuestionCountSelected()) {
-                      <input
-                        type="number"
-                        min="10"
-                        max="100"
-                        step="5"
-                        class="setup-input"
-                        [value]="customQuestionCount()"
-                        (blur)="$any($event.target).value < 10 ? setCustomQuestionCount( 10) : void 0"
-                        (input)="setCustomQuestionCount($any($event.target).value)"
-                        aria-label="Quantidade de questões personalizada"/>
-                    }
-                  </div>
-                </div>
-
-                <div class="setup-field">
-                  <label class="setup-label" for="durationMinutes">Tempo (minutos)</label>
-                  <input
-                    id="durationMinutes"
-                    type="number"
-                    min="5"
-                    max="240"
-                    step="5"
-                    [value]="setup().durationMinutes"
-                    (input)="setDurationMinutes(($any($event.target).value))"
-                    class="setup-input"/>
-                  <!--                <div class="setup-hint">Sugestão: {{ recommendedMinutes() }} min para {{ questionCount() }} questões</div>-->
-                </div>
-
-                <div class="setup-field">
-                  <label class="setup-label" for="difficulty">Dificuldade</label>
-                  <select id="difficulty" class="setup-select"
-                          [value]="setup().difficulty"
-                          (change)="setDifficulty($any($event.target).value)">
-                    <option value="any">Todas</option>
-                    <option value="easy">Fácil</option>
-                    <option value="medium">Média</option>
-                    <option value="hard">Difícil</option>
-                  </select>
-                </div>
-              </div>
-
-              <div class="setup-actions">
-                <button type="button" class="sc-btn sc-btn--ghost" (click)="applyRecommendedTime()">
-                  Usar tempo recomendado
-                </button>
-                <button type="button" class="sc-btn sc-btn--ghost" (click)="resetSetup()">
-                  Resetar
-                </button>
-              </div>
-            </div>
-
-            <div class="actions">
-              <button class="sc-btn sc-btn--primary" (click)="startExam()" [disabled]="loading()"
-                      aria-label="Iniciar simulado">
-                <lucide-icon [img]="icons.play" class="sc-icon" aria-hidden="true"></lucide-icon>
-                {{ loading() ? 'Iniciando...' : 'Iniciar com ' + questionCount() + ' questões' }}
-              </button>
-            </div>
-            <div class="actions">
-              <button class="sc-btn sc-btn--ghost" disabled type="button" aria-label="Imprimir simulado (em breve)">
-                Imprimir (em breve)
-              </button>
-            </div>
-          }
-
-          @if (errorMessage()) {
-            <div class="error sc-card">{{ errorMessage() }}</div>
-          }
-
-          @if (!loadingExam() && exam()) {
-            <app-seo-rich-template [exam]="exam()!"/>
-            <app-related-exams [currentExam]="exam()!"/>
-          }
-
+      @if (loadingExam() || !ready()) {
+        <div class="loading-state sc-card">
+          <p>{{ 'exams.loading' | translate }}</p>
         </div>
-      </div>
+
+      } @else {
+
+        @if (showRegisterPrompt()) {
+          <app-register-prompt-modal (register)="goToRegister()"
+                                     (anonymous)="createAnonymousAndStart()"
+                                     (close)="showRegisterPrompt.set(false)"
+                                     [loading]="loadingAnonymous()">
+          </app-register-prompt-modal>
+        }
+
+        <div class="exam-detail sc-page">
+          <div class="sc-container">
+            <app-breadcrumbs [items]="breadcrumbs()"/>
+
+            <div class="breadcrumb" style="display:none">
+              <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
+            </div>
+
+            @if (!loadingExam() && exam()) {
+              <section class="exam-header sc-card sc-card--padded">
+                <div class="exam-header-content">
+                  <div class="exam-header-logo">
+                    <img class="exam-icon"
+                         [ngSrc]="exam()?.slug + '.png'"
+                         [alt]="exam()?.title + ' ícone'"
+                         width="150" height="150"
+                         priority/>
+                  </div>
+
+                  <div class="exam-header-text">
+                    <h1>{{ exam()!.title }}</h1>
+                    <p class="exam-description">{{ exam()!.description }}</p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="mode-selection">
+                <h2>{{ 'exams.modeSelection' | translate }}</h2>
+                <div class="mode-cards">
+
+                  <div type="button"
+                       class="mode-card"
+                       (click)="selectMode('practice')"
+                       [class.selected]="selectedMode() === 'practice'"
+                       aria-label="Modo prática">
+                    <div class="mode-icon" aria-hidden="true">
+                      <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
+                    </div>
+                    <div>
+                      <h3>{{ 'exams.practiceMode' | translate }}</h3>
+                      <p class="mode-caption">{{ 'exams.practiceModeCaption' | translate }}</p>
+                      <ul class="mode-features">
+                        <li>{{ 'exams.practiceFeatures.seeExplanations' | translate }}</li>
+                        <li>{{ 'exams.practiceFeatures.noTimeLimit' | translate }}</li>
+                        <li>{{ 'exams.practiceFeatures.idealToLearn' | translate }}</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div type="button"
+                       class="mode-card"
+                       [class.selected]="selectedMode() === 'exam'"
+                       (click)="selectMode('exam')"
+                       aria-label="Selecionar modo exame">
+                    <div class="mode-icon" aria-hidden="true">
+                      <lucide-icon [img]="icons.exam" class="mode-icon-svg"></lucide-icon>
+                    </div>
+                    <div>
+                      <h3>{{ 'exams.examMode' | translate }}</h3>
+                      <p class="mode-caption">{{ 'exams.examModeCaption' | translate }}</p>
+                      <ul class="mode-features">
+                        <li>{{ 'exams.examFeatures.likesReal' | translate }}</li>
+                        <li>{{ 'exams.examFeatures.timedExam' | translate }}</li>
+                        <li>{{ 'exams.examFeatures.noExplanations' | translate }}</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              <div class="exam-info">
+                <div class="info-card sc-card sc-card--padded">
+                  <h3>{{ 'exams.examInfo' | translate }}</h3>
+                  <ul>
+                    <li><strong>{{ 'exams.examInfoType' | translate }}</strong> {{ 'exams.examInfoType_value' | translate }}</li>
+                    <li><strong>{{ 'exams.examInfoDuration' | translate }}</strong> {{ setup().durationMinutes }} {{ 'exams.minutesLabel' | translate }}</li>
+                    <li><strong>{{ 'exams.examInfoQuestions' | translate }}</strong> {{ questionCount() }}</li>
+                    <li><strong>{{ 'exams.examInfoMinScore' | translate }}</strong> {{ 'exams.examInfoMinScore_value' | translate }}</li>
+                  </ul>
+                </div>
+
+                <div class="info-card sc-card sc-card--padded">
+                  <h3>{{ 'exams.examRules' | translate }}</h3>
+                  <ul>
+                    <li>{{ 'exams.examRule1' | translate: {minutes: setup().durationMinutes} }}</li>
+                    <li>{{ 'exams.examRule2' | translate: {count: questionCount()} }}</li>
+                    <li>{{ 'exams.examRule3' | translate }}</li>
+                    <li>{{ 'exams.examRule4' | translate }}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="question-selector sc-card sc-card--padded">
+                <h3>{{ 'exams.customizeExam' | translate }}</h3>
+
+                <div class="setup-row">
+                  <div class="setup-field">
+                    <label class="setup-label">{{ 'exams.questionCount' | translate }}</label>
+                    <div class="question-options">
+
+                      @if (isCustomQuestionCountSelected()) {
+                        <div style="margin-top: 5px">{{ 'exams.questionCountCustom' | translate }}</div>
+
+                      } @else {
+                        <select class="setup-select"
+                                [value]="questionCount()"
+                                (change)="selectQuestionCount($any($event.target).value)">
+
+                          @for (count of questionCountOptions; track count) {
+                            <option [value]="count" [selected]="questionCount() === count">{{ 'exams.questionCountLabel' | translate: {count: count} }}</option>
+                          }
+
+                          <option value="custom" selected>{{ 'exams.questionCountCustom' | translate }}</option>
+                        </select>
+                      }
+
+                      @if (isCustomQuestionCountSelected()) {
+                        <input
+                          type="number"
+                          min="10"
+                          max="100"
+                          step="5"
+                          class="setup-input"
+                          [value]="customQuestionCount()"
+                          (blur)="$any($event.target).value < 10 ? setCustomQuestionCount( 10) : void 0"
+                          (input)="setCustomQuestionCount($any($event.target).value)"
+                          aria-label="Quantidade de questões personalizada"/>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="setup-field">
+                    <label class="setup-label" for="durationMinutes">{{ 'exams.durationLabel' | translate }}</label>
+                    <input
+                      id="durationMinutes"
+                      type="number"
+                      min="5"
+                      max="240"
+                      step="5"
+                      [value]="setup().durationMinutes"
+                      (input)="setDurationMinutes(($any($event.target).value))"
+                      class="setup-input"/>
+                    <!--                <div class="setup-hint">Sugestão: {{ recommendedMinutes() }} min para {{ questionCount() }} questões</div>-->
+                  </div>
+
+                  <div class="setup-field">
+                    <label class="setup-label" for="difficulty">{{ 'exams.difficultyLabel' | translate }}</label>
+                    <select id="difficulty" class="setup-select"
+                            [value]="setup().difficulty"
+                            (change)="setDifficulty($any($event.target).value)">
+                      <option value="any">{{ 'exams.difficultyAll' | translate }}</option>
+                      <option value="easy">{{ 'exams.difficultyEasy' | translate }}</option>
+                      <option value="medium">{{ 'exams.difficultyMedium' | translate }}</option>
+                      <option value="hard">{{ 'exams.difficultyHard' | translate }}</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="setup-actions">
+                  <button type="button" class="sc-btn sc-btn--ghost" (click)="applyRecommendedTime()">
+                    {{ 'exams.recommendedTime' | translate }}
+                  </button>
+                  <button type="button" class="sc-btn sc-btn--ghost" (click)="resetSetup()">
+                    {{ 'exams.resetButton' | translate }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="actions">
+                <button class="sc-btn sc-btn--primary" (click)="startExam()" [disabled]="loading()"
+                        aria-label="Iniciar simulado">
+                  <lucide-icon [img]="icons.play" class="sc-icon" aria-hidden="true"></lucide-icon>
+                  {{ loading() ? ('exams.startingExam' | translate) : ('exams.startExam' | translate: {count: questionCount()}) }}
+                </button>
+              </div>
+              <div class="actions">
+                <button class="sc-btn sc-btn--ghost" disabled type="button" aria-label="Imprimir simulado (em breve)">
+                  {{ 'exams.printButton' | translate }}
+                </button>
+              </div>
+            }
+
+            @if (errorMessage()) {
+              <div class="error sc-card">{{ errorMessage() }}</div>
+            }
+
+            @if (!loadingExam() && exam()) {
+              <app-seo-rich-template [exam]="exam()!"/>
+              <app-related-exams [currentExam]="exam()!"/>
+            }
+
+          </div>
+        </div>
+      }
     </div>
   `,
   styleUrls: ['./exam-detail.component.css']
 })
-export class ExamDetailComponent implements OnInit {
+export class ExamDetailComponent implements OnInit, AfterViewInit {
 
   readonly icons = {
     practice: BookOpen,
@@ -268,6 +271,8 @@ export class ExamDetailComponent implements OnInit {
     ];
   });
 
+  ready = signal(false);
+
   constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
@@ -277,7 +282,16 @@ export class ExamDetailComponent implements OnInit {
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
     private readonly setupPrefs: ExamAttemptSetupPreferencesService,
+    @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
+  }
+
+  ngAfterViewInit(): void {
+    if (isPlatformBrowser(this.platformId)) {
+      requestAnimationFrame(() => {
+        this.ready.set(true);
+      });
+    }
   }
 
   get seo() {
@@ -536,9 +550,9 @@ export class ExamDetailComponent implements OnInit {
     this.setup.set({...this.setup(), durationMinutes: next});
   }
 
-  setDifficulty(raw: AttemptDifficulty | string): void {
+  setDifficulty(raw: AttemptDifficulty): void {
     const allowed: AttemptDifficulty[] = ['any', 'easy', 'medium', 'hard'];
-    const next = allowed.includes(raw as AttemptDifficulty) ? (raw as AttemptDifficulty) : 'any';
+    const next = allowed.includes(raw) ? (raw) : 'any';
     this.setup.set({...this.setup(), difficulty: next});
   }
 

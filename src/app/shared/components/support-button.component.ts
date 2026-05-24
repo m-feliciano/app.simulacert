@@ -1,15 +1,16 @@
 import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {LucideAngularModule, HeartHandshake} from 'lucide-angular';
+import {TranslatePipe} from '../pipes/translate.pipe';
 
 @Component({
   selector: 'app-support-button',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, LucideAngularModule, TranslatePipe],
   template: `
-    <button class="nav-item support-btn" (click)="openSupport()" aria-label="Apoie">
+    <button class="nav-item support-btn" (click)="openSupport()" [attr.aria-label]="'nav.support' | translate">
       <lucide-icon [img]="icon" class="nav-icon" aria-hidden="true"></lucide-icon>
-      <span>Apoie</span>
+      <span>{{ 'nav.support' | translate }}</span>
     </button>
   `,
   styles: [
