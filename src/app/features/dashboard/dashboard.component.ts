@@ -63,7 +63,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
                     <lucide-icon [img]="Lightbulb" class="icon-premium"></lucide-icon>
                   </div>
                   <div class="recommendation-content">
-                    <h3>{{ 'dashboard.recommendations' | translate }}</h3>
+                    <h3>{{ 'dashboard.recommendation' | translate }}</h3>
                     <p>{{ recommendation() }}</p>
                     <a [routerLink]="recommendationLink()" class="btn-recommendation" aria-label="Ver recomendação">
                       {{ recommendationCTA() }}

@@ -42,7 +42,7 @@
     },
     "startNow": "Start Now",
     "lessthan1Min": "Takes less than 1 minute",
-    "recommendations": "Recommendation for you",
+    "recommendation": "Recommendation for you",
     "stats": {
       "totalAttempts": "Total Simulations",
       "completedAttempts": "Completed Simulations",
