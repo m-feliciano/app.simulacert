@@ -270,9 +270,9 @@ export class DashboardComponent implements OnInit {
 
   formatStatus(status: string): string {
     const statusMap: { [key: string]: string } = {
-      'IN_PROGRESS': this.i18n.instant('attempt.inProgress'),
-      'COMPLETED': this.i18n.instant('attempt.completed'),
-      'ABANDONED': this.i18n.instant('attempt.abandoned')
+      'IN_PROGRESS': this.i18n.instant('attempts.inProgress'),
+      'COMPLETED': this.i18n.instant('attempts.completed'),
+      'ABANDONED': this.i18n.instant('attempts.abandoned')
     };
     return statusMap[status] || status;
   }
