@@ -12,7 +12,9 @@
       "noExams": "Nenhum exame disponível",
       "viewAll": "Ver todos",
       "comingSoon": "(em breve)"
-    }
+    },
+    "exit": "Sair",
+    "login": "Entrar"
   },
   "auth": {
     "login": "Entrar",
@@ -379,6 +381,22 @@
     "language_changed": "Idioma atualizado.",
     "confirm": "Confirmar",
     "cancel": "Cancelar"
+  },
+  "attempt": {
+    "leave": "Sair",
+    "stay": "Cancelar",
+    "confirmLeaveTitle": "Sair do simulado",
+    "confirmLeaveHeader": "Tem certeza que deseja sair?",
+    "confirmLeaveMessage": "Seu progresso será salvo e você poderá retomar mais tarde.",
+    "previous": "Anterior",
+    "next": "Próxima",
+    "finish": "Finalizar",
+    "score": "Pontuação",
+    "time": "Tempo",
+    "question": "Questão",
+    "pause": "Pausar",
+    "resume": "Retomar",
+    "exit": "Sair"
   }
 }
 

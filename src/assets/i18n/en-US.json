@@ -12,7 +12,9 @@
       "noExams": "No exams available",
       "viewAll": "View all exams",
       "comingSoon": "(coming soon)"
-    }
+    },
+    "exit": "Sign out",
+    "login": "Sign in"
   },
   "auth": {
     "login": "Sign in",
@@ -414,6 +416,22 @@
     "language_changed": "Language updated.",
     "confirm": "Confirm",
     "cancel": "Cancel"
+  },
+  "attempt": {
+    "leave": "Exit",
+    "stay": "Continue",
+    "confirmLeaveTitle": "Confirm exit",
+    "confirmLeaveHeader": "Are you sure you want to leave this page?",
+    "confirmLeaveMessage": "Your progress will be saved and you can resume later.",
+    "previous": "Previous",
+    "next": "Next",
+    "finish": "Finish",
+    "score": "Score",
+    "time": "Time",
+    "question": "Question",
+    "pause": "Pause",
+    "resume": "Resume",
+    "exit": "Exit"
   }
 }
 
