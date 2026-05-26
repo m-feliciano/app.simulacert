@@ -23,11 +23,12 @@ import {NavbarComponent} from '../../shared/components/navbar.component';
 import {SupportButtonComponent} from '../../shared/components/support-button.component';
 import {fromEvent} from 'rxjs';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule, NavbarComponent, SupportButtonComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, CommonModule, NgOptimizedImage, FooterComponent, SupportModalComponent, SeoHeadDirective, LucideAngularModule, NavbarComponent, SupportButtonComponent, TranslatePipe],
   template: `
     <div class="app-layout" seoHead>
       <header class="topbar sc-glass sc-glass--acrylic">
@@ -37,6 +38,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
               <lucide-icon [img]="icons.menu" class="icon" aria-hidden="true"></lucide-icon>
             </button>
           }
+
           <img priority ngSrc="/simulacert-logo.svg"
                alt="simulacert"
                class="logo"
@@ -48,13 +50,16 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
         @if (!isMobile()) {
           <app-navbar/>
         }
+
         <div class="topbar-right">
           <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
+
           @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
-            <button class="logout-btn" (click)="logout()">Sair</button>
+            <button class="logout-btn" (click)="logout()">{{ 'nav.exit' | translate}}</button>
           } @else {
-            <button class="login-btn sc-btn sc-btn--primary" routerLink="/login">Entrar</button>
+            <button class="login-btn sc-btn sc-btn--primary" routerLink="/login">{{ 'nav.login' | translate }}</button>
           }
+
         </div>
       </header>
       <div class="app-content">
@@ -190,9 +195,9 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     }
 
     .logout-btn {
-      background: var(--brand-primary);
+      background: var(--surface);
       border: none;
-      color: white;
+      color: var(--text);
       padding: 8px 16px;
       border-radius: var(--border-radius-sm);
       cursor: pointer;
@@ -202,7 +207,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
     }
 
     .logout-btn:hover {
-      background: var(--color-primary-dark);
+      background: var(--surface-2);
       transform: translateY(-1px);
     }
 
