@@ -374,8 +374,7 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
 
             this.setTimingFromServer(timing);
 
-            this.popoverPinned.set(true);
-            this.showPopover.set(true);
+            this.togglePopoverPin();
           },
           error: () => {
             this.heartbeatOk.set(false);
@@ -644,7 +643,8 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
     });
   }
 
-  togglePopoverPin(event: Event) {
+  togglePopoverPin(event?: Event) {
+    console.log('Toggle popover pin', { pinned: this.popoverPinned() });
     event?.stopPropagation();
     const next = !this.popoverPinned();
     this.popoverPinned.set(next);
