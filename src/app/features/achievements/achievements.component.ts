@@ -145,7 +145,7 @@ interface Achievement {
     .subtitle {
       margin-top: var(--spacing-xs);
       color: var(--muted);
-      max-width: 60ch;
+      max-width: 75ch;
       line-height: 1.6;
     }
 
