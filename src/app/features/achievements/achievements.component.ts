@@ -714,7 +714,7 @@ export class AchievementsComponent implements OnInit {
     const unlockedCount = updated.filter(a => a.unlocked).length;
     return this.seoFactory.website({
       title: `Conquistas (${unlockedCount}) | SimulaCert`,
-      description: `Você desbloqueou ${unlockedCount} de ${updated.length} conquistas na SimulaCert. Acompanhe seu progresso e desbloqueie novos marcos.`,
+      description: `Você desbloqueou ${unlockedCount} de ${updated.length} conquistas na SimulaCert. Acompanhe seu progresso e desbloqueie novas.`,
       canonicalPath: '/achievements',
       robots: 'index, follow',
       jsonLdId: 'achievements',

@@ -58,7 +58,7 @@
       "mediumScore": "Bom progresso. Continue praticando e revisando as explicações para manter consistência acima do limite de aprovação.",
       "highScore": "Você está acima do limite de aprovação. Direcione o estudo para os domínios mais fracos e aumente a consistência entre os tópicos.",
       "excellentScore": "Resultados sólidos. Faça algumas tentativas completas e cronometradas para confirmar sua prontidão para a prova.",
-      "viewAchievements": "Ver marcos",
+      "viewAchievements": "Ver conquistas",
       "fewAttempts": "Conclua mais algumas avaliações para obter insights mais confiáveis e identificar oportunidades de melhoria.",
       "incompleteAttempts": "Você tem {{count}} avaliações em andamento. Finalize-as para ter uma visão mais completa do seu progresso.",
       "viewAttempts": "Revisar tentativas"
@@ -200,20 +200,20 @@
     "backToDashboard": "Voltar ao painel"
   },
   "achievements": {
-    "title": "Marcos",
-    "subtitle": "Acompanhe marcos relevantes enquanto desenvolve habilidades e melhora sua prontidão para a certificação.",
+    "title": "Conquistas",
+    "subtitle": "Acompanhe conquistas relevantes enquanto desenvolve habilidades e melhora sua prontidão para a certificação.",
     "level": "Nível",
     "points": "pontos",
     "streakDays": "dias de sequência",
     "streakMessage": "Consistência ajuda na retenção. Mantenha uma rotina de estudo sustentável.",
-    "loading": "Carregando marcos...",
+    "loading": "Carregando conquistas...",
     "unlocked": "Desbloqueado",
     "inProgress": "Em andamento",
     "progress": "Progresso",
     "aria": {
       "summary": "Resumo de progresso",
       "streak": "Sequência de estudo",
-      "list": "Lista de marcos"
+      "list": "Lista de conquistas"
     },
     "items": {
       "firstStep": {
