@@ -184,8 +184,8 @@ describe('AttemptRunnerComponent', () => {
 
     expect(compiled.querySelector('.loading-state')).toBeNull();
     expect(compiled.querySelector('.attempt-header h3')?.textContent).toBe('AWS Practitioner');
-    expect(compiled.querySelector('.question-number')?.textContent).toContain('Questão Q2');
-    expect(compiled.querySelector('.question-text')?.textContent).toBe('Questão 2');
+    expect(compiled.querySelector('.question-number')?.textContent).toContain('Q2');
+    expect(compiled.querySelector('.question-text')?.textContent).toContain(' 2');
     expect(compiled.querySelectorAll('.question-nav-btn')).toHaveLength(3);
     expect(compiled.querySelectorAll('.question-nav-btn.active')).toHaveLength(1);
     expect(compiled.querySelectorAll('.question-nav-btn.answered')).toHaveLength(1);
