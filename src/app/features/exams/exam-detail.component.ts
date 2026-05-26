@@ -1,10 +1,11 @@
-import {AfterViewInit, Component, computed, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
+import {AfterViewInit, Component, computed, DestroyRef, Inject, OnInit, PLATFORM_ID, signal} from '@angular/core';
 import {CommonModule, isPlatformBrowser, NgOptimizedImage} from '@angular/common';
 import {ActivatedRoute, Router} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {ExamResponse} from '../../api/domain';
+import {I18nService} from '../../core/i18n/i18n.service';
 import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
@@ -18,6 +19,7 @@ import {ExamAttemptSetupPreferencesService} from './exam-attempt-setup-preferenc
 import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angular';
 import {FormsModule} from '@angular/forms';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
+import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-exam-detail',
@@ -45,7 +47,8 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
             <app-breadcrumbs [items]="breadcrumbs()"/>
 
             <div class="breadcrumb" style="display:none">
-              <a (click)="goBack()" class="back-link" aria-label="Voltar para lista de exames">← Voltar</a>
+              <a (click)="goBack()" class="back-link"
+                 [attr.aria-label]="'exams.backToListAria' | translate">← {{ 'exams.back' | translate }}</a>
             </div>
 
             @if (!loadingExam() && exam()) {
@@ -54,7 +57,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
                   <div class="exam-header-logo">
                     <img class="exam-icon"
                          [ngSrc]="exam()?.slug + '.png'"
-                         [alt]="exam()?.title + ' ícone'"
+                         [alt]="'exams.examIconAlt' | translate: {exam: exam()?.title || ''}"
                          width="150" height="150"
                          priority/>
                   </div>
@@ -74,7 +77,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
                        class="mode-card"
                        (click)="selectMode('practice')"
                        [class.selected]="selectedMode() === 'practice'"
-                       aria-label="Modo prática">
+                       [attr.aria-label]="'exams.modePracticeAria' | translate">
                     <div class="mode-icon" aria-hidden="true">
                       <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
                     </div>
@@ -93,7 +96,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
                        class="mode-card"
                        [class.selected]="selectedMode() === 'exam'"
                        (click)="selectMode('exam')"
-                       aria-label="Selecionar modo exame">
+                       [attr.aria-label]="'exams.modeExamAria' | translate">
                     <div class="mode-icon" aria-hidden="true">
                       <lucide-icon [img]="icons.exam" class="mode-icon-svg"></lucide-icon>
                     </div>
@@ -166,7 +169,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
                           [value]="customQuestionCount()"
                           (blur)="$any($event.target).value < 10 ? setCustomQuestionCount( 10) : void 0"
                           (input)="setCustomQuestionCount($any($event.target).value)"
-                          aria-label="Quantidade de questões personalizada"/>
+                          [attr.aria-label]="'exams.customQuestionCountAria' | translate"/>
                       }
                     </div>
                   </div>
@@ -210,13 +213,14 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
               <div class="actions">
                 <button class="sc-btn sc-btn--primary" (click)="startExam()" [disabled]="loading()"
-                        aria-label="Iniciar simulado">
+                        [attr.aria-label]="'exams.startSimulation' | translate">
                   <lucide-icon [img]="icons.play" class="sc-icon" aria-hidden="true"></lucide-icon>
                   {{ loading() ? ('exams.startingExam' | translate) : ('exams.startExam' | translate: {count: questionCount()}) }}
                 </button>
               </div>
               <div class="actions">
-                <button class="sc-btn sc-btn--ghost" disabled type="button" aria-label="Imprimir simulado (em breve)">
+                <button class="sc-btn sc-btn--ghost" disabled type="button"
+                        [attr.aria-label]="'exams.printExamAria' | translate">
                   {{ 'exams.printButton' | translate }}
                 </button>
               </div>
@@ -263,15 +267,17 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
   questionCount = computed(() => this.setup().questionCount);
   recommendedMinutes = computed(() => Math.round(this.questionCount() * 1.5));
   breadcrumbs = computed(() => {
+    this.language();
     const exam = this.exam();
     return [
-      {label: 'Home', url: '/'},
-      {label: 'Exames', url: '/exams'},
-      {label: exam?.title || 'Simulado'},
+      {label: this.i18n.instant('common.home'), url: '/'},
+      {label: this.i18n.instant('exams.title'), url: '/exams'},
+      {label: exam?.title || this.i18n.instant('exams.title')},
     ];
   });
 
   ready = signal(false);
+  private readonly language = signal('pt-BR');
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -282,8 +288,19 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
     private readonly setupPrefs: ExamAttemptSetupPreferencesService,
+    private readonly i18n: I18nService,
+    private readonly destroyRef: DestroyRef,
     @Inject(PLATFORM_ID) private readonly platformId: Object
   ) {
+    this.language.set(this.i18n.getLanguage());
+    this.i18n.onLanguageChange
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((language) => {
+        this.language.set(language);
+        if (this.exam()) {
+          this.applySeo();
+        }
+      });
   }
 
   ngAfterViewInit(): void {
@@ -296,13 +313,13 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
 
   get seo() {
     const exam = this.exam();
-    const title = exam ? `${exam.title} | SimulaCert` : 'Simulado | SimulaCert';
-    const description = exam?.description || 'Simulado de certificação.';
+    const title = exam ? `${exam.title} | SimulaCert` : this.i18n.instant('exams.notFoundTitle');
+    const description = exam?.description || this.i18n.instant('exams.notFoundDescription');
     const canonicalUrl = exam?.slug ? this.seoFactory.canonicalFromPath(`/exams/${exam.slug}`) : '';
     const origin = this.seoFactory.origin();
     const image = exam?.slug ? `${origin}/${exam.slug}.png` : `${origin}/simulacert-logo.svg`;
 
-     const content = getExamSeoContent(exam);
+    const content = getExamSeoContent(exam, this.i18n);
      const faqJsonLd = exam?.slug
        ? {
          '@context': 'https://schema.org',
@@ -324,8 +341,8 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',
           itemListElement: [
-            {'@type': 'ListItem', position: 1, name: 'Home', item: `${origin}/`},
-            {'@type': 'ListItem', position: 2, name: 'Exames', item: `${origin}/exams`},
+            {'@type': 'ListItem', position: 1, name: this.i18n.instant('common.home'), item: `${origin}/`},
+            {'@type': 'ListItem', position: 2, name: this.i18n.instant('exams.title'), item: `${origin}/exams`},
             {'@type': 'ListItem', position: 3, name: exam.title, item: canonicalUrl},
           ],
         },
@@ -376,8 +393,8 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
 
     } else {
       const meta = this.seoFactory.website({
-        title: 'Simulado não encontrado | SimulaCert',
-        description: 'O simulado solicitado não foi encontrado. Veja a lista de exames disponíveis.',
+        title: this.i18n.instant('exams.notFoundTitle'),
+        description: this.i18n.instant('exams.notFoundDescription'),
         canonicalPath: '/exams',
         robots: 'noindex, follow',
         jsonLdId: 'exam-not-found'
@@ -410,7 +427,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
         }
       },
       error: () => {
-        this.errorMessage.set('Erro ao carregar exame');
+        this.errorMessage.set(this.i18n.instant('alerts.exam_load_error'));
         this.loadingExam.set(false);
       }
     });
@@ -453,7 +470,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
 
         if (!attemptId) {
           this.loading.set(false);
-          this.errorMessage.set('Não foi possível iniciar o exame. Tente novamente.');
+          this.errorMessage.set(this.i18n.instant('alerts.start_exam_error'));
           return;
         }
 
@@ -461,7 +478,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
       },
       error: () => {
         this.loading.set(false);
-        this.errorMessage.set('Erro ao iniciar exame');
+        this.errorMessage.set(this.i18n.instant('alerts.start_exam_error'));
       }
     });
   }
@@ -479,7 +496,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
       },
       error: () => {
         this.loadingAnonymous.set(false);
-        this.errorMessage.set('Erro ao criar usuário anônimo');
+        this.errorMessage.set(this.i18n.instant('alerts.anonymous_user_error'));
       }
     });
   }
@@ -499,7 +516,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
         this.loadingExam.set(false);
       },
       error: () => {
-        this.errorMessage.set('Erro ao carregar exame');
+        this.errorMessage.set(this.i18n.instant('alerts.exam_load_error'));
         this.loadingExam.set(false);
       }
     });

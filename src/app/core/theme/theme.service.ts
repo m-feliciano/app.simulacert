@@ -20,7 +20,7 @@ export class ThemeService {
   fontFamily = signal<FontFamily>('serif');
 
   private readonly isBrowser: boolean;
-  private readonly i18nService = inject(I18nService);
+  private readonly i18n = inject(I18nService);
 
   constructor(
     @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
@@ -127,20 +127,20 @@ export class ThemeService {
   setLanguage(lang: Language) {
     if (!this.isBrowser) return;
 
-    this.i18nService.get('alerts.change_language')
+    this.i18n.get('alerts.change_language')
       .subscribe((message) => {
         if (confirm(message)) {
 
-          this.i18nService.changeLanguage(lang)
+          this.i18n.changeLanguage(lang)
             .subscribe(() => {
               setTimeout(() => globalThis.location.reload(), 1000);
-              alert(this.i18nService.instant('alerts.language_changed'));
+              alert(this.i18n.instant('alerts.language_changed'));
             });
         }
       });
   }
 
   getLanguage(): Language {
-    return this.i18nService.getLanguage();
+    return this.i18n.getLanguage();
   }
 }
