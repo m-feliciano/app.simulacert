@@ -371,7 +371,11 @@ export class AttemptRunnerComponent implements OnInit, OnDestroy {
           next: (timing) => {
             this.heartbeatOk.set(true);
             this.lastHeartbeatAt.set(Date.now());
+
             this.setTimingFromServer(timing);
+
+            this.popoverPinned.set(true);
+            this.showPopover.set(true);
           },
           error: () => {
             this.heartbeatOk.set(false);
