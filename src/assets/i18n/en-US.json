@@ -369,16 +369,51 @@
         "keyword6": "aws certification practice exam basic"
       }
     },
-    "alerts": {
-      "no_exams": "No exams are currently available. Please check back soon.",
-      "exam_load_error": "We couldn't load the exam. Please try again.",
-      "start_exam_error": "We couldn't start the practice exam. Please try again.",
-      "anonymous_user_error": "We couldn't create an anonymous session. Please try again.",
-      "change_language": "[BETA] Change language? This may temporarily reset your custom theme preferences.",
-      "language_changed": "Language updated.",
-      "confirm": "Confirm",
-      "cancel": "Cancel"
+    "clfC02": {
+      "intro1": "The AWS Certified Cloud Practitioner (CLF-C02) practice exam helps you build a strong foundation in AWS concepts through exam-aligned questions and clear explanations.",
+      "intro2": "If you're looking for AWS Cloud Practitioner practice questions with detailed explanations, this mock exam supports your preparation by strengthening understanding and decision-making skills rather than relying on memorization alone.",
+      "topic1": "AWS Shared Responsibility Model: customer responsibilities versus AWS responsibilities.",
+      "topic2": "IAM fundamentals: users, groups, roles, policies, and common access troubleshooting scenarios.",
+      "topic3": "Compute options: when to use Amazon EC2 versus AWS Lambda for common workloads.",
+      "topic4": "Storage options: key differences between Amazon S3, EBS, and EFS, and when to choose each service.",
+      "topic5": "Pricing basics: understanding cost models and applying cost-control mechanisms.",
+      "topic6": "High availability: designing resilient architectures across multiple Availability Zones (AZs).",
+      "topic7": "Content delivery: using Amazon CloudFront and CDNs to reduce latency and improve performance.",
+      "topic8": "Cost management and governance tools: Cost Explorer, AWS Budgets, and Trusted Advisor.",
+      "strategy1": "Identify the primary objective of the question (cost, performance, security, or operational simplicity).",
+      "strategy2": "Use the process of elimination to rule out clearly incorrect answers before making a decision.",
+      "strategy3": "When cost is the main constraint, consider managed and serverless services that reduce operational overhead.",
+      "strategy4": "Avoid unnecessary complexity; many exam questions favor the simplest solution that meets the requirements.",
+      "strategy5": "If two options seem valid, choose the one that requires less ongoing maintenance unless the scenario suggests otherwise.",
+      "exampleQuestion": "An application needs to store files that are rarely accessed while minimizing storage costs. Which AWS service is the best fit?",
+      "exampleExplanation": "Amazon S3 Glacier is designed for low-cost, long-term storage. The other options are typically optimized for more frequent access patterns or different performance requirements.",
+      "faq1Question": "Is the AWS CLF-C02 practice exam free?",
+      "faq1Answer": "Yes. You can access the AWS Cloud Practitioner practice exam for free and assess your readiness with exam-aligned questions.",
+      "faq2Question": "How many questions are on the AWS Cloud Practitioner exam?",
+      "faq2Answer": "The official exam typically includes around 65 questions (multiple choice and multiple response) and lasts 90 minutes.",
+      "faq3Question": "What is the passing score for the CLF-C02 exam?",
+      "faq3Answer": "AWS uses a scaled scoring system ranging from 100 to 1,000. The passing score for the CLF-C02 exam is 700.",
+      "faq4Question": "Does this AWS Cloud Practitioner practice exam include detailed explanations?",
+      "faq4Answer": "Yes. Every question includes explanations to help you understand why an answer is correct and why the other options are not.",
+      "faq5Question": "How long does it take to prepare for the CLF-C02 exam?",
+      "faq5Answer": "Preparation time depends on your experience level. Many learners are ready within 2–4 weeks with consistent study and regular practice.",
+      "keyword1": "free aws clf-c02 practice exam",
+      "keyword2": "free aws cloud practitioner practice test",
+      "keyword3": "aws cloud practitioner practice questions with explanations",
+      "keyword4": "aws cloud practitioner mock exam",
+      "keyword5": "aws beginner exam questions",
+      "keyword6": "aws certification practice test beginner"
     }
+  },
+  "alerts": {
+    "no_exams": "No exams are currently available. Please check back soon.",
+    "exam_load_error": "We couldn't load the exam. Please try again.",
+    "start_exam_error": "We couldn't start the practice exam. Please try again.",
+    "anonymous_user_error": "We couldn't create an anonymous session. Please try again.",
+    "change_language": "[BETA] Change language? This may temporarily reset your custom theme preferences.",
+    "language_changed": "Language updated.",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
   }
 }
 
