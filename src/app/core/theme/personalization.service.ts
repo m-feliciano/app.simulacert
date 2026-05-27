@@ -1,8 +1,7 @@
 import {DOCUMENT, effect, Inject, inject, Injectable, PLATFORM_ID, signal} from '@angular/core';
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
-import {I18nService, Language} from '../i18n/i18n.service';
-import {finalize, take} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
 
 export type ThemeMode = 'light' | 'dark' | 'warm' | 'high-contrast';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge' | 'extra-small';
@@ -21,7 +20,7 @@ export class PersonalizationService {
   fontFamily = signal<FontFamily>('serif');
 
   private readonly isBrowser: boolean;
-  private readonly i18n = inject(I18nService);
+  private readonly translateService = inject(TranslateService);
 
   constructor(
     @Inject(LOCAL_STORAGE) private readonly storage: Storage | null,
@@ -121,23 +120,19 @@ export class PersonalizationService {
     return (this.storage?.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
   }
 
-  setLanguage(lang: Language) {
+  setLanguage(lang: string) {
     if (!this.isBrowser) return;
 
-    this.i18n.get('alerts.change_language')
+    this.translateService.get('alerts.change_language')
       .subscribe((message) => {
         if (confirm(message)) {
-
-          this.i18n.changeLanguage(lang)
-            .pipe(take(1), finalize(() => {
-              globalThis.location.reload();
-            }))
-            .subscribe();
+          this.storage?.setItem('language', lang);
+          globalThis.location.reload();
         }
       });
   }
 
-  getLanguage(): Language {
-    return this.i18n.getLanguage();
+  getLanguage(): string {
+    return this.storage?.getItem('language') || 'pt-BR';
   }
 }

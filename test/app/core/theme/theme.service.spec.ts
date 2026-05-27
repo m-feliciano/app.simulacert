@@ -4,7 +4,7 @@ import {TestBed} from '@angular/core/testing';
 import {afterEach, describe, expect, it, jest} from '@jest/globals';
 import {LOCAL_STORAGE} from '../../../../src/app/core/storage/local-storage.token';
 import {PersonalizationService} from '../../../../src/app/core/theme/personalization.service';
-import {I18nService} from '../../../../src/app/core/i18n/i18n.service';
+import {TranslateService} from '@ngx-translate/core';
 
 type StorageMock = Storage & {
   data: Record<string, string>;
@@ -59,7 +59,7 @@ function setupBrowserThemeTestingModule(storage: StorageMock) {
     imports: [ThemeServiceHostComponent],
     providers: [
       {provide: DOCUMENT, useValue: globalThis.document},
-      {provide: I18nService, useValue: mockI18nService()},
+      {provide: TranslateService, useValue: mockI18nService()},
       {provide: LOCAL_STORAGE, useValue: storage},
       {provide: PLATFORM_ID, useValue: 'browser'},
     ],
@@ -72,7 +72,7 @@ function setupServerThemeTestingModule(storage: StorageMock | null) {
     providers: [
       {provide: DOCUMENT, useValue: globalThis.document},
       {provide: LOCAL_STORAGE, useValue: storage},
-      {provide: I18nService, useValue: mockI18nService()},
+      {provide: TranslateService, useValue: mockI18nService()},
       {provide: PLATFORM_ID, useValue: 'server'},
     ],
   });

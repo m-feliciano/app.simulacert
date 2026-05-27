@@ -1,11 +1,10 @@
-import {Component, computed, DestroyRef, inject, Input, signal} from '@angular/core';
+import {Component, computed, inject, Input} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {RouterLink} from '@angular/router';
 import {ExamResponse} from '../../api/domain';
 import {getExamSeoContent} from '../../features/exams/exam-seo-content.registry';
 import {TranslatePipe} from '../pipes/translate.pipe';
-import {I18nService} from '../../core/i18n/i18n.service';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-seo-rich-template',
@@ -157,24 +156,14 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 })
 export class SeoRichTemplateComponent {
   @Input({required: true}) exam!: ExamResponse;
-  private readonly i18n = inject(I18nService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly language = signal('pt-BR');
+  protected readonly String = String;
 
-  constructor() {
-    this.language.set(this.i18n.getLanguage());
-    this.i18n.onLanguageChange
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((language) => this.language.set(language));
-  }
-
+  private readonly translateService = inject(TranslateService);
   content = computed(() => {
-    this.language();
-    return getExamSeoContent(this.exam, this.i18n);
+    return getExamSeoContent(this.exam, this.translateService);
   });
 
   primaryKeyword = computed(() => {
     return this.content().keywords?.[0] || `simulado ${this.exam?.title || ''}`.trim();
   });
-  protected readonly String = String;
 }

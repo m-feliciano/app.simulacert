@@ -13,12 +13,13 @@ import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
-import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslateService} from '@ngx-translate/core';
+import {FormatTimePipe} from '../../shared/pipes/format-status.pipe';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe, LucideAngularModule, TranslatePipe],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe, LucideAngularModule, TranslatePipe, FormatTimePipe],
   template: `
     <div seoHead>
       <div class="dashboard">
@@ -106,7 +107,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
 
             <div class="section">
               <h2>{{ 'dashboard.recentAttempts' | translate }}</h2>
-              @if (recentAttempts().length > 0) {
+              @if (recentAttempts() && recentAttempts().length > 0) {
                 <div class="attempts-list">
                   @for (attempt of recentAttempts(); track attempt.id) {
                     <a class="attempt-item"
@@ -115,7 +116,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
                       <div class="attempt-info">
                         <div class="attempt-date">{{ attempt.startedAt | formatDate }}</div>
                         <div class="attempt-status" [class]="attempt.status.toLowerCase()">
-                          {{ formatStatus(attempt.status) }}
+                          {{ attempt.status | formatStatus }}
                         </div>
                       </div>
                       @if (attempt.score) {
@@ -133,8 +134,10 @@ import {I18nService} from '../../core/i18n/i18n.service';
             </div>
 
             <div class="actions">
-              <a routerLink="/exams" class="btn-primary" aria-label="Fazer novo simulado">{{ 'dashboard.newSimulation' | translate }}</a>
-              <a routerLink="/stats" class="btn-secondary" aria-label="Ver estatísticas completas">{{ 'dashboard.fullStats' | translate }}</a>
+              <a routerLink="/exams" class="btn-primary"
+                 aria-label="Fazer novo simulado">{{ 'dashboard.newSimulation' | translate }}</a>
+              <a routerLink="/stats" class="btn-secondary"
+                 aria-label="Ver estatísticas completas">{{ 'dashboard.fullStats' | translate }}</a>
             </div>
           }
         }
@@ -169,7 +172,7 @@ export class DashboardComponent implements OnInit {
     private readonly statsApi: StatsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    private readonly i18n: I18nService,
+    private readonly translateService: TranslateService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Dashboard | SimulaCert',
@@ -222,40 +225,40 @@ export class DashboardComponent implements OnInit {
 
     if (avgScore < 50) {
       this.showRecommendations.set(true);
-      this.recommendation.set(this.i18n.instant('dashboard.recommendations.lowScore'));
-      this.recommendationCTA.set(this.i18n.instant('dashboard.recommendations.viewStatsDetail'));
+      this.recommendation.set(this.translateService.instant('dashboard.recommendations.lowScore'));
+      this.recommendationCTA.set(this.translateService.instant('dashboard.recommendations.viewStatsDetail'));
       this.recommendationLink.set('/stats');
 
     } else if (avgScore >= 50 && avgScore < 70) {
       this.showRecommendations.set(true);
-      this.recommendation.set(this.i18n.instant('dashboard.recommendations.mediumScore'));
-      this.recommendationCTA.set(this.i18n.instant('dashboard.newSimulation'));
+      this.recommendation.set(this.translateService.instant('dashboard.recommendations.mediumScore'));
+      this.recommendationCTA.set(this.translateService.instant('dashboard.newSimulation'));
       this.recommendationLink.set('/exams');
 
     } else if (avgScore >= 70 && avgScore < 85) {
       this.showRecommendations.set(true);
-      this.recommendation.set(this.i18n.instant('dashboard.recommendations.highScore'));
-      this.recommendationCTA.set(this.i18n.instant('dashboard.newSimulation'));
+      this.recommendation.set(this.translateService.instant('dashboard.recommendations.highScore'));
+      this.recommendationCTA.set(this.translateService.instant('dashboard.newSimulation'));
       this.recommendationLink.set('/exams');
 
     } else if (avgScore >= 85) {
       this.showRecommendations.set(true);
-      this.recommendation.set(this.i18n.instant('dashboard.recommendations.excellentScore'));
-      this.recommendationCTA.set(this.i18n.instant('dashboard.recommendations.viewAchievements'));
+      this.recommendation.set(this.translateService.instant('dashboard.recommendations.excellentScore'));
+      this.recommendationCTA.set(this.translateService.instant('dashboard.recommendations.viewAchievements'));
       this.recommendationLink.set('/achievements');
     }
 
     if (totalAttempts < 5) {
       this.showRecommendations.set(true);
-      this.recommendation.set(this.i18n.instant('dashboard.recommendations.fewAttempts'));
-      this.recommendationCTA.set(this.i18n.instant('dashboard.newSimulation'));
+      this.recommendation.set(this.translateService.instant('dashboard.recommendations.fewAttempts'));
+      this.recommendationCTA.set(this.translateService.instant('dashboard.newSimulation'));
       this.recommendationLink.set('/exams');
     }
 
     if (completedAttempts < totalAttempts && (totalAttempts - completedAttempts) >= 3) {
       this.showRecommendations.set(true);
-      this.recommendation.set(this.i18n.instant('dashboard.recommendations.incompleteAttempts', {count: totalAttempts - completedAttempts}));
-      this.recommendationCTA.set(this.i18n.instant('dashboard.recommendations.viewAttempts'));
+      this.recommendation.set(this.translateService.instant('dashboard.recommendations.incompleteAttempts', {count: totalAttempts - completedAttempts}));
+      this.recommendationCTA.set(this.translateService.instant('dashboard.recommendations.viewAttempts'));
       this.recommendationLink.set('/stats');
     }
   }
@@ -266,14 +269,5 @@ export class DashboardComponent implements OnInit {
         this.recentAttempts.set(attempts);
       },
     });
-  }
-
-  formatStatus(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'IN_PROGRESS': this.i18n.instant('attempts.inProgress'),
-      'COMPLETED': this.i18n.instant('attempts.completed'),
-      'ABANDONED': this.i18n.instant('attempts.abandoned')
-    };
-    return statusMap[status] || status;
   }
 }

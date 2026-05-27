@@ -1,5 +1,5 @@
 import {inject, Pipe, PipeTransform} from '@angular/core';
-import {I18nService} from '../../core/i18n/i18n.service';
+import {PersonalizationService} from '../../core/theme/personalization.service';
 
 @Pipe({
   name: 'formatDate',
@@ -7,7 +7,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
   pure: false
 })
 export class FormatDatePipe implements PipeTransform {
-  private readonly i18n = inject(I18nService);
+  private readonly personalization = inject(PersonalizationService);
 
   transform(value: string | number | null): string {
     if (!value) return '';
@@ -15,8 +15,7 @@ export class FormatDatePipe implements PipeTransform {
   }
 
   private formatDate(dateString: string): string {
-    const language = this.i18n.getLanguage();
-    const locale = language === 'pt-BR' ? 'pt-BR' : 'en-US';
+    const locale = this.personalization.getLanguage();
 
     return new Date(dateString).toLocaleDateString(locale, {
       day: '2-digit',

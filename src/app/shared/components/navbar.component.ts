@@ -20,14 +20,13 @@ import {
 import {ExamResponse} from '../../api/domain';
 import {SupportButtonComponent} from './support-button.component';
 import {TranslatePipe} from '../pipes/translate.pipe';
-import {I18nService} from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule, SupportButtonComponent, TranslatePipe],
   template: `
-    <nav class="topbar-nav" (mouseleave)="closeDropdown()" [class.ready]="i18n.ready()">
+    <nav class="topbar-nav" (mouseleave)="closeDropdown()" [class.ready]="true">
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">{{ 'nav.dashboard' | translate }}</a>
 
       <div class="exams-dropdown"
@@ -82,7 +81,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
         <a routerLink="/admin" routerLinkActive="active" class="nav-item">{{ 'nav.admin' | translate }}</a>
       }
 
-      <a routerLink="/news" routerLinkActive="false" class="nav-item muted disabled"
+      <a [routerLink]="null" routerLinkActive="false" class="nav-item muted disabled"
          style="cursor: not-allowed">{{ 'nav.news' | translate }}</a>
 
       <app-support-button></app-support-button>
@@ -286,7 +285,6 @@ export class NavbarComponent implements OnInit {
   dropdownOpen = signal(false);
   exams = signal<ExamResponse[]>([]);
   loading = signal(true);
-  readonly i18n = inject(I18nService);
   readonly authFacade = inject(AuthFacade);
   private readonly examsApi = inject(ExamsApiService);
   private readonly destroyRef = inject(DestroyRef);

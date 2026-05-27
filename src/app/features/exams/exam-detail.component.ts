@@ -5,7 +5,6 @@ import {ExamsApiService} from '../../api/exams.service';
 import {AttemptsApiService} from '../../api/attempts.service';
 import {AuthFacade} from '../../core/auth/auth.facade';
 import {ExamResponse} from '../../api/domain';
-import {I18nService} from '../../core/i18n/i18n.service';
 import {RegisterPromptModalComponent} from '../../shared/components/register-prompt-modal.component';
 import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
@@ -20,6 +19,7 @@ import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angu
 import {FormsModule} from '@angular/forms';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
   selector: 'app-exam-detail',
@@ -266,17 +266,15 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
   questionCount = computed(() => this.setup().questionCount);
   recommendedMinutes = computed(() => Math.round(this.questionCount() * 1.5));
   breadcrumbs = computed(() => {
-    this.language();
     const exam = this.exam();
     return [
-      {label: this.i18n.instant('common.home'), url: '/'},
-      {label: this.i18n.instant('exams.title'), url: '/exams'},
-      {label: exam?.title || this.i18n.instant('exams.title')},
+      {label: this.translateService.instant('common.home'), url: '/'},
+      {label: this.translateService.instant('exams.title'), url: '/exams'},
+      {label: exam?.title || this.translateService.instant('exams.title')},
     ];
   });
 
   ready = signal(false);
-  private readonly language = signal('pt-BR');
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -287,20 +285,10 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
     private readonly setupPrefs: ExamAttemptSetupPreferencesService,
-    private readonly i18n: I18nService,
+    private readonly translateService: TranslateService,
     private readonly destroyRef: DestroyRef,
     @Inject(PLATFORM_ID) private readonly platformId: Object
-  ) {
-    this.language.set(this.i18n.getLanguage());
-    this.i18n.onLanguageChange
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((language) => {
-        this.language.set(language);
-        if (this.exam()) {
-          this.applySeo();
-        }
-      });
-  }
+  ) {}
 
   ngAfterViewInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -312,13 +300,13 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
 
   get seo() {
     const exam = this.exam();
-    const title = exam ? `${exam.title} | SimulaCert` : this.i18n.instant('exams.notFoundTitle');
-    const description = exam?.description || this.i18n.instant('exams.notFoundDescription');
+    const title = exam ? `${exam.title} | SimulaCert` : this.translateService.instant('exams.notFoundTitle');
+    const description = exam?.description || this.translateService.instant('exams.notFoundDescription');
     const canonicalUrl = exam?.slug ? this.seoFactory.canonicalFromPath(`/exams/${exam.slug}`) : '';
     const origin = this.seoFactory.origin();
     const image = exam?.slug ? `${origin}/${exam.slug}.png` : `${origin}/simulacert-logo.svg`;
 
-    const content = getExamSeoContent(exam, this.i18n);
+    const content = getExamSeoContent(exam, this.translateService);
      const faqJsonLd = exam?.slug
        ? {
          '@context': 'https://schema.org',
@@ -340,8 +328,8 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
           '@context': 'https://schema.org',
           '@type': 'BreadcrumbList',
           itemListElement: [
-            {'@type': 'ListItem', position: 1, name: this.i18n.instant('common.home'), item: `${origin}/`},
-            {'@type': 'ListItem', position: 2, name: this.i18n.instant('exams.title'), item: `${origin}/exams`},
+            {'@type': 'ListItem', position: 1, name: this.translateService.instant('common.home'), item: `${origin}/`},
+            {'@type': 'ListItem', position: 2, name: this.translateService.instant('exams.title'), item: `${origin}/exams`},
             {'@type': 'ListItem', position: 3, name: exam.title, item: canonicalUrl},
           ],
         },
@@ -392,8 +380,8 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
 
     } else {
       const meta = this.seoFactory.website({
-        title: this.i18n.instant('exams.notFoundTitle'),
-        description: this.i18n.instant('exams.notFoundDescription'),
+        title: this.translateService.instant('exams.notFoundTitle'),
+        description: this.translateService.instant('exams.notFoundDescription'),
         canonicalPath: '/exams',
         robots: 'noindex, follow',
         jsonLdId: 'exam-not-found'
@@ -426,7 +414,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
         }
       },
       error: () => {
-        this.errorMessage.set(this.i18n.instant('alerts.exam_load_error'));
+        this.errorMessage.set(this.translateService.instant('alerts.exam_load_error'));
         this.loadingExam.set(false);
       }
     });
@@ -469,7 +457,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
 
         if (!attemptId) {
           this.loading.set(false);
-          this.errorMessage.set(this.i18n.instant('alerts.start_exam_error'));
+          this.errorMessage.set(this.translateService.instant('alerts.start_exam_error'));
           return;
         }
 
@@ -477,7 +465,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
       },
       error: () => {
         this.loading.set(false);
-        this.errorMessage.set(this.i18n.instant('alerts.start_exam_error'));
+        this.errorMessage.set(this.translateService.instant('alerts.start_exam_error'));
       }
     });
   }
@@ -495,7 +483,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
       },
       error: () => {
         this.loadingAnonymous.set(false);
-        this.errorMessage.set(this.i18n.instant('alerts.anonymous_user_error'));
+        this.errorMessage.set(this.translateService.instant('alerts.anonymous_user_error'));
       }
     });
   }
@@ -515,7 +503,7 @@ export class ExamDetailComponent implements OnInit, AfterViewInit {
         this.loadingExam.set(false);
       },
       error: () => {
-        this.errorMessage.set(this.i18n.instant('alerts.exam_load_error'));
+        this.errorMessage.set(this.translateService.instant('alerts.exam_load_error'));
         this.loadingExam.set(false);
       }
     });
