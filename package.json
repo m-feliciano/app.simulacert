@@ -1,6 +1,6 @@
 {
   "name": "simulacert",
-  "version": "1.0.9-release",
+  "version": "1.0.10-release",
   "scripts": {
     "ng": "ng",
     "start": "ng serve --proxy-config proxy.conf.json",
