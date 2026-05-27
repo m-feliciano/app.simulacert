@@ -11,7 +11,7 @@ export type FontFamily = 'sans' | 'serif' | 'mono' | 'fantasy' | 'slab' | 'syste
 @Injectable({
   providedIn: 'root'
 })
-export class ThemeService {
+export class PersonalizationService {
   private readonly THEME_KEY = 'sc_theme_mode';
   private readonly FONT_SIZE_KEY = 'sc_font_size';
   private readonly FONT_FAMILY_KEY = 'sc_font_family';

@@ -18,7 +18,7 @@ import {
   Trophy,
   Type
 } from 'lucide-angular';
-import {ThemeService} from '../theme/theme.service';
+import {PersonalizationService} from '../theme/personalization.service';
 import {NavbarComponent} from '../../shared/components/navbar.component';
 import {SupportButtonComponent} from '../../shared/components/support-button.component';
 import {fromEvent} from 'rxjs';
@@ -454,7 +454,7 @@ export class AppLayoutComponent {
   constructor(
     protected readonly authFacade: AuthFacade,
     protected readonly router: Router,
-    private readonly themeService: ThemeService, // init component
+    private readonly personalization: PersonalizationService
   ) {
     this.checkIfMobile();
 
@@ -476,7 +476,7 @@ export class AppLayoutComponent {
   }
 
   private checkIfMobile(): void {
-    if (globalThis.window === undefined) {
+    if (!globalThis.window) {
       this.isMobile.set(false);
       return;
     }

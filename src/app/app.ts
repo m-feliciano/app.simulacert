@@ -1,8 +1,9 @@
 import {Component, inject, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {ThemeService} from './core/theme/theme.service';
+import {PersonalizationService} from './core/theme/personalization.service';
 import {LucideAngularModule, Palette} from 'lucide-angular';
 import {TranslatePipe} from './shared/pipes/translate.pipe';
+import {Language} from './core/i18n/i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -18,17 +19,17 @@ export class App {
 
   showThemeMenu = signal(false);
 
-  protected readonly themeService = inject(ThemeService);
+  protected readonly personalization = inject(PersonalizationService);
 
   toggleThemeMenu(): void {
     this.showThemeMenu.set(!this.showThemeMenu());
   }
 
   get language(): string {
-    return this.themeService.getLanguage();
+    return this.personalization.getLanguage();
   }
 
   set language(lang: string) {
-    this.themeService.setLanguage(lang as any);
+    this.personalization.setLanguage(lang as Language);
   }
 }
