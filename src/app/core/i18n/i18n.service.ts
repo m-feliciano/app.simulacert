@@ -16,6 +16,7 @@ export class I18nService {
   private readonly languageSet$ = new Subject<Language>();
 
   public readonly onLanguageChange: Observable<Language> = this.languageSet$.asObservable();
+  public readonly ready = signal(false);
 
   constructor(
     private readonly translate: TranslateService,
@@ -44,7 +45,14 @@ export class I18nService {
         globalThis.document.documentElement.lang = language === 'pt-BR' ? 'pt-BR' : 'en-US';
       }
 
+      if (!this.isBrowser) {
+        return;
+      }
+
+      this.ready.set(false);
+
       this.translate.use(language).subscribe(() => {
+        this.ready.set(true);
         this.languageSet$.next(language);
       });
     });

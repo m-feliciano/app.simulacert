@@ -41,11 +41,13 @@ export class AuthFacade {
     const token = this.loadTokenFromStorage();
     const user = this.loadUserFromStorage();
 
-    this.state.set({
-      user,
-      token,
-      isAuthenticated: !!token,
-    });
+    if (token && user) {
+      this.state.set({
+        user,
+        token,
+        isAuthenticated: true
+      });
+    }
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {

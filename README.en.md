@@ -40,6 +40,10 @@ npm test
 npm run build
 ```
 
+### Mockoon
+To test the API locally, we recommend using [Mockoon](https://mockoon.com/). It allows you to create and manage mock APIs easily and quickly, ideal for development and testing.
+Use the `mockoon.json` file to import the API endpoints.
+
 ## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to help develop SimulaCert.
