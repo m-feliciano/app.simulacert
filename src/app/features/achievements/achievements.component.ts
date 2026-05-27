@@ -10,23 +10,23 @@ import {
   Award,
   BarChart3,
   BookOpen,
+  CheckSquare,
   Cloud,
   Crown,
   Flame,
   Globe,
   LucideAngularModule,
   Medal,
-  Target,
   MessageCircle,
   Search,
-  CheckSquare,
+  Target,
   ThumbsUp,
-  Users,
   Trophy,
+  Users,
 } from 'lucide-angular';
 import {ReviewsApiService} from '../../api/reviews.service';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
-import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslateService} from '@ngx-translate/core';
 
 interface Achievement {
   id: string;
@@ -541,7 +541,7 @@ export class AchievementsComponent implements OnInit {
     private readonly reviewsService: ReviewsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    private readonly i18n: I18nService,
+    private readonly translateService: TranslateService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Conquistas | SimulaCert',
@@ -584,8 +584,8 @@ export class AchievementsComponent implements OnInit {
       const copy = {...a} as Achievement;
       const key = achievementKeys[idx];
       if (key) {
-        copy.title = this.i18n.instant(`achievements.items.${key}.title`);
-        copy.description = this.i18n.instant(`achievements.items.${key}.description`);
+        copy.title = this.translateService.instant(`achievements.items.${key}.title`);
+        copy.description = this.translateService.instant(`achievements.items.${key}.description`);
       }
       return copy;
     });

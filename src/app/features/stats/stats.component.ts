@@ -11,12 +11,14 @@ import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 import {FormatDatePipe} from '../../shared/pipes/format-date.pipe';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
-import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslateService} from '@ngx-translate/core';
+import {forkJoin} from 'rxjs';
+import {FormatTimePipe} from '../../shared/pipes/format-status.pipe';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe, TranslatePipe],
+  imports: [CommonModule, RouterLink, ScoreStatusComponent, SeoHeadDirective, FormatPercentilePipe, FormatDatePipe, TranslatePipe, FormatTimePipe],
   template: `
     <div seoHead>
       <div class="stats-container">
@@ -108,7 +110,7 @@ import {I18nService} from '../../core/i18n/i18n.service';
 
                   <div class="col-status">
                     <span class="status-badge" [class]="attempt.status.toLowerCase()">
-                      {{ formatStatus(attempt.status) }}
+                      {{ attempt.status | formatStatus }}
                     </span>
                   </div>
 
@@ -149,7 +151,6 @@ export class StatsComponent implements OnInit {
     private readonly statsApi: StatsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    private readonly i18n: I18nService,
   ) {
     const meta = this.seoFactory.website({
       title: 'Estatísticas | SimulaCert',
@@ -172,46 +173,22 @@ export class StatsComponent implements OnInit {
   }
 
   loadStats(userId: string): void {
-    let loaded = 0;
+    forkJoin({
+      userStats: this.statsApi.getUserStatistics(userId),
+      domainStats: this.statsApi.getPerformanceByDomain(userId),
+      attemptHistory: this.statsApi.getAttemptHistory(userId)
+    }).subscribe({
+      next: ({userStats, domainStats, attemptHistory}) => {
+        this.userStats.set(userStats);
 
-    const done = () => {
-      loaded++;
-      if (loaded === 3) this.loading.set(false);
-    };
+        this.domainStats.set(domainStats.sort(
+          ({accuracyRate: a}, {accuracyRate: b}) => b - a));
+        this.attemptHistory.set(attemptHistory.sort(
+          ({startedAt: a}, {startedAt: b}) => new Date(b).getTime() - new Date(a).getTime()));
 
-    this.statsApi.getUserStatistics(userId).subscribe({
-      next: (stats) => {
-        this.userStats.set(stats);
-        done();
+        this.loading.set(false);
       },
-      error: () => done()
+      error: () => this.loading.set(false)
     });
-
-    this.statsApi.getPerformanceByDomain(userId).subscribe({
-      next: (domains) => {
-        this.domainStats.set(domains.sort((a, b) => b.accuracyRate - a.accuracyRate));
-        done();
-      },
-      error: () => done()
-    });
-
-    this.statsApi.getAttemptHistory(userId).subscribe({
-      next: (history) => {
-        this.attemptHistory.set(history.sort((a, b) =>
-          new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime()
-        ));
-        done();
-      },
-      error: () => done()
-    });
-  }
-
-  formatStatus(status: string): string {
-    const statusMap: { [key: string]: string } = {
-      'IN_PROGRESS': this.i18n.instant('attempts.inProgress'),
-      'COMPLETED': this.i18n.instant('attempts.completed'),
-      'ABANDONED': this.i18n.instant('attempts.abandoned')
-    };
-    return statusMap[status] || status;
   }
 }

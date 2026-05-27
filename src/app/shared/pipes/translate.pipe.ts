@@ -1,6 +1,6 @@
 import {ChangeDetectorRef, inject, Pipe, PipeTransform} from '@angular/core';
-import {I18nService} from '../../core/i18n/i18n.service';
-import {take, takeUntil} from 'rxjs';
+import {take} from 'rxjs';
+import {TranslateService} from '@ngx-translate/core';
 
 @Pipe({
   name: 'translate',
@@ -8,16 +8,22 @@ import {take, takeUntil} from 'rxjs';
   pure: false // allow dynamic updates when translations are loaded
 })
 export class TranslatePipe implements PipeTransform {
-  private readonly i18n = inject(I18nService);
+  private readonly translateService = inject(TranslateService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly pending = new Set<string>();
 
   transform(key: string, params?: any): string {
-    const value = this.i18n.instant(key, params);
+    const value = this.translateService.instant(key, params);
 
-    if (value === key) {
-      this.i18n.get(key, params)
-        .pipe(take(1), takeUntil(this.i18n.onLanguageChange))
-        .subscribe(() => this.cdr.markForCheck());
+    if (value === key && !this.pending.has(key)) {
+      this.pending.add(key);
+
+      this.translateService.get(key, params)
+        .pipe(take(1))
+        .subscribe(() => {
+          this.pending.delete(key);
+          this.cdr.markForCheck();
+        });
     }
 
     return value;

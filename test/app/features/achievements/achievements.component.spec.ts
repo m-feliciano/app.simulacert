@@ -6,8 +6,8 @@ import {ReviewsApiService} from '../../../../src/app/api/reviews.service';
 import {StatsApiService} from '../../../../src/app/api/stats.service';
 import {SeoFactoryService} from '../../../../src/app/core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../../../src/app/core/seo/seo-facade.service';
-import {I18nService} from '../../../../src/app/core/i18n/i18n.service';
 import {ComponentFixture, TestBed} from '@angular/core/testing';
+import {TranslateService} from '@ngx-translate/core';
 
 function buildUtcDay(offsetDays = 0): string {
   const now = new Date();
@@ -84,7 +84,7 @@ describe('AchievementsComponent', () => {
         {provide: ReviewsApiService, useValue: reviewsApi},
         {provide: SeoFactoryService, useValue: seoFactory},
         {provide: SeoFacadeService, useValue: seoFacade},
-        {provide: I18nService, useValue: mockI18nService()},
+        {provide: TranslateService, useValue: mockI18nService()},
       ],
     });
 

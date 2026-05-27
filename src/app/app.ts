@@ -3,7 +3,6 @@ import {RouterOutlet} from '@angular/router';
 import {PersonalizationService} from './core/theme/personalization.service';
 import {LucideAngularModule, Palette} from 'lucide-angular';
 import {TranslatePipe} from './shared/pipes/translate.pipe';
-import {Language} from './core/i18n/i18n.service';
 
 @Component({
   selector: 'app-root',
@@ -30,6 +29,6 @@ export class App {
   }
 
   set language(lang: string) {
-    this.personalization.setLanguage(lang as Language);
+    this.personalization.setLanguage(lang);
   }
 }

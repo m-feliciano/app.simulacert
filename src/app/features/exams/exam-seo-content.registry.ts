@@ -1,5 +1,5 @@
 import {ExamResponse} from '../../api/domain';
-import {I18nService} from '../../core/i18n/i18n.service';
+import {TranslateService} from '@ngx-translate/core';
 
 export type ExamFaqItem = { question: string; answer: string };
 
@@ -20,7 +20,7 @@ export type ExamSeoContent = {
 };
 
 
-export function getExamSeoContent(exam: ExamResponse | null | undefined, i18n?: I18nService): ExamSeoContent {
+export function getExamSeoContent(exam: ExamResponse | null | undefined, i18n?: TranslateService): ExamSeoContent {
   const slug = exam?.slug || '';
 
   const i18nInstant = (key: string, fallback: string) => i18n?.instant(key) || fallback;
