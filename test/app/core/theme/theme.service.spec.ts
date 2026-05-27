@@ -3,7 +3,7 @@ import {Component, PLATFORM_ID} from '@angular/core';
 import {TestBed} from '@angular/core/testing';
 import {afterEach, describe, expect, it, jest} from '@jest/globals';
 import {LOCAL_STORAGE} from '../../../../src/app/core/storage/local-storage.token';
-import {ThemeService} from '../../../../src/app/core/theme/theme.service';
+import {PersonalizationService} from '../../../../src/app/core/theme/personalization.service';
 import {I18nService} from '../../../../src/app/core/i18n/i18n.service';
 
 type StorageMock = Storage & {
@@ -15,7 +15,7 @@ type StorageMock = Storage & {
   template: '',
 })
 class ThemeServiceHostComponent {
-  constructor(public readonly themeService: ThemeService) {}
+  constructor(public readonly themeService: PersonalizationService) {}
 }
 
 function createStorageMock(initial: Record<string, string> = {}): StorageMock {
@@ -162,7 +162,7 @@ describe('ThemeService', () => {
 
     setupServerThemeTestingModule(storage);
 
-    const service = TestBed.inject(ThemeService);
+    const service = TestBed.inject(PersonalizationService);
 
     expect(isPlatformBrowser(TestBed.inject(PLATFORM_ID))).toBe(false);
     expect(service.themeMode()).toBe('light');

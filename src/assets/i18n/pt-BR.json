@@ -292,9 +292,9 @@
     "warm": "Sépia",
     "fontSize": "Tamanho",
     "fontFamily": "Fonte",
-    "language": "Idioma",
+    "language": "Idioma/Language",
     "portuguese": "Português",
-    "english": "Inglês",
+    "english": "English",
     "customize": "Configurações da interface"
   },
   "footer": {

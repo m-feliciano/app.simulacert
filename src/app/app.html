@@ -6,41 +6,41 @@
       <div class="dropdown-section">
         <label>{{ 'theme.mode' | translate }}</label>
         <div class="options-grid">
-          <button (click)="themeService.setTheme('light')"
-                  [class.active]="themeService.themeMode() === 'light'">{{ 'theme.light' | translate }}
+          <button (click)="personalization.setTheme('light')"
+                  [class.active]="personalization.themeMode() === 'light'">{{ 'theme.light' | translate }}
           </button>
-          <button (click)="themeService.setTheme('dark')"
-                  [class.active]="themeService.themeMode() === 'dark'">{{ 'theme.dark' | translate }}
+          <button (click)="personalization.setTheme('dark')"
+                  [class.active]="personalization.themeMode() === 'dark'">{{ 'theme.dark' | translate }}
           </button>
-          <button (click)="themeService.setTheme('warm')"
-                  [class.active]="themeService.themeMode() === 'warm'">{{ 'theme.warm' | translate }}
+          <button (click)="personalization.setTheme('warm')"
+                  [class.active]="personalization.themeMode() === 'warm'">{{ 'theme.warm' | translate }}
           </button>
         </div>
       </div>
       <div class="dropdown-section">
         <label>{{ 'theme.fontSize' | translate }}</label>
         <div class="options-grid">
-          <button (click)="themeService.setFontSize('extra-small')" [class.active]="themeService.fontSize() === 'extra-small'">PP</button>
-          <button (click)="themeService.setFontSize('small')" [class.active]="themeService.fontSize() === 'small'">P</button>
-          <button (click)="themeService.setFontSize('medium')" [class.active]="themeService.fontSize() === 'medium'">M</button>
-          <button (click)="themeService.setFontSize('large')" [class.active]="themeService.fontSize() === 'large'">G</button>
-          <button (click)="themeService.setFontSize('xlarge')" [class.active]="themeService.fontSize() === 'xlarge'">GG</button>
+          <button (click)="personalization.setFontSize('extra-small')" [class.active]="personalization.fontSize() === 'extra-small'">PP</button>
+          <button (click)="personalization.setFontSize('small')" [class.active]="personalization.fontSize() === 'small'">P</button>
+          <button (click)="personalization.setFontSize('medium')" [class.active]="personalization.fontSize() === 'medium'">M</button>
+          <button (click)="personalization.setFontSize('large')" [class.active]="personalization.fontSize() === 'large'">G</button>
+          <button (click)="personalization.setFontSize('xlarge')" [class.active]="personalization.fontSize() === 'xlarge'">GG</button>
         </div>
       </div>
       <div class="dropdown-section">
         <label>{{ 'theme.fontFamily' | translate }}</label>
         <div class="options-grid">
-          <button (click)="themeService.setFontFamily('sans')" [class.active]="themeService.fontFamily() === 'sans'"
+          <button (click)="personalization.setFontFamily('sans')" [class.active]="personalization.fontFamily() === 'sans'"
                   style="font-family: var(--font-sans)">Sans</button>
-          <button (click)="themeService.setFontFamily('serif')" [class.active]="themeService.fontFamily() === 'serif'"
+          <button (click)="personalization.setFontFamily('serif')" [class.active]="personalization.fontFamily() === 'serif'"
                   style="font-family: var(--font-serif)">Serif</button>
-          <button (click)="themeService.setFontFamily('mono')" [class.active]="themeService.fontFamily() === 'mono'"
+          <button (click)="personalization.setFontFamily('mono')" [class.active]="personalization.fontFamily() === 'mono'"
                   style="font-family: var(--font-mono)">Mono</button>
-          <button (click)="themeService.setFontFamily('fantasy')" [class.active]="themeService.fontFamily() === 'fantasy'"
+          <button (click)="personalization.setFontFamily('fantasy')" [class.active]="personalization.fontFamily() === 'fantasy'"
                   style="font-family: var(--font-fantasy)">Fantasy</button>
-          <button (click)="themeService.setFontFamily('slab')" [class.active]="themeService.fontFamily() === 'slab'"
+          <button (click)="personalization.setFontFamily('slab')" [class.active]="personalization.fontFamily() === 'slab'"
                   style="font-family: var(--font-slab)">Slab</button>
-          <button (click)="themeService.setFontFamily('system')" [class.active]="themeService.fontFamily() === 'system'"
+          <button (click)="personalization.setFontFamily('system')" [class.active]="personalization.fontFamily() === 'system'"
                   style="font-family: var(--font-system)">System</button>
         </div>
       </div>
