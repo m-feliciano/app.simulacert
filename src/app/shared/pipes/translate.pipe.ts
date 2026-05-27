@@ -16,10 +16,7 @@ export class TranslatePipe implements PipeTransform {
 
     if (value === key) {
       this.i18n.get(key, params)
-        .pipe(
-          take(1),
-          takeUntil(this.i18n.onLanguageChange)
-        )
+        .pipe(takeUntil(this.i18n.onLanguageChange))
         .subscribe(() => this.cdr.markForCheck());
     }
 
