@@ -2,7 +2,7 @@ import {DOCUMENT, effect, Inject, inject, Injectable, PLATFORM_ID, signal} from 
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
 import {I18nService, Language} from '../i18n/i18n.service';
-import {take} from 'rxjs';
+import {finalize, take} from 'rxjs';
 
 export type ThemeMode = 'light' | 'dark' | 'warm' | 'high-contrast';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge' | 'extra-small';
@@ -129,10 +129,10 @@ export class PersonalizationService {
         if (confirm(message)) {
 
           this.i18n.changeLanguage(lang)
-            .pipe(take(1))
-            .subscribe(() => {
-              setTimeout(() => globalThis.location.reload(), 1000);
-            });
+            .pipe(take(1), finalize(() => {
+              globalThis.location.reload();
+            }))
+            .subscribe();
         }
       });
   }

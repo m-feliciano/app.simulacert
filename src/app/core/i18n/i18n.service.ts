@@ -59,13 +59,6 @@ export class I18nService {
   }
 
   changeLanguage(language: Language): Observable<Language> {
-    if (this.currentLanguage() === language) {
-      return new Observable<Language>(subscriber => {
-        subscriber.next(language);
-        subscriber.complete();
-      });
-    }
-
     this.currentLanguage.set(language);
     return this.onLanguageChange;
   }
