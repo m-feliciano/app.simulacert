@@ -27,7 +27,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
   imports: [CommonModule, RegisterPromptModalComponent, SeoHeadDirective, BreadcrumbsComponent, SeoRichTemplateComponent, RelatedExamsComponent, LucideAngularModule, NgOptimizedImage, FormsModule, TranslatePipe],
   template: `
     <div seoHead>
-      @if (loadingExam() || !ready()) {
+      @if (loadingExam() || !exam()) {
         <div class="loading-state sc-card">
           <p>{{ 'exams.loading' | translate }}</p>
         </div>
@@ -42,7 +42,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
           </app-register-prompt-modal>
         }
 
-        <div class="exam-detail sc-page">
+        <div class="exam-detail sc-page" [class.visible]="ready()">
           <div class="sc-container">
             <app-breadcrumbs [items]="breadcrumbs()"/>
 
@@ -58,8 +58,7 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
                     <img class="exam-icon"
                          [ngSrc]="exam()?.slug + '.png'"
                          [alt]="'exams.examIconAlt' | translate: {exam: exam()?.title || ''}"
-                         width="150" height="150"
-                         priority/>
+                         width="150" height="150" priority/>
                   </div>
 
                   <div class="exam-header-text">

@@ -1,7 +1,6 @@
 import {
   APP_INITIALIZER,
   ApplicationConfig,
-  NgZone,
   PLATFORM_ID,
   provideBrowserGlobalErrorListeners
 } from '@angular/core';
@@ -61,7 +60,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: APP_INITIALIZER,
       useFactory: initTranslateFactory,
-      deps: [TranslateService, LOCAL_STORAGE, NgZone],
+      deps: [TranslateService, LOCAL_STORAGE, PLATFORM_ID],
       multi: true
     }
   ]

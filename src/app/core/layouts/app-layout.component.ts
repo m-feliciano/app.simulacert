@@ -51,16 +51,18 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
           <app-navbar/>
         }
 
-        <div class="topbar-right">
-          <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
+        @defer {
+          <div class="topbar-right">
+            <span class="user-name">{{ authFacade.currentUser()?.name }}</span>
 
-          @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
-            <button class="logout-btn" (click)="logout()">{{ 'nav.exit' | translate}}</button>
-          } @else {
-            <button class="login-btn sc-btn sc-btn--primary" routerLink="/login">{{ 'nav.login' | translate }}</button>
-          }
-
-        </div>
+            @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
+              <button class="logout-btn" (click)="logout()">{{ 'nav.exit' | translate }}</button>
+            } @else {
+              <button class="login-btn sc-btn sc-btn--primary" routerLink="/login">{{ 'nav.login' | translate }}
+              </button>
+            }
+          </div>
+        }
       </header>
       <div class="app-content">
         @if (isMobile() && !sidebarCollapsed()) {
@@ -103,7 +105,13 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         <main class="main-content">
           <div class="content-wrapper">
             <router-outlet/>
-            <app-footer/>
+
+            @defer (on idle) {
+              <app-footer/>
+            } @placeholder {
+              <div class="footer-placeholder" style="height: 100px;"></div>
+            }
+
           </div>
         </main>
       </div>
@@ -382,6 +390,10 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       .content-wrapper {
         padding: var(--spacing-xl) var(--spacing-xl) 0;
       }
+    }
+
+    .footer-placeholder {
+      margin-top: auto;
     }
 
     .topbar-nav {

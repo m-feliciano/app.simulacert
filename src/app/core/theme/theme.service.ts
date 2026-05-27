@@ -2,6 +2,7 @@ import {DOCUMENT, effect, Inject, inject, Injectable, PLATFORM_ID, signal} from 
 import {isPlatformBrowser} from '@angular/common';
 import {LOCAL_STORAGE} from '../storage/local-storage.token';
 import {I18nService, Language} from '../i18n/i18n.service';
+import {take} from 'rxjs';
 
 export type ThemeMode = 'light' | 'dark' | 'warm' | 'high-contrast';
 export type FontSize = 'small' | 'medium' | 'large' | 'xlarge' | 'extra-small';
@@ -65,9 +66,10 @@ export class ThemeService {
   }
 
   private applyTheme(mode: ThemeMode) {
-    const root = this.document.documentElement;
-    root.classList.remove('theme-light', 'theme-dark', 'theme-warm', 'theme-high-contrast');
-    root.classList.add(`theme-${mode}`);
+    if (!this.document.documentElement.classList.contains(`theme-${mode}`)) {
+      this.document.documentElement.classList.remove('theme-light', 'theme-dark', 'theme-warm', 'theme-high-contrast');
+      this.document.documentElement.classList.add(`theme-${mode}`);
+    }
 
     const themeColors: Record<ThemeMode, string> = {
       'light': '#f6f7f9',
@@ -87,22 +89,17 @@ export class ThemeService {
   }
 
   private applyFontSize(size: FontSize) {
-    const root = this.document.documentElement;
-    root.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge', 'font-extra-small');
-    root.classList.add(`font-${size}`);
+    if (!this.document.documentElement.classList.contains(`font-${size}`)) {
+      this.document.documentElement.classList.remove('font-small', 'font-medium', 'font-large', 'font-xlarge', 'font-extra-small');
+      this.document.documentElement.classList.add(`font-${size}`);
+    }
   }
 
   private applyFontFamily(family: FontFamily) {
-    const root = this.document.documentElement;
-    root.classList.remove(
-      'font-family-sans',
-      'font-family-serif',
-      'font-family-mono',
-      'font-family-fantasy',
-      'font-family-slab',
-      'font-family-system'
-    );
-    root.classList.add(`font-family-${family}`);
+    if (!this.document.documentElement.classList.contains(`font-family-${family}`)) {
+      this.document.documentElement.classList.remove('font-family-sans', 'font-family-serif', 'font-family-mono', 'font-family-fantasy', 'font-family-slab', 'font-family-system');
+      this.document.documentElement.classList.add(`font-family-${family}`);
+    }
   }
 
   private getStoredTheme(): ThemeMode {
@@ -132,9 +129,9 @@ export class ThemeService {
         if (confirm(message)) {
 
           this.i18n.changeLanguage(lang)
+            .pipe(take(1))
             .subscribe(() => {
               setTimeout(() => globalThis.location.reload(), 1000);
-              alert(this.i18n.instant('alerts.language_changed'));
             });
         }
       });

@@ -7,7 +7,6 @@ import {SeoHeadDirective} from '../../shared/components/seo-head.component';
 import {SeoFactoryService} from '../../core/seo/seo-factory.service';
 import {SeoFacadeService} from '../../core/seo/seo-facade.service';
 import {BreadcrumbsComponent} from '../../shared/components/breadcrumbs.component';
-import {I18nService} from '../../core/i18n/i18n.service';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
 @Component({
@@ -87,7 +86,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
                   } @else {
                     <a class="btn-primary"
                        [routerLink]="['/exams', exam.slug]"
-                       [attr.aria-label]="i18nService.instant('exams.list.start') + ' ' + exam.title">
+                       [attr.aria-label]="('exams.list.start' | translate) + ' ' + exam.title">
                       {{ 'exams.list.start' | translate }}
                     </a>
                   }
@@ -392,7 +391,6 @@ export class ExamsListComponent implements OnInit, AfterViewInit {
     private readonly examsApi: ExamsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    readonly i18nService: I18nService,
     @Inject(PLATFORM_ID) public readonly platformId: string
   ) {
   }

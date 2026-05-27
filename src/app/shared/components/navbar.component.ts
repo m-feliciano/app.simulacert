@@ -20,13 +20,14 @@ import {
 import {ExamResponse} from '../../api/domain';
 import {SupportButtonComponent} from './support-button.component';
 import {TranslatePipe} from '../pipes/translate.pipe';
+import {I18nService} from '../../core/i18n/i18n.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
   imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule, SupportButtonComponent, TranslatePipe],
   template: `
-    <nav class="topbar-nav" (mouseleave)="closeDropdown()">
+    <nav class="topbar-nav" (mouseleave)="closeDropdown()" [class.ready]="i18n.ready()">
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">{{ 'nav.dashboard' | translate }}</a>
 
       <div class="exams-dropdown"
@@ -89,6 +90,15 @@ import {TranslatePipe} from '../pipes/translate.pipe';
   `,
   styles: [
     `
+       .topbar-nav {
+         opacity: 0;
+         transition: opacity 120ms ease;
+       }
+
+       .topbar-nav.ready {
+         opacity: 1;
+       }
+
       .exams-dropdown {
         position: relative;
         width: fit-content;
@@ -276,6 +286,7 @@ export class NavbarComponent implements OnInit {
   dropdownOpen = signal(false);
   exams = signal<ExamResponse[]>([]);
   loading = signal(true);
+  readonly i18n = inject(I18nService);
   readonly authFacade = inject(AuthFacade);
   private readonly examsApi = inject(ExamsApiService);
   private readonly destroyRef = inject(DestroyRef);
