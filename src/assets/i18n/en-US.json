@@ -431,7 +431,10 @@
     "question": "Question",
     "pause": "Pause",
     "resume": "Resume",
-    "exit": "Exit"
+    "exit": "Exit",
+    "retryMessage": "Try again",
+    "close": "Close",
+    "finishErrorTitle": "Error submitting your attempt"
   }
 }
 

@@ -396,7 +396,10 @@
     "question": "Questão",
     "pause": "Pausar",
     "resume": "Retomar",
-    "exit": "Sair"
+    "exit": "Sair",
+    "retryMessage": "Tente novamente",
+    "close": "Fechar",
+    "finishErrorTitle": "Erro ao finalizar"
   }
 }
 
