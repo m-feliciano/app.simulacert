@@ -1,11 +1,28 @@
+type AchievementKey =
+  | 'firstStep'
+  | 'persistent'
+  | 'studious'
+  | 'approved'
+  | 'perfectionist'
+  | 'fireStreak'
+  | 'marathoner'
+  | 'awsSpecialist'
+  | 'cloudMaster'
+  | 'helpfulCommunity'
+  | 'questionSearch'
+  | 'feedback100'
+  | 'amazonRecommender'
+  | 'feedbackLeader'
+  | 'contentInfluencer';
+
 export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: string;
-  unlockedAt?: string;
+  id: AchievementKey;
+  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe' | 'crown' | 'message-circle' | 'search' | 'check-square' | 'thumbs-up' | 'users';
+  target: number;
   progress?: number;
-  target?: number;
+  unlocked?: boolean;
+  title?: string;
+  description?: string;
 }
 
 export interface UserProgress {

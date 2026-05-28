@@ -1,4 +1,4 @@
-import {Component, OnInit, signal} from '@angular/core';
+import {Component, computed, OnInit, signal} from '@angular/core';
 import {forkJoin} from 'rxjs';
 import {CommonModule} from '@angular/common';
 import {AuthFacade} from '../../core/auth/auth.facade';
@@ -26,17 +26,7 @@ import {
 } from 'lucide-angular';
 import {ReviewsApiService} from '../../api/reviews.service';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
-import {TranslateService} from '@ngx-translate/core';
-
-interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  icon: 'target' | 'strength' | 'book' | 'award' | 'trophy' | 'flame' | 'medal' | 'cloud' | 'globe' | 'crown' | 'message-circle' | 'search' | 'check-square' | 'thumbs-up' | 'users';
-  unlocked?: boolean;
-  progress?: number;
-  target: number;
-}
+import {Achievement} from '../../api/domain/progress.model';
 
 @Component({
   selector: 'app-achievements',
@@ -82,303 +72,79 @@ interface Achievement {
         @if (loading()) {
           <div class="sc-card achievements-loading">{{ 'achievements.loading' | translate }}</div>
         } @else {
-          <section class="grid" [attr.aria-label]="'achievements.aria.list' | translate">
-            @for (achievement of achievements(); track achievement.id) {
-              <article class="card sc-card" [class.unlocked]="achievement.unlocked">
-                <div class="card-top">
-                  <div class="icon" aria-hidden="true">
-                    <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
-                  </div>
-                  @if (achievement.unlocked) {
-                    <span class="state state--unlocked">{{ 'achievements.unlocked' | translate }}</span>
-                  } @else {
-                    <span class="state state--locked">{{ 'achievements.inProgress' | translate }}</span>
-                  }
-                </div>
+          <details class="milestones-section collapsible"
+                   [attr.aria-label]="'achievements.inProgress' | translate" open>
+            <summary class="section-header section-header--summary">
+              <h2 class="section-title">{{ 'achievements.inProgress' | translate }}</h2>
+              <span class="section-count">{{ inProgressAchievements().length }}</span>
+            </summary>
 
-                <h3>{{ achievement.title }}</h3>
-                <p>{{ achievement.description }}</p>
+            <section class="grid" [attr.aria-label]="'achievements.aria.list' | translate">
+              @for (achievement of inProgressAchievements(); track achievement.id) {
+                @if (!(achievement.id == 'firstStep') && (achievement.progress || 0) === 0) {
+                  <article class="card sc-card discovery"
+                    [attr.aria-label]="('achievements.items.' + achievement.id + '.title') | translate">
 
-                @if (!achievement.unlocked) {
-                  <div class="progress" role="progressbar"
-                       [attr.aria-valuenow]="achievement.progress"
-                       [attr.aria-valuemin]="0"
-                       [attr.aria-valuemax]="achievement.target"
-                       [attr.aria-label]="'achievements.progress' | translate">
-                    <div class="progress-track">
-                      <div class="progress-fill"
-                           [style.width.%]="((achievement!.progress || 0) / achievement.target) * 100"></div>
+                    <div class="discovery-icon" aria-hidden="true">
+                      <lucide-icon class="discovery-icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
                     </div>
-                    <div class="progress-text">{{ achievement.progress }} / {{ achievement.target }}</div>
-                  </div>
+                  </article>
+                } @else {
+                  <article class="card sc-card" [class.unlocked]="achievement.unlocked">
+                    <div class="card-top">
+                      <div class="icon" aria-hidden="true">
+                        <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
+                      </div>
+                      <span class="state state--locked">{{ 'achievements.inProgress' | translate }}</span>
+                    </div>
+
+                    <h3>{{ ('achievements.items.' + achievement.id + '.title') | translate }}</h3>
+                    <p>{{ ('achievements.items.' + achievement.id + '.description') | translate }}</p>
+
+                    <div class="progress" role="progressbar"
+                         [attr.aria-valuemin]="0"
+                         [attr.aria-valuenow]="achievement.progress"
+                         [attr.aria-valuemax]="achievement.target"
+                         [attr.aria-label]="'achievements.progress' | translate">
+                      <div class="progress-track">
+                        <div class="progress-fill"
+                             [style.width.%]="((achievement!.progress || 0) / achievement.target) * 100"></div>
+                      </div>
+                      <div class="progress-text">{{ achievement.progress }} / {{ achievement.target }}</div>
+                    </div>
+                  </article>
                 }
-              </article>
-            }
+              }
+            </section>
+          </details>
+
+          <section class="milestones-section" [attr.aria-label]="'achievements.unlocked' | translate">
+            <div class="section-header">
+              <h2 class="section-title">{{ 'achievements.unlocked' | translate }}</h2>
+              <span class="section-count">{{ unlockedAchievements().length }}</span>
+            </div>
+
+            <section class="grid" [attr.aria-label]="'achievements.aria.list' | translate">
+              @for (achievement of unlockedAchievements(); track achievement.id) {
+                <article class="card sc-card unlocked" [class.unlocked]="true">
+                  <div class="card-top">
+                    <div class="icon" aria-hidden="true">
+                      <lucide-icon class="icon-svg" [img]="iconsByAchievement[achievement.icon]"></lucide-icon>
+                    </div>
+                    <span class="state state--unlocked">{{ 'achievements.unlocked' | translate }}</span>
+                  </div>
+
+                  <h3>{{ ('achievements.items.' + achievement.id + '.title') | translate }}</h3>
+                  <p>{{ ('achievements.items.' + achievement.id + '.description') | translate }}</p>
+                </article>
+              }
+            </section>
           </section>
         }
       </div>
     </div>
   `,
-  styles: [`
-    .achievements {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-lg);
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: var(--spacing-lg);
-      flex-wrap: wrap;
-    }
-
-    .title h1 {
-      margin: 0;
-      font-size: clamp(1.6rem, 2.4vw, 2rem);
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-
-    .subtitle {
-      margin-top: var(--spacing-xs);
-      color: var(--muted);
-      max-width: 75ch;
-      line-height: 1.6;
-    }
-
-    .summary {
-      display: flex;
-      gap: var(--spacing-xs);
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-xs);
-    }
-
-    .pill-icon {
-      width: 18px;
-      height: 18px;
-      color: var(--brand-secondary);
-    }
-
-    .pill-strong {
-      font-weight: 700;
-      color: var(--text);
-      margin-top: 5px;
-    }
-
-    .pill-muted {
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .streak {
-      padding: var(--spacing-lg);
-      border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 153, 0, 0.24);
-      background:
-        radial-gradient(1200px 300px at 0% 0%, rgba(255, 153, 0, 0.22), transparent 55%),
-        radial-gradient(900px 240px at 100% 0%, rgba(236, 114, 17, 0.18), transparent 55%),
-        var(--surface);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-lg);
-    }
-
-    .streak-left {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-    }
-
-    .streak-badge {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: rgba(255, 153, 0, 0.14);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--brand-primary-600);
-      border: 1px solid rgba(255, 153, 0, 0.22);
-    }
-
-    .streak-icon {
-      width: 20px;
-      height: 20px;
-    }
-
-    .streak-number {
-      font-size: 32px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-
-    .streak-label {
-      margin-top: 4px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-
-    .streak-message {
-      margin: 0;
-      color: var(--text-2);
-    }
-
-    .grid {
-      display: grid;
-      gap: var(--spacing-md);
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    }
-
-    .card {
-      padding: var(--spacing-lg);
-      border-radius: var(--radius-lg);
-      transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
-    }
-
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-      border-color: var(--border-strong);
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .card:hover {
-        transform: none;
-      }
-    }
-
-    .card.unlocked {
-      border-color: rgba(22, 163, 74, 0.28);
-      box-shadow: var(--shadow-sm);
-    }
-
-    .card-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-md);
-    }
-
-    .icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: rgba(17, 24, 39, 0.04);
-      border: 1px solid var(--border);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--brand-secondary);
-    }
-
-    .card.unlocked .icon {
-      background: rgba(22, 163, 74, 0.08);
-      border-color: rgba(22, 163, 74, 0.18);
-      color: var(--success);
-    }
-
-    .icon-svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    h3 {
-      margin: 0;
-      color: var(--text);
-      font-size: 16px;
-      letter-spacing: -0.01em;
-    }
-
-    p {
-      margin: var(--spacing-xs) 0 0;
-      color: var(--muted);
-      font-size: 14px;
-      line-height: 1.55;
-    }
-
-    .state {
-      font-size: 12px;
-      font-weight: 700;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text-2);
-      white-space: nowrap;
-    }
-
-    .state--unlocked {
-      border-color: rgba(22, 163, 74, 0.22);
-      background: rgba(22, 163, 74, 0.08);
-      color: var(--success);
-    }
-
-    .state--locked {
-      border-color: rgba(255, 153, 0, 0.20);
-      background: rgba(255, 153, 0, 0.08);
-      color: var(--brand-primary-600);
-    }
-
-    .progress {
-      margin-top: var(--spacing-md);
-    }
-
-    .progress-track {
-      width: 100%;
-      height: 10px;
-      background: rgba(17, 24, 39, 0.08);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--brand-primary), var(--brand-primary-600));
-      transition: width var(--transition-normal);
-    }
-
-    .progress-text {
-      margin-top: 8px;
-      font-size: 12px;
-      color: var(--muted);
-      font-weight: 600;
-    }
-
-    @media (max-width: 520px) {
-      .streak {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-
-    .achievements-loading {
-      text-align: center;
-      color: var(--muted);
-      padding: 20px;
-      border-radius: var(--radius-md);
-      font-weight: 600;
-      height: 200px;
-      align-content: center;
-    }
-  `]
+  styleUrls: ['./achievements.component.css']
 })
 export class AchievementsComponent implements OnInit {
   private readonly _pointsPerAchievement = 50;
@@ -387,128 +153,102 @@ export class AchievementsComponent implements OnInit {
   totalPoints = signal(0);
   streakDays = signal(0);
   loading = signal(true);
-  achievements = signal<Achievement[]>([
+
+  protected readonly achievements = signal<Achievement[]>([
     {
-      id: '1',
-      title: 'Primeiro Passo',
-      description: 'Complete seu primeiro simulado',
+      id: 'firstStep',
       icon: 'target',
       progress: 0,
       target: 1
     },
     {
-      id: '2',
-      title: 'Persistente',
-      description: 'Complete 10 simulados',
+      id: 'persistent',
       icon: 'strength',
       progress: 0,
       target: 10
     },
     {
-      id: '3',
-      title: 'Estudioso',
-      description: 'Complete 50 simulados',
+      id: 'studious',
       icon: 'book',
       progress: 0,
       target: 50
     },
     {
-      id: '4',
-      title: 'Aprovado',
-      description: 'Obtenha 70% ou mais em um simulado',
+      id: 'approved',
       icon: 'award',
       progress: 0,
       target: 1
     },
     {
-      id: '5',
-      title: 'Perfeccionista',
-      description: 'Obtenha 90% ou mais em um simulado',
+      id: 'perfectionist',
       icon: 'trophy',
       progress: 0,
       target: 1
     },
     {
-      id: '6',
-      title: 'Sequência de Fogo',
-      description: 'Estude por 7 dias seguidos',
+      id: 'fireStreak',
       icon: 'flame',
       progress: 0,
       target: 7
     },
     {
-      id: '7',
-      title: 'Maratonista',
-      description: 'Estude por 30 dias seguidos',
+      id: 'marathoner',
       icon: 'medal',
       progress: 0,
       target: 30
     },
     {
-      id: '8',
-      title: 'Especialista AWS',
-      description: 'Complete todos os exames AWS',
+      id: 'awsSpecialist',
       icon: 'cloud',
       progress: 0,
       target: 4
     },
     {
-      id: '9',
-      title: 'Multi-Cloud',
-      description: 'Complete exames de AWS, Azure e GCP',
+      id: 'cloudMaster',
       icon: 'globe',
       progress: 0,
       target: 3
     },
     {
-      id: '10',
-      title: 'Veterano',
-      description: 'Complete 100 simulados',
-      icon: 'crown',
+      id: 'helpfulCommunity',
+      icon: 'message-circle',
+      progress: 0,
+      target: 5
+    },
+    {
+      id: 'questionSearch',
+      icon: 'search',
       progress: 0,
       target: 100
     },
     {
-      id: '11',
-      title: 'Primeira Impressão',
-      description: 'Envie seu primeiro feedback útil sobre um simulado',
-      icon: 'message-circle',
-      progress: 0,
-      target: 1
-    },
-    {
-      id: '12',
-      title: 'Analista',
-      description: 'Envie 10 feedbacks relevantes sobre simulados',
-      icon: 'search',
-      progress: 0,
-      target: 10
-    },
-    {
-      id: '13',
-      title: 'Revisor Técnico',
-      description: 'Envie 25 feedbacks detalhados e consistentes',
+      id: 'feedback100',
       icon: 'check-square',
       progress: 0,
-      target: 25
+      target: 100
     },
     {
-      id: '14',
-      title: 'Especialista em Qualidade',
-      description: 'Tenha 10 feedbacks marcados como úteis por outros usuários',
+      id: 'amazonRecommender',
       icon: 'thumbs-up',
+      progress: 0,
+      target: 100
+    },
+    {
+      id: 'feedbackLeader',
+      icon: 'users',
       progress: 0,
       target: 10
     },
     {
-      id: '15',
-      title: 'Influenciador de Conteúdo',
-      description: 'Tenha 25 feedbacks aprovados pela comunidade',
-      icon: 'users',
+      id: 'contentInfluencer',
+      icon: 'crown',
       progress: 0,
       target: 25
     }
   ]);
+
+  protected readonly unlockedAchievements = computed(() => this.achievements().filter((a) => !!a.unlocked));
+  protected readonly inProgressAchievements = computed(() => this.achievements().filter((a) => !a.unlocked));
 
   readonly icons = {
     level: Trophy,
@@ -541,7 +281,6 @@ export class AchievementsComponent implements OnInit {
     private readonly reviewsService: ReviewsApiService,
     private readonly seoFactory: SeoFactoryService,
     private readonly seoFacade: SeoFacadeService,
-    private readonly translateService: TranslateService,
   ) {
     const seo = this.seoFactory.website({
       title: 'Conquistas | SimulaCert',
@@ -567,30 +306,12 @@ export class AchievementsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.translateAchievements();
     const user = this.authFacade.currentUser();
-    const userId = user?.id;
-    if (!userId) {
+    if (!user?.id) {
       this.loading.set(false);
       return;
     }
-    this.loadData(userId);
-  }
-
-  private translateAchievements(): void {
-    const achievementKeys = ['firstStep', 'persistent', 'studious', 'approved', 'perfectionist', 'fireStreak', 'marathoner', 'awsSpecialist', 'cloudMaster', 'helpfulCommunity', 'questionSearch', 'feedback100', 'amazonRecommender', 'feedbackLeader', 'contentInfluencer'];
-
-    const updated = this.achievements().map((a, idx) => {
-      const copy = {...a} as Achievement;
-      const key = achievementKeys[idx];
-      if (key) {
-        copy.title = this.translateService.instant(`achievements.items.${key}.title`);
-        copy.description = this.translateService.instant(`achievements.items.${key}.description`);
-      }
-      return copy;
-    });
-
-    this.achievements.set(updated);
+    this.loadData(user.id);
   }
 
   private loadData(userId: string) {
@@ -623,73 +344,71 @@ export class AchievementsComponent implements OnInit {
         const bestScore = stats.bestScore ?? 0;
 
         const updated = this.achievements().map(a => {
-          const copy = {...a} as Achievement;
-          switch (copy.id) {
-            case '1':
-              copy.progress = Math.min(completed, copy.target);
-              copy.unlocked = completed >= 1;
+          const achievement = {...a} as Achievement;
+
+          switch (achievement.id) {
+            case 'firstStep':
+              achievement.progress = Math.min(completed, achievement.target);
+              achievement.unlocked = completed >= achievement.target
               break;
-            case '2':
-              copy.progress = Math.min(completed, copy.target);
-              copy.unlocked = completed >= 10;
+            case 'persistent':
+            case 'studious':
+              achievement.progress = Math.min(completed, achievement.target);
+              achievement.unlocked = completed >= achievement.target;
               break;
-            case '3':
-              copy.progress = Math.min(completed, copy.target);
-              copy.unlocked = completed >= 50;
+            case 'approved':
+              achievement.progress = bestScore >= 70 ? achievement.target : 0;
+              achievement.unlocked = bestScore >= achievement.target;
               break;
-            case '4':
-              copy.progress = bestScore >= 70 ? copy.target : 0;
-              copy.unlocked = bestScore >= 70;
+            case 'perfectionist':
+              achievement.progress = bestScore >= 90 ? achievement.target : 0;
+              achievement.unlocked = bestScore >= achievement.target;
               break;
-            case '5':
-              copy.progress = bestScore >= 90 ? copy.target : 0;
-              copy.unlocked = bestScore >= 90;
+            case 'fireStreak':
+            case 'marathoner':
+              achievement.progress = Math.min(streak, achievement.target);
+              achievement.unlocked = streak >= achievement.target;
               break;
-            case '6':
-              copy.progress = Math.min(streak, copy.target);
-              copy.unlocked = streak >= 7;
+            case 'awsSpecialist':
+              achievement.progress = Math.min(domains?.length || 0, achievement.target);
+              achievement.unlocked = (domains?.length || 0) >= achievement.target;
               break;
-            case '7':
-              copy.progress = Math.min(streak, copy.target);
-              copy.unlocked = streak >= 30;
+            case 'cloudMaster':
+              achievement.progress = Math.min(awsProviders.size, achievement.target);
+              achievement.unlocked = awsProviders.size >= achievement.target;
               break;
-            case '8':
-              copy.progress = Math.min(domains?.length || 0, copy.target);
-              copy.unlocked = (domains?.length || 0) >= copy.target;
+            case 'questionSearch': {
+              const totalQuestionsCovered = domains?.reduce((sum, d) => sum + (d.totalQuestions ?? 0), 0) || 0;
+              achievement.progress = Math.min(totalQuestionsCovered, achievement.target);
+              achievement.unlocked = totalQuestionsCovered >= achievement.target;
               break;
-            case '9':
-              copy.progress = Math.min(awsProviders.size, copy.target);
-              copy.unlocked = awsProviders.size >= copy.target;
+            }
+            case 'feedback100':
+              achievement.progress = Math.min((feedbacks?.submitted ?? 0), achievement.target);
+              achievement.unlocked = (feedbacks?.submitted ?? 0) >= achievement.target;
               break;
-            case '10':
-              copy.progress = Math.min(completed, copy.target);
-              copy.unlocked = completed >= 100;
+            case 'amazonRecommender':
+              achievement.progress = Math.min((feedbacks?.useful ?? 0), achievement.target);
+              achievement.unlocked = (feedbacks?.useful ?? 0) >= achievement.target;
               break;
-            case '11':
-              copy.progress = Math.min((feedbacks?.submitted ?? 0), copy.target);
-              copy.unlocked = (feedbacks?.submitted ?? 0) >= copy.target;
-              break;
-            case '12':
-              copy.progress = Math.min((feedbacks?.submitted ?? 0), copy.target);
-              copy.unlocked = (feedbacks?.submitted ?? 0) >= copy.target;
-              break;
-            case '13':
-              copy.progress = Math.min((feedbacks?.detailed ?? 0), copy.target);
-              copy.unlocked = (feedbacks?.detailed ?? 0) >= copy.target;
-              break;
-            case '14':
-              copy.progress = Math.min((feedbacks?.useful ?? 0), copy.target);
-              copy.unlocked = (feedbacks?.useful ?? 0) >= copy.target;
-              break;
-            case '15':
-              copy.progress = Math.min((feedbacks?.approved ?? 0), copy.target);
-              copy.unlocked = (feedbacks?.approved ?? 0) >= copy.target;
+            case 'feedbackLeader':
+            case 'helpfulCommunity':
+            case 'contentInfluencer':
+              achievement.progress = Math.min((feedbacks?.approved ?? 0), achievement.target);
+              achievement.unlocked = (feedbacks?.approved ?? 0) >= achievement.target;
               break;
           }
-          return copy;
+
+          return achievement;
         });
 
-        this.achievements.set(updated);
+        const achievements = updated.sort(({unlocked: a}, {unlocked: b}) => {
+          if (a && !b) return -1;
+          if (!a && b) return 1;
+          return 0;
+        });
+
+        this.achievements.set(achievements);
 
         const unlockedCount = updated.filter(a => a.unlocked).length;
 

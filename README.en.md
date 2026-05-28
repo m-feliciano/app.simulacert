@@ -44,6 +44,12 @@ npm run build
 To test the API locally, we recommend using [Mockoon](https://mockoon.com/). It allows you to create and manage mock APIs easily and quickly, ideal for development and testing.
 Use the `mockoon.json` file to import the API endpoints.
 
+## Internationalization (i18n)
+The app is currently available in English and Portuguese. To add more languages, follow these steps:
+1. Create a new JSON file in the `src/assets/i18n` directory (e.g., `es.json` for Spanish).
+2. Add the translated key-value pairs to the new JSON file.
+3. Update the personalization component to add the new language option.
+
 ## Contributing
 
 Contributions are welcome! See [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to help develop SimulaCert.

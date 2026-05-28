@@ -45,36 +45,38 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
             <div class="exams-grid">
               @for (exam of exams(); track exam.id) {
 
-                <div class="exam-card">
+                <div class="exam-card" [class.incoming]="exam.incoming">
 
-                  <div class="exam-header">
-                    <h3>{{ exam.title }}</h3>
+                  <div class="exam-card-content">
+                    <div class="exam-header">
+                      <h3>{{ exam.title }}</h3>
 
-                    @if (exam.difficulty) {
-                      <span
-                        class="difficulty-badge"
-                        [class]="'difficulty-' + exam.difficulty.toLowerCase()">
-                        {{ ('exams.list.difficulty.' + exam.difficulty) | translate }}
-                      </span>
+                      @if (exam.difficulty) {
+                        <span
+                          class="difficulty-badge"
+                          [class]="'difficulty-' + exam.difficulty.toLowerCase()">
+                          {{ ('exams.list.difficulty.' + exam.difficulty) | translate }}
+                        </span>
+                      }
+                    </div>
+
+                    @if (exam.slug) {
+                      <img
+                        class="exam-icon"
+                        [ngSrc]="exam.slug + '.png'"
+                        [alt]="exam.title + ' ícone'"
+                        width="120"
+                        height="120"
+                        [priority]="$index < 1"
+                      />
+                    }
+
+                    @if (exam.description) {
+                      <p class="exam-description">
+                        {{ exam.description }}
+                      </p>
                     }
                   </div>
-
-                  @if (exam.slug) {
-                    <img
-                      class="exam-icon"
-                      [ngSrc]="exam.slug + '.png'"
-                      [alt]="exam.title + ' ícone'"
-                      width="120"
-                      height="120"
-                      [priority]="$index < 1"
-                    />
-                  }
-
-                  @if (exam.description) {
-                    <p class="exam-description">
-                      {{ exam.description }}
-                    </p>
-                  }
 
                   @if (exam.incoming) {
                     <a class="btn-primary disabled muted"
@@ -227,6 +229,34 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         transition: var(--transition-fast);
       }
 
+      .exam-card-content {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        flex: 1;
+      }
+
+      .exam-card.incoming {
+        border: 1px dashed rgba(17, 24, 39, 0.16);
+      }
+
+      .exam-card.incoming .exam-header {
+        opacity: 0.92;
+      }
+
+      .exam-card.incoming .exam-icon,
+      .exam-card.incoming .exam-description {
+        filter: blur(1.6px);
+        opacity: 0.82;
+        transition: filter 140ms ease, opacity 140ms ease;
+      }
+
+      .exam-card.incoming:hover .exam-icon,
+      .exam-card.incoming:hover .exam-description {
+        filter: blur(1px);
+        opacity: 0.9;
+      }
+
       .exam-card:hover {
         transform: translateY(-4px);
         box-shadow: var(--shadow-md);
@@ -235,6 +265,13 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       @media (prefers-reduced-motion: reduce) {
         .exam-card:hover {
           transform: none;
+        }
+
+        .exam-card.incoming .exam-icon,
+        .exam-card.incoming .exam-description,
+        .exam-card.incoming:hover .exam-icon,
+        .exam-card.incoming:hover .exam-description {
+          transition: none;
         }
       }
 
