@@ -171,20 +171,31 @@ describe('AchievementsComponent', () => {
 
     expect(component.loading()).toBe(false);
     expect(component.streakDays()).toBe(2);
-    expect(component.level()).toBe(4);
-    expect(component.totalPoints()).toBe(584);
+    expect(component.level()).toBe(3);
+    expect(component.totalPoints()).toBe(534);
 
     const achievements = component.achievements();
-    const unlockedIds = achievements.filter((achievement) => achievement.unlocked).map((achievement) => achievement.id);
+    const unlockedIds = achievements.filter(({unlocked}) => unlocked).map(({id}) => id);
 
-    expect(unlockedIds).toEqual(['1', '2', '4', '8', '9', '11', '12', '13', '14', '15']);
-    expect(achievements.find((achievement) => achievement.id === '3')?.progress).toBe(12);
-    expect(achievements.find((achievement) => achievement.id === '6')?.progress).toBe(2);
-    expect(achievements.find((achievement) => achievement.id === '10')?.progress).toBe(12);
+    expect(unlockedIds).toEqual([
+      "firstStep",
+      "persistent",
+      "approved",
+      "perfectionist",
+      "awsSpecialist",
+      "cloudMaster",
+      "helpfulCommunity",
+      "feedbackLeader",
+      "contentInfluencer",
+    ]);
+    expect(achievements.find((achievement) => achievement.id === 'studious')?.progress).toBe(12);
+    expect(achievements.find((achievement) => achievement.id === 'fireStreak')?.progress).toBe(2);
+    expect(achievements.find((achievement) => achievement.id === 'feedback100')?.progress).toBe(12);
+    expect(achievements.find((achievement) => achievement.id === 'questionSearch')?.progress).toBe(60);
 
     expect(seoFacade.set).toHaveBeenCalledTimes(2);
     expect(seoFacade.set).toHaveBeenLastCalledWith(expect.objectContaining({
-      title: 'Conquistas (10) | SimulaCert',
+      title: 'Conquistas (9) | SimulaCert',
       canonicalPath: '/achievements',
       jsonLdId: 'achievements',
     }));
@@ -197,8 +208,8 @@ describe('AchievementsComponent', () => {
     expect(compiled.querySelector('.pill-muted')?.textContent).toContain('');
     expect(compiled.querySelector('.streak-number')?.textContent).toBe('2');
     expect(compiled.querySelectorAll('.grid .card')).toHaveLength(15);
-    expect(compiled.querySelectorAll('.state--unlocked')).toHaveLength(10);
-    expect(compiled.querySelectorAll('.state--locked')).toHaveLength(5);
+    expect(compiled.querySelectorAll('.state--unlocked')).toHaveLength(9);
+    expect(compiled.querySelectorAll('.state--locked')).toHaveLength(6);
     expect(compiled.querySelector('.card.unlocked h3')?.textContent).toBe('');
     expect(compiled.querySelector('.card.unlocked .state--unlocked')?.textContent).toContain('');
     expect(compiled.querySelector('.card:not(.unlocked) .progress-text')?.textContent).toContain('12 / 50');

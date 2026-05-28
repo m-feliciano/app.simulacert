@@ -1,9 +1,10 @@
 # SimulaCert
 
-## Idiomas da documentação
+## Idiomas da documentação / Documentation languages
 
-- 🇧🇷 Português (este arquivo)
-- 🇺🇸 English: veja [README.en.md](./README.en.md)
+[![CI/CD Pipeline](https://github.com/m-feliciano/app.simulacert/actions/workflows/deploy.yml/badge.svg)](https://github.com/m-feliciano/app.simulacert/actions/workflows/deploy.yml)
+
+- 🇺🇸 English: see [README.en.md](./README.en.md)
 
 ## Sobre a Plataforma
 
@@ -46,6 +47,12 @@ npm run build
 Para testar a API localmente, recomendamos usar o [Mockoon](https://mockoon.com/). Ele permite criar e gerenciar APIs simuladas de forma fácil e rápida, ideal para desenvolvimento e testes.
 Use o arquivo `mockoon.json` para importar os endpoints da API.
 
+## Internacionalização (i18n)
+O aplicativo está atualmente disponível em inglês e português. Para adicionar mais idiomas, siga estes passos:
+1. Crie um novo arquivo JSON no diretório `src/assets/i18n` (ex: `es.json` para espanhol).
+2. Adicione os pares de chave-valor traduzidos ao novo arquivo JSON.
+3. Atualize o componente de personalização para adicionar a nova opção de idioma.
+
 ## Contribuindo
 
 Contribuições são bem-vindas! Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para detalhes sobre como ajudar no desenvolvimento do SimulaCert.
@@ -59,4 +66,4 @@ Este projeto está sob uma licença proprietária. Consulte o arquivo [LICENSE](
 - **Website**: [simulacert.com](https://simulacert.com)
 - **E-mail**: marcelofeliciano@tutamail.com
 
-Última atualização: 2026-05-15
+Última atualização: 2026-05-28

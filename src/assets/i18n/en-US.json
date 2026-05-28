@@ -219,64 +219,64 @@
     },
     "items": {
       "firstStep": {
-        "title": "Getting started",
+        "title": "Getting Started",
         "description": "You've started your certification preparation. Explore available exams and choose your next assessment."
       },
       "persistent": {
-        "title": "Consistent practice",
+        "title": "Consistent Practice",
         "description": "10 assessments completed. You're building familiarity with exam objectives and question patterns."
       },
       "studious": {
-        "title": "High-volume practice",
-        "description": "50 assessments completed. Strong commitment to repeated practice and review."
+        "title": "High-Volume Practice",
+        "description": "50 assessments completed. A strong volume of practice to reinforce core concepts and improve consistency."
       },
       "approved": {
-        "title": "Passing benchmark",
+        "title": "Passing Benchmark",
         "description": "Scored 70% or higher. You've reached the baseline passing benchmark. Now focus on consistency across domains."
       },
       "perfectionist": {
-        "title": "Advanced proficiency",
-        "description": "Scored 90% or higher. Demonstrates strong accuracy and depth across the assessed objectives."
+        "title": "Advanced Proficiency",
+        "description": "Scored 90% or higher. Demonstrates high accuracy and strong coverage across assessed objectives."
       },
       "fireStreak": {
-        "title": "Weekly consistency",
-        "description": "Studied 7 days in a row. Consistent repetition helps improve recall under time pressure."
+        "title": "Weekly Consistency",
+        "description": "Studied for 7 days in a row. Consistent repetition helps improve recall under time pressure."
       },
       "marathoner": {
-        "title": "Monthly consistency",
+        "title": "Monthly Consistency",
         "description": "30-day study streak. A sustained routine supports long-term skill development."
       },
       "awsSpecialist": {
-        "title": "AWS learning specialist",
+        "title": "AWS Learning Specialist",
         "description": "Completed all available AWS exams. Strong breadth across AWS certification domains."
       },
       "cloudMaster": {
-        "title": "Multi-cloud proficiency",
+        "title": "Multi-Cloud Proficiency",
         "description": "Completed exams across multiple cloud providers. Demonstrates broad platform awareness and transferable concepts."
       },
       "helpfulCommunity": {
-        "title": "Community contributor",
-        "description": "Earned 5 community-approved feedback votes. Your input helps improve the learning experience for others."
+        "title": "Community Contributor",
+        "description": "Had 5 feedback entries approved by the community. Your input helps improve the learning experience for others."
       },
       "questionSearch": {
-        "title": "Content explorer",
-        "description": "Reviewed 100 unique questions. You're broadening coverage across objectives and scenarios."
+        "title": "Content Explorer",
+        "description": "Reviewed 100 unique questions. This expands your coverage across exam objectives and scenario types."
       },
       "feedback100": {
-        "title": "Active reviewer",
+        "title": "Active Reviewer",
         "description": "Submitted 100 feedback entries. Thank you for helping improve question quality and clarity."
       },
       "amazonRecommender": {
-        "title": "Peer-recognized",
+        "title": "Peer-Recognized",
         "description": "Received 100 likes on your feedback. Other learners are finding your notes useful."
       },
       "feedbackLeader": {
-        "title": "Community guide",
-        "description": "Earned 25 community-approved feedback votes. Your reviews are helping others study more effectively."
+        "title": "Community Guide",
+        "description": "Had 25 feedback entries approved by the community. Your reviews are helping others study more effectively."
       },
       "contentInfluencer": {
-        "title": "Trusted contributor",
-        "description": "Your shared insights are becoming a reliable reference during exam preparation."
+        "title": "Trusted Contributor",
+        "description": "Your contributions are becoming a trusted reference for other learners during exam preparation."
       }
     }
   },
