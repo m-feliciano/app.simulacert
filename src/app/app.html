@@ -6,52 +6,38 @@
       <div class="dropdown-section">
         <label>{{ 'theme.mode' | translate }}</label>
         <div class="options-grid">
-          <button (click)="personalization.setTheme('light')"
-                  [class.active]="personalization.themeMode() === 'light'">{{ 'theme.light' | translate }}
-          </button>
-          <button (click)="personalization.setTheme('dark')"
-                  [class.active]="personalization.themeMode() === 'dark'">{{ 'theme.dark' | translate }}
-          </button>
-          <button (click)="personalization.setTheme('warm')"
-                  [class.active]="personalization.themeMode() === 'warm'">{{ 'theme.warm' | translate }}
-          </button>
+          <button (click)="theme ='light'" [class.active]="theme === 'light'">{{ 'theme.light' | translate }}</button>
+          <button (click)="theme ='dark'" [class.active]="theme === 'dark'">{{ 'theme.dark' | translate }}</button>
+          <button (click)="theme ='warm'" [class.active]="theme === 'warm'">{{ 'theme.warm' | translate }}</button>
         </div>
       </div>
       <div class="dropdown-section">
         <label>{{ 'theme.fontSize' | translate }}</label>
         <div class="options-grid">
-          <button (click)="personalization.setFontSize('extra-small')" [class.active]="personalization.fontSize() === 'extra-small'">PP</button>
-          <button (click)="personalization.setFontSize('small')" [class.active]="personalization.fontSize() === 'small'">P</button>
-          <button (click)="personalization.setFontSize('medium')" [class.active]="personalization.fontSize() === 'medium'">M</button>
-          <button (click)="personalization.setFontSize('large')" [class.active]="personalization.fontSize() === 'large'">G</button>
-          <button (click)="personalization.setFontSize('xlarge')" [class.active]="personalization.fontSize() === 'xlarge'">GG</button>
+          <button (click)="fontSize = 'extra-small'" [class.active]="fontSize === 'extra-small'">PP</button>
+          <button (click)="fontSize = 'small'" [class.active]="fontSize === 'small'">P</button>
+          <button (click)="fontSize = 'medium'" [class.active]="fontSize === 'medium'">M</button>
+          <button (click)="fontSize = 'large'" [class.active]="fontSize === 'large'">G</button>
+          <button (click)="fontSize = 'xlarge'" [class.active]="fontSize === 'xlarge'">GG</button>
         </div>
       </div>
       <div class="dropdown-section">
         <label>{{ 'theme.fontFamily' | translate }}</label>
         <div class="options-grid">
-          <button (click)="personalization.setFontFamily('sans')" [class.active]="personalization.fontFamily() === 'sans'"
-                  style="font-family: var(--font-sans)">Sans</button>
-          <button (click)="personalization.setFontFamily('serif')" [class.active]="personalization.fontFamily() === 'serif'"
-                  style="font-family: var(--font-serif)">Serif</button>
-          <button (click)="personalization.setFontFamily('mono')" [class.active]="personalization.fontFamily() === 'mono'"
-                  style="font-family: var(--font-mono)">Mono</button>
-          <button (click)="personalization.setFontFamily('fantasy')" [class.active]="personalization.fontFamily() === 'fantasy'"
-                  style="font-family: var(--font-fantasy)">Fantasy</button>
-          <button (click)="personalization.setFontFamily('slab')" [class.active]="personalization.fontFamily() === 'slab'"
-                  style="font-family: var(--font-slab)">Slab</button>
-          <button (click)="personalization.setFontFamily('system')" [class.active]="personalization.fontFamily() === 'system'"
-                  style="font-family: var(--font-system)">System</button>
+          <button (click)="fontFamily = 'sans'" [class.active]="fontFamily === 'sans'" style="font-family: var(--font-sans)">Sans</button>
+          <button (click)="fontFamily = 'serif'" [class.active]="fontFamily === 'serif'" style="font-family: var(--font-serif)">Serif</button>
+          <button (click)="fontFamily = 'mono'" [class.active]="fontFamily === 'mono'" style="font-family: var(--font-mono)">Mono</button>
+          <button (click)="fontFamily = 'fantasy'" [class.active]="fontFamily === 'fantasy'" style="font-family: var(--font-fantasy)">Fantasy</button>
+          <button (click)="fontFamily = 'slab'" [class.active]="fontFamily === 'slab'" style="font-family: var(--font-slab)">Slab</button>
+          <button (click)="fontFamily = 'system'" [class.active]="fontFamily === 'system'" style="font-family: var(--font-system)">System</button>
         </div>
       </div>
       <div class="dropdown-section">
         <label>{{ 'theme.language' | translate }}</label>
         <div class="options-grid">
-          <button (click)="language = 'pt-BR'"
-                  [class.active]="language === 'pt-BR'">{{ 'theme.portuguese' | translate }}
+          <button (click)="language = 'pt-BR'" [class.active]="language === 'pt-BR'">{{ 'theme.portuguese' | translate }}
           </button>
-          <button (click)="language = 'en-US'"
-                  [class.active]="language === 'en-US'">{{ 'theme.english' | translate }}
+          <button (click)="language = 'en-US'" [class.active]="language === 'en-US'">{{ 'theme.english' | translate }}
           </button>
         </div>
       </div>
