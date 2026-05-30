@@ -20,7 +20,10 @@ export class App implements OnInit {
   private readonly personalization = inject(PersonalizationService);
 
   ngOnInit(): void {
-    globalThis.document.documentElement.lang = this.language;
+    if(globalThis?.document?.documentElement) {
+      globalThis.document.documentElement.setAttribute('data-theme', this.theme);
+      globalThis.document.documentElement.setAttribute('lang', this.language);
+    }
   }
 
   toggleThemeMenu(): void {

@@ -23,7 +23,7 @@
 .subtitle {
   margin-top: var(--spacing-xs);
   color: var(--muted);
-  max-width: 75ch;
+  max-width: fit-content;
   line-height: 1.6;
 }
 

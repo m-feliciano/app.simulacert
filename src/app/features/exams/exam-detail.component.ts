@@ -18,7 +18,6 @@ import {ExamAttemptSetupPreferencesService} from './exam-attempt-setup-preferenc
 import {BookOpen, Clock, LucideAngularModule, Play, Settings2} from 'lucide-angular';
 import {FormsModule} from '@angular/forms';
 import {TranslatePipe} from '../../shared/pipes/translate.pipe';
-import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {TranslateService} from '@ngx-translate/core';
 
 @Component({
@@ -42,199 +41,204 @@ import {TranslateService} from '@ngx-translate/core';
           </app-register-prompt-modal>
         }
 
-        <div class="exam-detail sc-page" [class.visible]="ready()">
-          <div class="sc-container">
-            <app-breadcrumbs [items]="breadcrumbs()"/>
+        <div class="exam-detail sc-page-wo-padding" [class.visible]="ready()">
+          <app-breadcrumbs [items]="breadcrumbs()"/>
 
-            <div class="breadcrumb" style="display:none">
-              <a (click)="goBack()" class="back-link"
-                 [attr.aria-label]="'exams.backToListAria' | translate">← {{ 'exams.back' | translate }}</a>
+          <div class="breadcrumb" style="display:none">
+            <a (click)="goBack()" class="back-link"
+               [attr.aria-label]="'exams.backToListAria' | translate">← {{ 'exams.back' | translate }}</a>
+          </div>
+
+          @if (!loadingExam() && exam()) {
+            <section class="exam-header sc-card sc-card--padded">
+              <div class="exam-header-content">
+                <div class="exam-header-logo">
+                  <img class="exam-icon"
+                       [ngSrc]="exam()?.slug + '.png'"
+                       [alt]="'exams.examIconAlt' | translate: {exam: exam()?.title || ''}"
+                       width="150" height="150" priority/>
+                </div>
+
+                <div class="exam-header-text">
+                  <h1>{{ exam()!.title }}</h1>
+                  <p class="exam-description">{{ exam()!.description }}</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="mode-selection">
+              <h2>{{ 'exams.modeSelection' | translate }}</h2>
+              <div class="mode-cards">
+
+                <div type="button"
+                     class="mode-card"
+                     (click)="selectMode('practice')"
+                     [class.selected]="selectedMode() === 'practice'"
+                     [attr.aria-label]="'exams.modePracticeAria' | translate">
+                  <div class="mode-icon" aria-hidden="true">
+                    <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
+                  </div>
+                  <div>
+                    <h3>{{ 'exams.practiceMode' | translate }}</h3>
+                    <p class="mode-caption">{{ 'exams.practiceModeCaption' | translate }}</p>
+                    <ul class="mode-features">
+                      <li>{{ 'exams.practiceFeatures.seeExplanations' | translate }}</li>
+                      <li>{{ 'exams.practiceFeatures.noTimeLimit' | translate }}</li>
+                      <li>{{ 'exams.practiceFeatures.idealToLearn' | translate }}</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div type="button"
+                     class="mode-card"
+                     [class.selected]="selectedMode() === 'exam'"
+                     (click)="selectMode('exam')"
+                     [attr.aria-label]="'exams.modeExamAria' | translate">
+                  <div class="mode-icon" aria-hidden="true">
+                    <lucide-icon [img]="icons.exam" class="mode-icon-svg"></lucide-icon>
+                  </div>
+                  <div>
+                    <h3>{{ 'exams.examMode' | translate }}</h3>
+                    <p class="mode-caption">{{ 'exams.examModeCaption' | translate }}</p>
+                    <ul class="mode-features">
+                      <li>{{ 'exams.examFeatures.likesReal' | translate }}</li>
+                      <li>{{ 'exams.examFeatures.timedExam' | translate }}</li>
+                      <li>{{ 'exams.examFeatures.noExplanations' | translate }}</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <div class="exam-info">
+              <div class="info-card sc-card sc-card--padded">
+                <h3>{{ 'exams.examInfo' | translate }}</h3>
+                <ul>
+                  <li>
+                    <strong>{{ 'exams.examInfoType' | translate }}</strong> {{ 'exams.examInfoType_value' | translate }}
+                  </li>
+                  <li>
+                    <strong>{{ 'exams.examInfoDuration' | translate }}</strong> {{ setup().durationMinutes }} {{ 'exams.minutesLabel' | translate }}
+                  </li>
+                  <li><strong>{{ 'exams.examInfoQuestions' | translate }}</strong> {{ questionCount() }}</li>
+                  <li>
+                    <strong>{{ 'exams.examInfoMinScore' | translate }}</strong> {{ 'exams.examInfoMinScore_value' | translate }}
+                  </li>
+                </ul>
+              </div>
+
+              <div class="info-card sc-card sc-card--padded">
+                <h3>{{ 'exams.examRules' | translate }}</h3>
+                <ul>
+                  <li>{{ 'exams.examRule1' | translate: {minutes: setup().durationMinutes} }}</li>
+                  <li>{{ 'exams.examRule2' | translate: {count: questionCount()} }}</li>
+                  <li>{{ 'exams.examRule3' | translate }}</li>
+                  <li>{{ 'exams.examRule4' | translate }}</li>
+                </ul>
+              </div>
             </div>
 
-            @if (!loadingExam() && exam()) {
-              <section class="exam-header sc-card sc-card--padded">
-                <div class="exam-header-content">
-                  <div class="exam-header-logo">
-                    <img class="exam-icon"
-                         [ngSrc]="exam()?.slug + '.png'"
-                         [alt]="'exams.examIconAlt' | translate: {exam: exam()?.title || ''}"
-                         width="150" height="150" priority/>
-                  </div>
+            <div class="question-selector sc-card sc-card--padded">
+              <h3>{{ 'exams.customizeExam' | translate }}</h3>
 
-                  <div class="exam-header-text">
-                    <h1>{{ exam()!.title }}</h1>
-                    <p class="exam-description">{{ exam()!.description }}</p>
-                  </div>
-                </div>
-              </section>
+              <div class="setup-row">
+                <div class="setup-field">
+                  <label class="setup-label">{{ 'exams.questionCount' | translate }}</label>
+                  <div class="question-options">
 
-              <section class="mode-selection">
-                <h2>{{ 'exams.modeSelection' | translate }}</h2>
-                <div class="mode-cards">
+                    @if (isCustomQuestionCountSelected()) {
+                      <div style="margin-top: 5px">{{ 'exams.questionCountCustom' | translate }}</div>
 
-                  <div type="button"
-                       class="mode-card"
-                       (click)="selectMode('practice')"
-                       [class.selected]="selectedMode() === 'practice'"
-                       [attr.aria-label]="'exams.modePracticeAria' | translate">
-                    <div class="mode-icon" aria-hidden="true">
-                      <lucide-icon [img]="icons.practice" class="mode-icon-svg"></lucide-icon>
-                    </div>
-                    <div>
-                      <h3>{{ 'exams.practiceMode' | translate }}</h3>
-                      <p class="mode-caption">{{ 'exams.practiceModeCaption' | translate }}</p>
-                      <ul class="mode-features">
-                        <li>{{ 'exams.practiceFeatures.seeExplanations' | translate }}</li>
-                        <li>{{ 'exams.practiceFeatures.noTimeLimit' | translate }}</li>
-                        <li>{{ 'exams.practiceFeatures.idealToLearn' | translate }}</li>
-                      </ul>
-                    </div>
-                  </div>
+                    } @else {
+                      <select class="setup-select"
+                              [value]="questionCount()"
+                              (change)="selectQuestionCount($any($event.target).value)">
 
-                  <div type="button"
-                       class="mode-card"
-                       [class.selected]="selectedMode() === 'exam'"
-                       (click)="selectMode('exam')"
-                       [attr.aria-label]="'exams.modeExamAria' | translate">
-                    <div class="mode-icon" aria-hidden="true">
-                      <lucide-icon [img]="icons.exam" class="mode-icon-svg"></lucide-icon>
-                    </div>
-                    <div>
-                      <h3>{{ 'exams.examMode' | translate }}</h3>
-                      <p class="mode-caption">{{ 'exams.examModeCaption' | translate }}</p>
-                      <ul class="mode-features">
-                        <li>{{ 'exams.examFeatures.likesReal' | translate }}</li>
-                        <li>{{ 'exams.examFeatures.timedExam' | translate }}</li>
-                        <li>{{ 'exams.examFeatures.noExplanations' | translate }}</li>
-                      </ul>
-                    </div>
+                        @for (count of questionCountOptions; track count) {
+                          <option [value]="count"
+                                  [selected]="questionCount() === count">{{ 'exams.questionCountLabel' | translate: {count: count} }}
+                          </option>
+                        }
+
+                        <option value="custom" selected>{{ 'exams.questionCountCustom' | translate }}</option>
+                      </select>
+                    }
+
+                    @if (isCustomQuestionCountSelected()) {
+                      <input
+                        type="number"
+                        min="10"
+                        max="100"
+                        step="5"
+                        class="setup-input"
+                        [value]="customQuestionCount()"
+                        (blur)="$any($event.target).value < 10 ? setCustomQuestionCount( 10) : void 0"
+                        (input)="setCustomQuestionCount($any($event.target).value)"
+                        [attr.aria-label]="'exams.customQuestionCountAria' | translate"/>
+                    }
                   </div>
                 </div>
-              </section>
 
-              <div class="exam-info">
-                <div class="info-card sc-card sc-card--padded">
-                  <h3>{{ 'exams.examInfo' | translate }}</h3>
-                  <ul>
-                    <li><strong>{{ 'exams.examInfoType' | translate }}</strong> {{ 'exams.examInfoType_value' | translate }}</li>
-                    <li><strong>{{ 'exams.examInfoDuration' | translate }}</strong> {{ setup().durationMinutes }} {{ 'exams.minutesLabel' | translate }}</li>
-                    <li><strong>{{ 'exams.examInfoQuestions' | translate }}</strong> {{ questionCount() }}</li>
-                    <li><strong>{{ 'exams.examInfoMinScore' | translate }}</strong> {{ 'exams.examInfoMinScore_value' | translate }}</li>
-                  </ul>
+                <div class="setup-field">
+                  <label class="setup-label" for="durationMinutes">{{ 'exams.durationLabel' | translate }}</label>
+                  <input
+                    id="durationMinutes"
+                    type="number"
+                    min="5"
+                    max="240"
+                    step="5"
+                    [value]="setup().durationMinutes"
+                    (input)="setDurationMinutes(($any($event.target).value))"
+                    class="setup-input"/>
+                  <!--                <div class="setup-hint">Sugestão: {{ recommendedMinutes() }} min para {{ questionCount() }} questões</div>-->
                 </div>
 
-                <div class="info-card sc-card sc-card--padded">
-                  <h3>{{ 'exams.examRules' | translate }}</h3>
-                  <ul>
-                    <li>{{ 'exams.examRule1' | translate: {minutes: setup().durationMinutes} }}</li>
-                    <li>{{ 'exams.examRule2' | translate: {count: questionCount()} }}</li>
-                    <li>{{ 'exams.examRule3' | translate }}</li>
-                    <li>{{ 'exams.examRule4' | translate }}</li>
-                  </ul>
+                <div class="setup-field">
+                  <label class="setup-label" for="difficulty">{{ 'exams.difficultyLabel' | translate }}</label>
+                  <select id="difficulty" class="setup-select"
+                          [value]="setup().difficulty"
+                          (change)="setDifficulty($any($event.target).value)">
+                    <option value="any">{{ 'exams.difficultyAll' | translate }}</option>
+                    <option value="easy">{{ 'exams.difficultyEasy' | translate }}</option>
+                    <option value="medium">{{ 'exams.difficultyMedium' | translate }}</option>
+                    <option value="hard">{{ 'exams.difficultyHard' | translate }}</option>
+                  </select>
                 </div>
               </div>
 
-              <div class="question-selector sc-card sc-card--padded">
-                <h3>{{ 'exams.customizeExam' | translate }}</h3>
-
-                <div class="setup-row">
-                  <div class="setup-field">
-                    <label class="setup-label">{{ 'exams.questionCount' | translate }}</label>
-                    <div class="question-options">
-
-                      @if (isCustomQuestionCountSelected()) {
-                        <div style="margin-top: 5px">{{ 'exams.questionCountCustom' | translate }}</div>
-
-                      } @else {
-                        <select class="setup-select"
-                                [value]="questionCount()"
-                                (change)="selectQuestionCount($any($event.target).value)">
-
-                          @for (count of questionCountOptions; track count) {
-                            <option [value]="count" [selected]="questionCount() === count">{{ 'exams.questionCountLabel' | translate: {count: count} }}</option>
-                          }
-
-                          <option value="custom" selected>{{ 'exams.questionCountCustom' | translate }}</option>
-                        </select>
-                      }
-
-                      @if (isCustomQuestionCountSelected()) {
-                        <input
-                          type="number"
-                          min="10"
-                          max="100"
-                          step="5"
-                          class="setup-input"
-                          [value]="customQuestionCount()"
-                          (blur)="$any($event.target).value < 10 ? setCustomQuestionCount( 10) : void 0"
-                          (input)="setCustomQuestionCount($any($event.target).value)"
-                          [attr.aria-label]="'exams.customQuestionCountAria' | translate"/>
-                      }
-                    </div>
-                  </div>
-
-                  <div class="setup-field">
-                    <label class="setup-label" for="durationMinutes">{{ 'exams.durationLabel' | translate }}</label>
-                    <input
-                      id="durationMinutes"
-                      type="number"
-                      min="5"
-                      max="240"
-                      step="5"
-                      [value]="setup().durationMinutes"
-                      (input)="setDurationMinutes(($any($event.target).value))"
-                      class="setup-input"/>
-                    <!--                <div class="setup-hint">Sugestão: {{ recommendedMinutes() }} min para {{ questionCount() }} questões</div>-->
-                  </div>
-
-                  <div class="setup-field">
-                    <label class="setup-label" for="difficulty">{{ 'exams.difficultyLabel' | translate }}</label>
-                    <select id="difficulty" class="setup-select"
-                            [value]="setup().difficulty"
-                            (change)="setDifficulty($any($event.target).value)">
-                      <option value="any">{{ 'exams.difficultyAll' | translate }}</option>
-                      <option value="easy">{{ 'exams.difficultyEasy' | translate }}</option>
-                      <option value="medium">{{ 'exams.difficultyMedium' | translate }}</option>
-                      <option value="hard">{{ 'exams.difficultyHard' | translate }}</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="setup-actions">
-                  <button type="button" class="sc-btn sc-btn--ghost" (click)="applyRecommendedTime()">
-                    {{ 'exams.recommendedTime' | translate }}
-                  </button>
-                  <button type="button" class="sc-btn sc-btn--ghost" (click)="resetSetup()">
-                    {{ 'exams.resetButton' | translate }}
-                  </button>
-                </div>
-              </div>
-
-              <div class="actions">
-                <button class="sc-btn sc-btn--primary" (click)="startExam()" [disabled]="loading()"
-                        [attr.aria-label]="'exams.startSimulation' | translate">
-                  <lucide-icon [img]="icons.play" class="sc-icon" aria-hidden="true"></lucide-icon>
-                  {{ loading() ? ('exams.startingExam' | translate) : ('exams.startExam' | translate: {count: questionCount()}) }}
+              <div class="setup-actions">
+                <button type="button" class="sc-btn sc-btn--ghost" (click)="applyRecommendedTime()">
+                  {{ 'exams.recommendedTime' | translate }}
+                </button>
+                <button type="button" class="sc-btn sc-btn--ghost" (click)="resetSetup()">
+                  {{ 'exams.resetButton' | translate }}
                 </button>
               </div>
-              <div class="actions">
-                <button class="sc-btn sc-btn--ghost" disabled type="button"
-                        [attr.aria-label]="'exams.printExamAria' | translate">
-                  {{ 'exams.printButton' | translate }}
-                </button>
-              </div>
-            }
+            </div>
 
-            @if (errorMessage()) {
-              <div class="error sc-card">{{ errorMessage() }}</div>
-            }
+            <div class="actions">
+              <button class="sc-btn sc-btn--primary" (click)="startExam()" [disabled]="loading()"
+                      [attr.aria-label]="'exams.startSimulation' | translate">
+                <lucide-icon [img]="icons.play" class="sc-icon" aria-hidden="true"></lucide-icon>
+                {{ loading() ? ('exams.startingExam' | translate) : ('exams.startExam' | translate: {count: questionCount()}) }}
+              </button>
+            </div>
+            <div class="actions">
+              <button class="sc-btn sc-btn--ghost" disabled type="button"
+                      [attr.aria-label]="'exams.printExamAria' | translate">
+                {{ 'exams.printButton' | translate }}
+              </button>
+            </div>
+          }
 
-            @if (!loadingExam() && exam()) {
-              <app-seo-rich-template [exam]="exam()!"/>
-              <app-related-exams [currentExam]="exam()!"/>
-            }
+          @if (errorMessage()) {
+            <div class="error sc-card">{{ errorMessage() }}</div>
+          }
 
-          </div>
+          @if (!loadingExam() && exam()) {
+            <app-seo-rich-template [exam]="exam()!"/>
+            <app-related-exams [currentExam]="exam()!"/>
+          }
         </div>
       }
     </div>
