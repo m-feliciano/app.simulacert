@@ -1,6 +1,6 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, OnInit, signal} from '@angular/core';
 import {RouterOutlet} from '@angular/router';
-import {PersonalizationService} from './core/theme/personalization.service';
+import {FontFamily, FontSize, PersonalizationService, ThemeMode} from './core/theme/personalization.service';
 import {LucideAngularModule, Palette} from 'lucide-angular';
 import {TranslatePipe} from './shared/pipes/translate.pipe';
 
@@ -11,14 +11,17 @@ import {TranslatePipe} from './shared/pipes/translate.pipe';
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App {
+export class App implements OnInit {
   readonly icons = {
     palette: Palette
   };
 
-  showThemeMenu = signal(false);
+  protected showThemeMenu = signal(false);
+  private readonly personalization = inject(PersonalizationService);
 
-  protected readonly personalization = inject(PersonalizationService);
+  ngOnInit(): void {
+    globalThis.document.documentElement.lang = this.language;
+  }
 
   toggleThemeMenu(): void {
     this.showThemeMenu.set(!this.showThemeMenu());
@@ -30,5 +33,17 @@ export class App {
 
   set language(lang: string) {
     this.personalization.setLanguage(lang);
+  }
+
+  set theme(theme: ThemeMode) {
+    this.personalization.setTheme(theme);
+  }
+
+  set fontSize(font: FontSize) {
+    this.personalization.setFontSize(font);
+  }
+
+  set fontFamily(font: FontFamily) {
+    this.personalization.setFontFamily(font);
   }
 }

@@ -19,6 +19,7 @@ export interface AttemptResponse {
   seed: number;
   startedAt: string;
   status: AttemptStatus;
+  pausedRemainingSeconds?: number;
   userId: string;
   mode?: 'exam' | 'practice';
 }
