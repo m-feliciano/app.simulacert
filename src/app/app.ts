@@ -35,8 +35,16 @@ export class App implements OnInit {
     this.personalization.setLanguage(lang);
   }
 
+  get theme() {
+    return this.personalization.themeMode();
+  }
+
   set theme(theme: ThemeMode) {
     this.personalization.setTheme(theme);
+  }
+
+  get fontSize() {
+    return this.personalization.fontSize();
   }
 
   set fontSize(font: FontSize) {
@@ -45,5 +53,9 @@ export class App implements OnInit {
 
   set fontFamily(font: FontFamily) {
     this.personalization.setFontFamily(font);
+  }
+
+  get fontFamily() {
+    return this.personalization.fontFamily();
   }
 }
