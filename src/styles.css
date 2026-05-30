@@ -271,6 +271,11 @@ html.font-family-system, html.font-family-system body { font-family: var(--font-
   padding: var(--spacing-lg) var(--spacing-md);
 }
 
+.sc-page-wo-padding {
+  max-width: var(--container);
+  margin: 0 auto;
+}
+
 .sc-container {
   width: min(1200px, calc(100% - 2 * var(--spacing-lg)));
   margin-inline: auto;
