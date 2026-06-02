@@ -311,16 +311,6 @@ import {LOCAL_STORAGE} from '../../core/storage/local-storage.token';
       display: block;
     }
 
-    .explanation-content .option.correct {
-      border-left: 2px solid #22c55e;
-      background: rgba(34, 197, 94, 0.04);
-    }
-
-    .explanation-content .option.incorrect {
-      border-left: 2px solid #ef4444;
-      background: transparent;
-    }
-
     .explanation-content p {
       margin: 4px 0 0 0;
       line-height: 1.5;
