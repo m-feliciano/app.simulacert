@@ -12,36 +12,29 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
-    permissions:
-      actions: read
-      contents: read
-
     steps:
-      - name: Download artifact
-        uses: dawidd6/action-download-artifact@v9
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          workflow: ci.yml
-          run_id: ${{ github.event.workflow_run.id }}
-          name: angular-build
-          path: dist/simulacert/browser
+          node-version: 22
+          cache: npm
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - run: npm ci
+      - run: npm run build:prod:static
+
+      - uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Upload files to S3
-        run: |
+      - run: |
           aws s3 sync \
             dist/simulacert/browser \
             s3://simulacert-app-prod \
             --delete
 
-      - name: Invalidate CloudFront cache
-        run: |
+      - run: |
           aws cloudfront create-invalidation \
             --distribution-id E1F2G7KCZXOOIL \
             --paths "/*"
