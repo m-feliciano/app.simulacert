@@ -1,69 +1,52 @@
-name: CI/CD Pipeline
+name: Deploy to S3
 
 on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+  workflow_run:
+    workflows:
+      - Build and Test
+    types:
+      - completed
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
 
 jobs:
-  tests:
+  deploy:
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'master'
     runs-on: ubuntu-latest
+
+    permissions:
+      actions: read
+      contents: read
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Download artifact
+        uses: dawidd6/action-download-artifact@v9
         with:
-          node-version: 24
+          workflow: ci.yml
+          run_id: ${{ github.event.workflow_run.id }}
+          name: angular-build
+          path: dist/simulacert/browser
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests
-        run: npm test
-
-  build-and-deploy:
-    needs: tests
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          node-version: 24
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build Angular app
-        run: npm run build:prod:static
-
-      - name: Upload to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --delete
-        env:
-          AWS_S3_BUCKET: simulacert-app-prod
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: us-east-1
-          SOURCE_DIR: dist/simulacert/browser
+      - name: Upload files to S3
+        run: |
+          aws s3 sync \
+            dist/simulacert/browser \
+            s3://simulacert-app-prod \
+            --delete
 
       - name: Invalidate CloudFront cache
-        uses: chetan/invalidate-cloudfront-action@v2
-        with:
-          distribution-id: E1F2G7KCZXOOIL
-          paths: "/*"
-        env:
-          DISTRIBUTION: E1F2G7KCZXOOIL
-          PATHS: "/*"
-          AWS_REGION: us-east-1
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id E1F2G7KCZXOOIL \
+            --paths "/*"
