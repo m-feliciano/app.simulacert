@@ -341,6 +341,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       width: 18px;
       height: 18px;
       min-width: 18px;
+      margin-right: 10px;
     }
 
     .sidebar.collapsed .nav-label {
@@ -380,7 +381,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
     .nav-item {
       background: none;
       border: none;
-      font-size: 1rem;
+      font-size: 14px;
       border-radius: var(--border-radius-sm);
       cursor: pointer;
       transition: background 0.2s, color 0.2s;

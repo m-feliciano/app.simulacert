@@ -8,28 +8,17 @@ import {TranslatePipe} from '../pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe],
   template: `
-    <button class="support-btn nav-item"
+    <a class="support-btn nav-item"
             (click)="openSupport()"
             [attr.aria-label]="'nav.support' | translate">
 
       <lucide-icon [img]="icon" class="nav-icon" aria-hidden="true"></lucide-icon>
       <span>{{ 'nav.support' | translate }}</span>
-    </button>
+    </a>
   `,
-  styles: [
-    `
+  styles: [`
       .support-btn {
-        background: none;
-        border: none;
-        color: var(--text-2);
-        display: flex;
-        align-items: center;
         gap: 10px;
-        cursor: pointer;
-        transition: background 0.2s;
-        width: 100%;
-        text-align: left;
-        padding: 0 var(--spacing-2xs);
         font-size: 14px;
       }
 
@@ -38,12 +27,14 @@ import {TranslatePipe} from '../pipes/translate.pipe';
         color: var(--text);
       }
 
-      .support-btn .nav-icon {
+      .nav-icon {
         color: hotpink;
-        margin-top: -5px !important;
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        margin-top: -5px;
+        margin-right: 5px;
       }
-
-      .nav-icon { width: 18px; height: 18px; min-width: 18px; }
     `
   ]
 })
