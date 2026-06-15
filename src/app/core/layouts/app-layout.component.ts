@@ -69,7 +69,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         @if (isMobile() && !sidebarCollapsed()) {
           <div class="sidebar-overlay" (click)="onNavItemClick()"></div>
 
-          <aside class="sidebar" [ngClass]="{'collapsed': sidebarCollapsed()}">
+          <aside class="sidebar sc-glass sc-glass--acrylic" [ngClass]="{'collapsed': sidebarCollapsed()}">
             <nav class="sidebar-nav">
               <a routerLink="/dashboard" routerLinkActive="active" class="nav-item" (click)="onNavItemClick()">
                 <lucide-icon [img]="icons.dashboard" class="nav-icon" aria-hidden="true"></lucide-icon>
@@ -153,9 +153,9 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       right: 0;
       top: 25px;
       position: absolute;
-      left: 40px;
-      width: calc(100% - 40px * 2);
-      border-radius: 40px;
+      left: var(--padding-topbar);
+      width: calc(100% - var(--padding-topbar) * 2);
+      border-radius: var(--padding-topbar);
     }
 
     .topbar-left {
@@ -254,7 +254,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
     .sidebar {
       width: 200px;
-      background: var(--surface);
       color: var(--text);
       border-right: 1px solid var(--border);
       transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.33s, width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
@@ -324,17 +323,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       padding: var(--spacing-lg) 0;
     }
 
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-md);
-      padding: var(--spacing-md) 14px;
-      color: var(--text-2);
-      text-decoration: none;
-      transition: var(--transition-fast);
-      position: relative;
-    }
-
     .nav-item:hover {
       background: rgba(17, 24, 39, 0.06);
       color: var(--text);
@@ -370,7 +358,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       min-height: 100%;
       display: flex;
       flex-direction: column;
-      padding: var(--spacing-lg) var(--spacing-lg) 0;
+      padding: var(--spacing-xxl) var(--spacing-lg) 0;
       position: relative;
     }
 
@@ -381,7 +369,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
     @media (min-width: 768px) {
       .content-wrapper {
-        padding: var(--spacing-2xl) var(--spacing-xl) 0;
+        padding: var(--spacing-xxl) var(--spacing-xl) 0;
       }
     }
 
@@ -392,20 +380,24 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
     .nav-item {
       background: none;
       border: none;
-      color: var(--text-2);
       font-size: 1rem;
       border-radius: var(--border-radius-sm);
-      text-decoration: none;
       cursor: pointer;
       transition: background 0.2s, color 0.2s;
-      display: flex;
-      align-items: center;
       gap: 6px;
     }
 
     .sc-glass--acrylic::after {
       content: '';
       display: none;
+    }
+
+
+    @media (max-width: 768px) {
+      .topbar {
+        left: 20px;
+        width: calc(100% - 20px * 2);
+      }
     }
   `]
 })
