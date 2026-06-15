@@ -58,7 +58,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
             @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
               <button class="logout-btn" (click)="logout()">{{ 'nav.exit' | translate }}</button>
             } @else {
-              <button class="logout-btn logout-btn-hover" routerLink="/login">{{ 'nav.login' | translate }}
+              <button class="logout-btn login-btn" routerLink="/login">{{ 'nav.login' | translate }}
               </button>
             }
           </div>
@@ -221,13 +221,14 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       transform: translateY(-1px);
     }
 
-    .logout-btn:active {
-      transform: translateY(0);
+    .login-btn:hover {
+      color: white;
+      background: var(--color-primary-dark);
+      transform: translateY(-1px);
     }
 
-    .logout-btn-hover:hover:not(:disabled) {
-      background: var(--brand-primary-600);
-      box-shadow: 0 4px 12px rgba(var(--brand-primary-rgb), 0.25);
+    .logout-btn:active {
+      transform: translateY(0);
     }
 
     .nav-item {
