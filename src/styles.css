@@ -273,7 +273,7 @@ html.font-family-system, html.font-family-system body { font-family: var(--font-
 
 .sc-page-wo-padding {
   max-width: var(--container);
-  margin: 0 auto;
+  margin: 24px auto 0;
 }
 
 .sc-container {

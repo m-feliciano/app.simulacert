@@ -15,9 +15,9 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
   imports: [CommonModule, SeoHeadDirective, NgOptimizedImage, BreadcrumbsComponent, TranslatePipe, RouterLink],
   template: `
     <div seoHead>
-      <app-breadcrumbs [items]="[{ label: 'Home', url: '/' }, { label: 'exams.list.breadcrumbs' | translate }]"/>
-
       <div class="exams-container">
+        <app-breadcrumbs [items]="[{ label: 'Home', url: '/' }, { label: 'exams.list.breadcrumbs' | translate }]"/>
+
         @if (loading()) {
           <div class="skeleton-loader">
             @for (_ of [1, 2, 3]; track $index) {
@@ -38,10 +38,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         } @else if (exams().length > 0) {
 
           <div class="page-shell" [class.visible]="ready()">
-            <h1 class="page-title">
-              {{ 'exams.list.title' | translate }}
-            </h1>
-
             <div class="exams-grid">
               @for (exam of exams(); track exam.id) {
 
@@ -116,13 +112,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         object-fit: contain;
       }
 
-      .page-title {
-        text-align: center;
-        margin: 32px 0 24px 0;
-        font-size: 2.2rem;
-        font-weight: 700;
-      }
-
       .skeleton-loader {
         display: flex;
         justify-content: center;
@@ -191,7 +180,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
       .exams-container {
         max-width: 1200px;
-        margin: 0 auto;
+        margin: 24px auto 0;
       }
 
       h1 {

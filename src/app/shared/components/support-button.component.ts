@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {LucideAngularModule, HeartHandshake} from 'lucide-angular';
+import {HeartHandshake, LucideAngularModule} from 'lucide-angular';
 import {TranslatePipe} from '../pipes/translate.pipe';
 
 @Component({
@@ -24,10 +24,10 @@ import {TranslatePipe} from '../pipes/translate.pipe';
         align-items: center;
         gap: 10px;
         cursor: pointer;
-        padding: var(--spacing-md) var(--spacing-lg);
         transition: background 0.2s;
         width: 100%;
         text-align: left;
+        padding: 0 var(--spacing-2xs);
       }
       .support-btn:hover {
         background: rgba(17, 24, 39, 0.06);

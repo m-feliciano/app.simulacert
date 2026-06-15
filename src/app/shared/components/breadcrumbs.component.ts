@@ -28,7 +28,7 @@ export type BreadcrumbItem = {
   `,
   styles: [`
     .breadcrumbs {
-      margin: 8px 0 16px;
+      margin: 8px 0 30px;
       font-size: 14px;
     }
 

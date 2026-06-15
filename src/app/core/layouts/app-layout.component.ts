@@ -45,11 +45,11 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
                height="32" width="120"
                (click)="router.navigate(['/'])"
                style="cursor: pointer"/>
-        </div>
 
-        @if (!isMobile()) {
-          <app-navbar/>
-        }
+          @if (!isMobile()) {
+            <app-navbar/>
+          }
+        </div>
 
         @defer {
           <div class="topbar-right">
@@ -64,6 +64,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
           </div>
         }
       </header>
+
       <div class="app-content">
         @if (isMobile() && !sidebarCollapsed()) {
           <div class="sidebar-overlay" (click)="onNavItemClick()"></div>
@@ -149,10 +150,12 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       padding: 0 var(--spacing-lg);
       border-bottom: 1px solid var(--border);
       z-index: 1100;
-      position: fixed;
-      left: 0;
       right: 0;
-      top: 0;
+      top: 25px;
+      position: absolute;
+      left: 40px;
+      width: calc(100% - 40px * 2);
+      border-radius: 40px;
     }
 
     .topbar-left {
@@ -165,7 +168,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       background: none;
       border: none;
       cursor: pointer;
-      padding: var(--spacing-xs) var(--spacing-sm);
       border-radius: var(--border-radius-sm);
       transition: var(--transition-fast);
       display: inline-flex;
@@ -223,18 +225,17 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       transform: translateY(0);
     }
 
-
-    .topbar-nav .nav-item {
+    .nav-item {
       color: var(--text-2);
     }
 
-    .topbar-nav .nav-item:hover {
+    .nav-item:hover {
       background: rgba(17, 24, 39, 0.06);
       color: var(--text);
     }
 
-    .topbar-nav .nav-item.active,
-    .topbar-nav .nav-item:focus-visible {
+    .nav-item.active,
+    .nav-item:focus-visible {
       background: rgba(255, 153, 0, 0.14);
       color: var(--brand-primary-600);
     }
@@ -250,11 +251,11 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
     }
 
     .sidebar {
-      width: 250px;
+      width: 200px;
       background: var(--surface);
       color: var(--text);
       border-right: 1px solid var(--border);
-      transition: transform 0.45s cubic-bezier(0.4,0,0.2,1), opacity 0.33s, width 0.45s cubic-bezier(0.4,0,0.2,1);
+      transition: transform 0.45s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.33s, width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
       opacity: 1;
       overflow-x: hidden;
       overflow-y: auto;
@@ -264,7 +265,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
     .sidebar.collapsed {
       transform: translateX(-100%);
-      width: 250px;
+      width: 200px;
       opacity: 0;
       pointer-events: none;
     }
@@ -276,7 +277,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
     @media (max-width: 768px) {
       .sidebar {
         position: fixed;
-        top: 64px;
+        top: 90px;
         left: 0;
         bottom: 0;
         transform: translateX(0);
@@ -312,7 +313,9 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
     }
 
     @media (min-width: 769px) {
-      .sidebar, .sidebar-overlay { display: none !important; }
+      .sidebar, .sidebar-overlay {
+        display: none !important;
+      }
     }
 
     .sidebar-nav {
@@ -323,23 +326,11 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       display: flex;
       align-items: center;
       gap: var(--spacing-md);
-      padding: var(--spacing-md) var(--spacing-lg);
+      padding: var(--spacing-md) 14px;
       color: var(--text-2);
       text-decoration: none;
       transition: var(--transition-fast);
       position: relative;
-    }
-
-    .nav-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 4px;
-      background: var(--color-primary);
-      transform: scaleX(0);
-      transition: var(--transition-fast);
     }
 
     .nav-item:hover {
@@ -388,7 +379,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
 
     @media (min-width: 768px) {
       .content-wrapper {
-        padding: var(--spacing-xl) var(--spacing-xl) 0;
+        padding: var(--spacing-2xl) var(--spacing-xl) 0;
       }
     }
 
@@ -396,18 +387,11 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       margin-top: auto;
     }
 
-    .topbar-nav {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-lg);
-      margin-left: var(--spacing-xl);
-    }
-    .topbar-nav .nav-item {
+    .nav-item {
       background: none;
       border: none;
       color: var(--text-2);
       font-size: 1rem;
-      padding: 8px 16px;
       border-radius: var(--border-radius-sm);
       text-decoration: none;
       cursor: pointer;
@@ -416,17 +400,14 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       align-items: center;
       gap: 6px;
     }
-    .topbar-nav .nav-item.active,
-    .topbar-nav .nav-item:focus-visible {
-      background: rgba(255, 153, 0, 0.14);
-      color: var(--brand-primary-600);
+
+    .sc-btn {
+      padding: 8px 16px;
     }
-    .topbar-nav .nav-item:hover {
-      background: rgba(17, 24, 39, 0.06);
-      color: var(--text);
-    }
-    @media (max-width: 768px) {
-      .topbar-nav { display: none; }
+
+    .sc-glass--acrylic::after {
+      content: '';
+      display: none;
     }
   `]
 })
@@ -449,12 +430,12 @@ export class AppLayoutComponent {
   sidebarCollapsed = signal(true);
   isMobile = signal(false);
 
-  readonly destroyRef = inject(DestroyRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly personalization = inject(PersonalizationService);
 
   constructor(
     protected readonly authFacade: AuthFacade,
-    protected readonly router: Router,
-    private readonly personalization: PersonalizationService
+    protected readonly router: Router
   ) {
     this.checkIfMobile();
 

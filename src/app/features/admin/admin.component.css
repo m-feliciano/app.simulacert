@@ -89,6 +89,8 @@ label {
   border-radius: 4px;
   font-size: 14px;
   box-sizing: border-box;
+  color: var(--text-2);
+  background: var(--surface);
 }
 
 .form-control:focus {
@@ -109,7 +111,7 @@ textarea.form-control {
 
 .option-item {
   display: grid;
-  grid-template-columns: 100px 1fr auto 40px;
+  grid-template-columns: 150px 1fr auto 40px;
   gap: 10px;
   margin-bottom: 15px;
   align-items: center;
@@ -230,10 +232,6 @@ textarea.form-control {
   display: flex;
   gap: 10px;
   margin-bottom: 30px;
-}
-
-.search-user .form-control {
-  flex: 1;
 }
 
 .user-card {
