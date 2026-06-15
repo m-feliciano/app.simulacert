@@ -8,7 +8,7 @@ import {TranslatePipe} from '../pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, LucideAngularModule, TranslatePipe],
   template: `
-    <button class="nav-item support-btn"
+    <button class="support-btn nav-item"
             (click)="openSupport()"
             [attr.aria-label]="'nav.support' | translate">
 
@@ -40,6 +40,7 @@ import {TranslatePipe} from '../pipes/translate.pipe';
 
       .support-btn .nav-icon {
         color: hotpink;
+        margin-top: -5px !important;
       }
 
       .nav-icon { width: 18px; height: 18px; min-width: 18px; }
@@ -50,7 +51,8 @@ export class SupportButtonComponent {
   readonly icon = HeartHandshake;
 
   openSupport(): void {
-    globalThis.document?.dispatchEvent(new CustomEvent('open-support', {bubbles: true}));
+    const event = new CustomEvent('open-support', {bubbles: true});
+    globalThis.document?.dispatchEvent(event);
   }
 }
 

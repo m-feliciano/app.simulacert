@@ -10,6 +10,8 @@
   --spacing-2xl: 48px;
   --spacing-xxl: 64px;
 
+  --padding-topbar: 40px;
+
   /* Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -681,6 +683,17 @@ button, a {
 
 .nf__link:hover {
   text-decoration: underline;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) 14px;
+  color: var(--text-2);
+  text-decoration: none;
+  transition: var(--transition-fast);
+  position: relative;
 }
 
 

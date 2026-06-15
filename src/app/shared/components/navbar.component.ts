@@ -6,17 +6,6 @@ import {takeUntilDestroyed} from '@angular/core/rxjs-interop';
 import {RouterLink, RouterLinkActive} from '@angular/router';
 import {ExamsApiService} from '../../api/exams.service';
 import {AuthFacade} from '../../core/auth/auth.facade';
-import {
-  BarChart3,
-  HeartHandshake,
-  LucideAngularModule,
-  Menu,
-  Newspaper,
-  NotebookPen,
-  Settings,
-  TrendingUp,
-  Trophy
-} from 'lucide-angular';
 import {ExamResponse} from '../../api/domain';
 import {SupportButtonComponent} from './support-button.component';
 import {TranslatePipe} from '../pipes/translate.pipe';
@@ -24,13 +13,12 @@ import {TranslatePipe} from '../pipes/translate.pipe';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, LucideAngularModule, SupportButtonComponent, TranslatePipe],
+  imports: [CommonModule, NgOptimizedImage, RouterLink, RouterLinkActive, SupportButtonComponent, TranslatePipe],
   template: `
     <nav class="topbar-nav" (mouseleave)="closeDropdown()" [class.ready]="true">
       <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">{{ 'nav.dashboard' | translate }}</a>
 
-      <div class="exams-dropdown"
-           [class.open]="dropdownOpen()"
+      <div class="exams-dropdown" [class.open]="dropdownOpen()"
            (mouseenter)="openDropdown()"
            (mouseleave)="closeDropdown()">
         <a class="nav-item dropdown-toggle" routerLink="/exams" routerLinkActive="active"
@@ -87,190 +75,162 @@ import {TranslatePipe} from '../pipes/translate.pipe';
       <app-support-button></app-support-button>
     </nav>
   `,
-  styles: [
-    `
-       .topbar-nav {
-         opacity: 0;
-         transition: opacity 120ms ease;
-       }
+  styles: [`
+    .topbar-nav {
+      opacity: 0;
+      transition: opacity 120ms ease;
+    }
 
-       .topbar-nav.ready {
-         opacity: 1;
-       }
+    .topbar-nav.ready {
+      opacity: 1;
+    }
 
-      .exams-dropdown {
-        position: relative;
-        width: fit-content;
-      }
+    .exams-dropdown {
+      position: relative;
+      width: fit-content;
+    }
 
-      .dropdown-toggle {
-        background: none;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        gap: 6px;
-        align-items: center;
-      }
+    .dropdown-toggle {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
 
-      .dropdown-menu {
-        position: absolute;
-        top: calc(100% + 8px);
-        left: 0;
-        min-width: 320px;
-        background: var(--surface);
-        border: 1px solid var(--border);
-        box-shadow: var(--shadow-md);
-        border-radius: 8px;
-        padding: 8px;
-        z-index: 1200;
-      }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 320px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      border-radius: 8px;
+      padding: 8px;
+      z-index: 1200;
+    }
 
-      .dropdown-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 8px 12px;
-        color: var(--text-2);
-        text-decoration: none;
-        border-radius: 6px;
-      }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      color: var(--text-2);
+      text-decoration: none;
+      border-radius: 6px;
+    }
 
-      .dropdown-item:hover {
-        background: rgba(17, 24, 39, 0.06);
-        color: var(--text);
-      }
+    .dropdown-item:hover {
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
+    }
 
-      .dropdown-loading, .dropdown-empty {
-        padding: 8px 12px;
-        color: var(--text-2);
-      }
+    .dropdown-loading, .dropdown-empty {
+      padding: 8px 12px;
+      color: var(--text-2);
+    }
 
-      .dropdown-footer {
-        padding-top: 6px;
-        border-top: 1px solid var(--border);
-        margin-top: 6px;
-        text-align: center;
-      }
+    .dropdown-footer {
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+      margin-top: 6px;
+      text-align: center;
+    }
 
-      .coming {
-        font-size: 12px;
-        color: var(--text-2);
-        margin-left: 6px;
-      }
+    .coming {
+      font-size: 12px;
+      color: var(--text-2);
+      margin-left: 6px;
+    }
 
-      .exam-thumb {
-        width: 40px;
-        height: 40px;
-        object-fit: contain;
-        border-radius: 6px;
-      }
+    .exam-thumb {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+      border-radius: 6px;
+    }
 
-      .exam-meta {
-        font-size: 13px;
-        display: flex;
-        flex-direction: column;
-        min-width: 0;
-      }
+    .exam-meta {
+      font-size: 13px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
 
-      .exam-title {
-        font-weight: 600;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-width: fit-content;
-      }
+    .exam-title {
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: fit-content;
+    }
 
+    .topbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: var(--spacing-xl);
+    }
+
+    .topbar-nav .nav-item {
+      background: none;
+      border: none;
+      color: var(--text-2);
+      border-radius: var(--border-radius-sm);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+    }
+
+    .topbar-nav .nav-item.active,
+    .topbar-nav .nav-item:focus-visible {
+      color: var(--brand-primary-600);
+    }
+
+    .topbar-nav .nav-item:hover {
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
+    }
+
+    .nav-item:hover {
+      background: rgba(17, 24, 39, 0.06);
+      color: var(--text);
+    }
+
+    .nav-item.active {
+      background: rgba(255, 153, 0, 0.14);
+      color: var(--brand-primary-600);
+    }
+
+    .nav-item.active::before {
+      transform: scaleX(1);
+    }
+
+    .dropdown-item.disabled {
+      pointer-events: none;
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 768px) {
       .topbar-nav {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        margin-left: var(--spacing-xl);
+        display: none;
       }
-
-      .topbar-nav .nav-item {
-        background: none;
-        border: none;
-        color: var(--text-2);
-        border-radius: var(--border-radius-sm);
-        text-decoration: none;
-        cursor: pointer;
-        transition: background 0.2s, color 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        font-size: 14px;
-      }
-
-      .topbar-nav .nav-item.active,
-      .topbar-nav .nav-item:focus-visible {
-        color: var(--brand-primary-600);
-      }
-
-      .topbar-nav .nav-item:hover {
-        background: rgba(17, 24, 39, 0.06);
-        color: var(--text);
-      }
-
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-md);
-        padding: var(--spacing-md) 14px;
-        color: var(--text-2);
-        text-decoration: none;
-        transition: var(--transition-fast);
-        position: relative;
-      }
-
-      .nav-item:hover {
-        background: rgba(17, 24, 39, 0.06);
-        color: var(--text);
-      }
-
-      .nav-item.active {
-        background: rgba(255, 153, 0, 0.14);
-        color: var(--brand-primary-600);
-      }
-
-      .nav-item.active::before {
-        transform: scaleX(1);
-      }
-
-      .nav-icon {
-        width: 18px;
-        height: 18px;
-        min-width: 18px;
-      }
-
-      .dropdown-item.disabled {
-        pointer-events: none;
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-
-      @media (max-width: 768px) {
-        .topbar-nav {
-          display: none;
-        }
-      }
-    `
+    }
+  `
   ]
 })
 export class NavbarComponent implements OnInit {
-  readonly icons = {
-    menu: Menu,
-    dashboard: BarChart3,
-    exams: NotebookPen,
-    stats: TrendingUp,
-    achievements: Trophy,
-    news: Newspaper,
-    admin: Settings,
-    support: HeartHandshake,
-  };
-
   dropdownOpen = signal(false);
   exams = signal<ExamResponse[]>([]);
   loading = signal(true);
+
   readonly authFacade = inject(AuthFacade);
   private readonly examsApi = inject(ExamsApiService);
   private readonly destroyRef = inject(DestroyRef);
