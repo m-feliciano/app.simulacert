@@ -1,10 +1,10 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { ExamsApiService } from '../../api/exams.service';
-import { QuestionsApiService } from '../../api/questions.service';
-import { AuthApiService } from '../../api/auth.service';
-import { ExamResponse, UserResponse } from '../../api/domain';
+import {Component, effect, signal} from '@angular/core';
+import {CommonModule} from '@angular/common';
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ExamsApiService} from '../../api/exams.service';
+import {QuestionsApiService} from '../../api/questions.service';
+import {AuthApiService} from '../../api/auth.service';
+import {ExamResponse, UserResponse} from '../../api/domain';
 
 @Component({
   selector: 'app-admin',
@@ -106,7 +106,7 @@ import { ExamResponse, UserResponse } from '../../api/domain';
 
               <div class="form-row">
                 <div class="form-group">
-                  <label>Domínio AWS</label>
+                  <label>Domínio</label>
                   <input type="text" formControlName="domain" class="form-control"/>
                 </div>
 
@@ -122,19 +122,33 @@ import { ExamResponse, UserResponse } from '../../api/domain';
 
               <div class="options-group">
                 <h3>Opções de Resposta</h3>
+
                 @for (option of questionOptions(); track $index) {
                   <div class="option-item">
-                    <input type="text" [(ngModel)]="option.key" [ngModelOptions]="{standalone: true}"
-                           placeholder="Chave (A, B, C, D)" class="option-key"/>
-                    <input type="text" [(ngModel)]="option.text" [ngModelOptions]="{standalone: true}"
-                           placeholder="Texto da opção" class="option-text"/>
+                    <input type="text"
+                           [(ngModel)]="option.key"
+                           [ngModelOptions]="{standalone: true}"
+                           placeholder="Chave (A, B, C, D)"
+                           class="form-control option-key"/>
+
+                    <input type="text"
+                           [(ngModel)]="option.text"
+                           [ngModelOptions]="{standalone: true}"
+                           placeholder="Texto da opção"
+                           class="form-control option-text"/>
+
                     <label class="option-correct">
-                      <input type="checkbox" [(ngModel)]="option.isCorrect" [ngModelOptions]="{standalone: true}"/>
+                      <input type="checkbox"
+                             class="form-control"
+                             [(ngModel)]="option.isCorrect"
+                             [ngModelOptions]="{standalone: true}"/>
                       Correta
                     </label>
                     <button type="button" class="btn-remove" (click)="removeOption($index)">×</button>
+
                   </div>
                 }
+
                 <button type="button" class="btn-secondary" (click)="addOption()">+ Adicionar Opção</button>
               </div>
 
@@ -151,75 +165,43 @@ import { ExamResponse, UserResponse } from '../../api/domain';
           <div class="section">
             <h2>Gerenciar Usuários</h2>
 
-            <div class="search-user">
-              <input
-                type="email"
-                [value]="searchEmail()"
-                (input)="searchEmail.set($any($event.target).value)"
-                placeholder="Digite o email do usuário"
-                class="form-control"/>
-              <button
-                type="button"
-                class="btn-primary"
-                (click)="searchUserByEmail()"
-                [disabled]="loadingUser() || !searchEmail()">
-                {{ loadingUser() ? 'Buscando...' : '🔍 Buscar' }}
-              </button>
-            </div>
-
-            @if (foundUser()) {
-              <div class="user-card">
-                <div class="user-info">
-                  <h3>{{ foundUser()!.name }}</h3>
-                  <p><strong>Email:</strong> {{ foundUser()!.email }}</p>
-                  <p><strong>Função:</strong> {{ foundUser()!.role }}</p>
-                  <p><strong>Cadastro:</strong> {{ foundUser()!.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
-                  <div class="user-status">
-                    <span [class.status-active]="foundUser()!.active" [class.status-inactive]="!foundUser()!.active">
-                      {{ foundUser()!.active ? '✓ Ativo' : '✗ Inativo' }}
-                    </span>
-                  </div>
-                </div>
-                <div class="user-actions">
-                  <button
-                    [class.btn-danger]="foundUser()!.active"
-                    [class.btn-success]="!foundUser()!.active"
-                    (click)="toggleUserStatus(foundUser()!)"
-                    [disabled]="loadingUser()">
-                    {{ foundUser()!.active ? 'Desativar' : 'Ativar' }}
-                  </button>
-                </div>
+            <form [formGroup]="userForm" (ngSubmit)="searchUserByEmail()">
+              <div class="search-user">
+                <input type="email"
+                       formControlName="email"
+                       placeholder="Digite o email do usuário"
+                       class="form-control"/>
               </div>
-            } @else {
-              <div class="users-list">
-                @for (user of users(); track user.id) {
-                  <div class="user-card">
-                    <div class="user-info">
-                      <h3>{{ user.name }}</h3>
-                      <p><strong>Email:</strong> {{ user.email }}</p>
-                      <p><strong>Função:</strong> {{ user.role }}</p>
-                      <p><strong>Cadastro:</strong> {{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+            </form>
 
-                      <div class="user-status">
+            <div class="users-list">
+              @for (user of users(); track user.id) {
+                <div class="user-card">
+                  <div class="user-info">
+                    <h3>{{ user.name }}</h3>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Função:</strong> {{ user.role }}</p>
+                    <p><strong>Cadastro:</strong> {{ user.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+
+                    <div class="user-status">
                         <span [class.status-active]="user.active" [class.status-inactive]="!user.active">
                           {{ user.active ? '✓ Ativo' : '✗ Inativo' }}
                         </span>
-                      </div>
-                    </div>
-
-                    <div class="user-actions">
-                      <button
-                        [class.btn-danger]="user.active"
-                        [class.btn-success]="!user.active"
-                        (click)="toggleUserStatus(user)"
-                        [disabled]="loadingUser()">
-                        {{ user.active ? 'Desativar' : 'Ativar' }}
-                      </button>
                     </div>
                   </div>
-                }
-              </div>
-            }
+
+                  <div class="user-actions">
+                    <button
+                      [class.btn-danger]="user.active"
+                      [class.btn-success]="!user.active"
+                      (click)="toggleUserStatus(user)"
+                      [disabled]="loadingUser()">
+                      {{ user.active ? 'Desativar' : 'Ativar' }}
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
           </div>
         </div>
       }
@@ -227,29 +209,35 @@ import { ExamResponse, UserResponse } from '../../api/domain';
   `,
   styleUrls: [`admin.component.css`]
 })
-export class AdminComponent implements OnInit {
+export class AdminComponent {
   activeTab = signal<'exams' | 'questions' | 'users'>('exams');
   exams = signal<ExamResponse[]>([]);
-
-  examForm: FormGroup;
-  questionForm: FormGroup;
-
+  users = signal<UserResponse[]>([]);
   questionOptions = signal<Array<{ key: string; text: string; isCorrect: boolean }>>([]);
+
+  loadingUser = signal(false);
   loadingExam = signal(false);
   loadingQuestion = signal(false);
   loadingImport = signal(false);
-  searchEmail = signal('');
-  loadingUser = signal(false);
 
-  foundUser = signal<UserResponse | null>(null);
-  users = signal<UserResponse[]>([]);
+  protected readonly examForm: FormGroup;
+  protected readonly questionForm: FormGroup;
+  protected readonly userForm: FormGroup;
+  private readonly emptyQuestions = [
+    {key: '', text: '', isCorrect: false},
+    {key: '', text: '', isCorrect: false},
+    {key: '', text: '', isCorrect: false},
+    {key: '', text: '', isCorrect: false}
+  ];
 
   constructor(
     private readonly fb: FormBuilder,
     private readonly examsApi: ExamsApiService,
     private readonly questionsApi: QuestionsApiService,
-    private readonly authApi: AuthApiService
+    private readonly authApi: AuthApiService,
   ) {
+    this.questionOptions.set(this.emptyQuestions);
+
     this.examForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(255)]],
       description: ['', [Validators.maxLength(1000)]]
@@ -262,17 +250,44 @@ export class AdminComponent implements OnInit {
       difficulty: ['MEDIUM', Validators.required]
     });
 
-    this.questionOptions.set([
-      { key: '', text: '', isCorrect: false },
-      { key: '', text: '', isCorrect: false },
-      { key: '', text: '', isCorrect: false },
-      { key: '', text: '', isCorrect: false }
-    ]);
+    this.userForm = this.fb.group({
+      email: ['', [Validators.required, Validators.email]],
+    });
+
+    effect(() => {
+      switch (this.activeTab()) {
+        case 'users':
+          this.loadUsers();
+          break;
+
+        case 'exams':
+          this.loadExams();
+          break;
+      }
+    });
   }
 
-  ngOnInit(): void {
-    this.loadExams();
-    this.loadUsers();
+  createQuestion(): void {
+    if (this.questionForm.valid && this.questionOptions().length > 0) {
+      this.loadingQuestion.set(true);
+
+      const request = {
+        ...this.questionForm.value,
+        options: this.questionOptions().filter(opt => opt.key && opt.text)
+      };
+
+      this.questionsApi.createQuestion(request).subscribe({
+        next: () => {
+          this.questionForm.reset();
+          this.questionForm.patchValue({difficulty: 'MEDIUM'});
+          this.questionOptions.set(this.emptyQuestions);
+          this.loadingQuestion.set(false);
+        },
+        error: (error) => {
+          this.loadingQuestion.set(false);
+        }
+      });
+    }
   }
 
   loadExams(): void {
@@ -309,31 +324,30 @@ export class AdminComponent implements OnInit {
     }
   }
 
-  createQuestion(): void {
-    if (this.questionForm.valid && this.questionOptions().length > 0) {
-      this.loadingQuestion.set(true);
-      const request = {
-        ...this.questionForm.value,
-        options: this.questionOptions().filter(opt => opt.key && opt.text)
-      };
-
-      this.questionsApi.createQuestion(request).subscribe({
-        next: () => {
-          this.questionForm.reset();
-          this.questionForm.patchValue({ difficulty: 'MEDIUM' });
-          this.questionOptions.set([
-            { key: '', text: '', isCorrect: false },
-            { key: '', text: '', isCorrect: false },
-            { key: '', text: '', isCorrect: false },
-            { key: '', text: '', isCorrect: false }
-          ]);
-          this.loadingQuestion.set(false);
-        },
-        error: (error) => {
-          this.loadingQuestion.set(false);
-        }
-      });
+  searchUserByEmail(): void {
+    if (this.userForm.invalid) {
+      this.userForm.markAllAsTouched();
+      return;
     }
+
+    this.loadingUser.set(true);
+
+    const email = (this.userForm.value as string).trim();
+    this.authApi.getUserByEmail(email).subscribe({
+      next: (user) => {
+        if (user) {
+          this.users.set([user]);
+        } else {
+          this.users.set([]);
+        }
+
+        this.loadingUser.set(false);
+      },
+      error: () => {
+        this.loadingUser.set(false);
+        this.showToast('Usuário não encontrado', 'error');
+      }
+    });
   }
 
   addOption(): void {
@@ -371,28 +385,6 @@ export class AdminComponent implements OnInit {
       error: () => {
         this.users.set([]);
         this.loadingUser.set(false);
-      }
-    });
-  }
-
-  searchUserByEmail(): void {
-    const email = this.searchEmail().trim();
-    if (!email) {
-      this.showToast('Digite um email válido', 'error');
-      return;
-    }
-
-    this.loadingUser.set(true);
-
-    this.authApi.getUserByEmail(email).subscribe({
-      next: (user) => {
-        this.foundUser.set(user);
-        this.loadingUser.set(false);
-      },
-      error: (error) => {
-        this.foundUser.set(null);
-        this.loadingUser.set(false);
-        this.showToast('Usuário não encontrado', 'error');
       }
     });
   }

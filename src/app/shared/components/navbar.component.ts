@@ -183,7 +183,7 @@ import {TranslatePipe} from '../pipes/translate.pipe';
       .topbar-nav {
         display: flex;
         align-items: center;
-        gap: var(--spacing-lg);
+        gap: 4px;
         margin-left: var(--spacing-xl);
       }
 
@@ -191,8 +191,6 @@ import {TranslatePipe} from '../pipes/translate.pipe';
         background: none;
         border: none;
         color: var(--text-2);
-        font-size: 1rem;
-        padding: 8px 16px;
         border-radius: var(--border-radius-sm);
         text-decoration: none;
         cursor: pointer;
@@ -200,11 +198,11 @@ import {TranslatePipe} from '../pipes/translate.pipe';
         display: flex;
         align-items: center;
         gap: 6px;
+        font-size: 14px;
       }
 
       .topbar-nav .nav-item.active,
       .topbar-nav .nav-item:focus-visible {
-        background: rgba(255, 153, 0, 0.14);
         color: var(--brand-primary-600);
       }
 
@@ -217,23 +215,11 @@ import {TranslatePipe} from '../pipes/translate.pipe';
         display: flex;
         align-items: center;
         gap: var(--spacing-md);
-        padding: var(--spacing-md) var(--spacing-lg);
+        padding: var(--spacing-md) 14px;
         color: var(--text-2);
         text-decoration: none;
         transition: var(--transition-fast);
         position: relative;
-      }
-
-      .nav-item::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: 4px;
-        background: var(--color-primary);
-        transform: scaleX(0);
-        transition: var(--transition-fast);
       }
 
       .nav-item:hover {

@@ -1,7 +1,7 @@
 {
   "nav": {
     "dashboard": "Painel",
-    "exams": "Exames e simulados",
+    "exams": "Exames",
     "stats": "Desempenho",
     "achievements": "Conquistas",
     "admin": "Admin",
@@ -377,7 +377,7 @@
     "exam_load_error": "N\u00e3o foi poss\u00edvel carregar o exame. Tente novamente.",
     "start_exam_error": "N\u00e3o foi poss\u00edvel iniciar o simulado. Tente novamente.",
     "anonymous_user_error": "N\u00e3o foi poss\u00edvel criar uma sess\u00e3o an\u00f4nima. Tente novamente.",
-    "change_language": "[BETA] Deseja alterar o idioma? Suas preferências de tema podem ser redefinidas temporariamente.",
+    "change_language": "[BETA] Would you like to change the language? Your theme preferences may be temporarily reset.",
     "language_changed": "Idioma atualizado.",
     "confirm": "Confirmar",
     "cancel": "Cancelar"
