@@ -58,7 +58,7 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
             @if (authFacade.isAuthenticated() && !authFacade.isAnonymous()) {
               <button class="logout-btn" (click)="logout()">{{ 'nav.exit' | translate }}</button>
             } @else {
-              <button class="login-btn sc-btn sc-btn--primary" routerLink="/login">{{ 'nav.login' | translate }}
+              <button class="logout-btn logout-btn-hover" routerLink="/login">{{ 'nav.login' | translate }}
               </button>
             }
           </div>
@@ -225,6 +225,11 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       transform: translateY(0);
     }
 
+    .logout-btn-hover:hover:not(:disabled) {
+      background: var(--brand-primary-600);
+      box-shadow: 0 4px 12px rgba(var(--brand-primary-rgb), 0.25);
+    }
+
     .nav-item {
       color: var(--text-2);
     }
@@ -238,10 +243,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
     .nav-item:focus-visible {
       background: rgba(255, 153, 0, 0.14);
       color: var(--brand-primary-600);
-    }
-
-    .login-btn:active {
-      transform: translateY(0);
     }
 
     .app-content {
@@ -399,10 +400,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
       display: flex;
       align-items: center;
       gap: 6px;
-    }
-
-    .sc-btn {
-      padding: 8px 16px;
     }
 
     .sc-glass--acrylic::after {
