@@ -5,6 +5,7 @@ import {ExamsApiService} from '../../api/exams.service';
 import {QuestionsApiService} from '../../api/questions.service';
 import {AuthApiService} from '../../api/auth.service';
 import {ExamResponse, UserResponse} from '../../api/domain';
+import {AuthFacade} from '../../core/auth/auth.facade';
 
 @Component({
   selector: 'app-admin',
@@ -195,7 +196,7 @@ import {ExamResponse, UserResponse} from '../../api/domain';
                       [class.btn-danger]="user.active"
                       [class.btn-success]="!user.active"
                       (click)="toggleUserStatus(user)"
-                      [disabled]="loadingUser()">
+                      [disabled]="loadingUser() || authFacade.currentUser()?.id === user.id">
                       {{ user.active ? 'Desativar' : 'Ativar' }}
                     </button>
                   </div>
@@ -223,6 +224,7 @@ export class AdminComponent {
   protected readonly examForm: FormGroup;
   protected readonly questionForm: FormGroup;
   protected readonly userForm: FormGroup;
+
   private readonly emptyQuestions = [
     {key: '', text: '', isCorrect: false},
     {key: '', text: '', isCorrect: false},
@@ -235,6 +237,7 @@ export class AdminComponent {
     private readonly examsApi: ExamsApiService,
     private readonly questionsApi: QuestionsApiService,
     private readonly authApi: AuthApiService,
+    protected readonly authFacade: AuthFacade
   ) {
     this.questionOptions.set(this.emptyQuestions);
 
@@ -268,50 +271,45 @@ export class AdminComponent {
   }
 
   createQuestion(): void {
-    if (this.questionForm.valid && this.questionOptions().length > 0) {
-      this.loadingQuestion.set(true);
+    if (!this.questionForm.valid || !this.questionOptions().length) return;
 
-      const request = {
-        ...this.questionForm.value,
-        options: this.questionOptions().filter(opt => opt.key && opt.text)
-      };
+    this.loadingQuestion.set(true);
 
-      this.questionsApi.createQuestion(request).subscribe({
-        next: () => {
-          this.questionForm.reset();
-          this.questionForm.patchValue({difficulty: 'MEDIUM'});
-          this.questionOptions.set(this.emptyQuestions);
-          this.loadingQuestion.set(false);
-        },
-        error: (error) => {
-          this.loadingQuestion.set(false);
-        }
-      });
-    }
+    const request = {
+      ...this.questionForm.value,
+      options: this.questionOptions().filter(opt => opt.key && opt.text)
+    };
+
+    this.questionsApi.createQuestion(request).subscribe({
+      next: () => {
+        this.questionForm.reset();
+        this.questionForm.patchValue({difficulty: 'MEDIUM'});
+        this.questionOptions.set(this.emptyQuestions);
+        this.loadingQuestion.set(false);
+      },
+      error: () => this.loadingQuestion.set(false)
+    });
   }
 
   loadExams(): void {
     this.examsApi.getAllAvailable().subscribe({
-      next: (exams) => {
-        this.exams.set(exams);
-      }
+      next: (exams) => this.exams.set(exams)
     });
   }
 
   createExam(): void {
-    if (this.examForm.valid) {
-      this.loadingExam.set(true);
-      this.examsApi.createExam(this.examForm.value).subscribe({
-        next: () => {
-          this.examForm.reset();
-          this.loadExams();
-          this.loadingExam.set(false);
-        },
-        error: () => {
-          this.loadingExam.set(false);
-        }
-      });
-    }
+    if (!this.examForm.valid) return;
+
+    this.loadingExam.set(true);
+
+    this.examsApi.createExam(this.examForm.value).subscribe({
+      next: () => {
+        this.examForm.reset();
+        this.loadExams();
+        this.loadingExam.set(false);
+      },
+      error: () => this.loadingExam.set(false)
+    });
   }
 
   deleteExam(examId: string): void {
@@ -332,20 +330,14 @@ export class AdminComponent {
 
     this.loadingUser.set(true);
 
-    const email = (this.userForm.value as string).trim();
-    this.authApi.getUserByEmail(email).subscribe({
+    this.authApi.getUserByEmail(this.userForm.value).subscribe({
       next: (user) => {
-        if (user) {
-          this.users.set([user]);
-        } else {
-          this.users.set([]);
-        }
-
+        user ? this.users.set([user]) : this.users.set([]);
         this.loadingUser.set(false);
       },
       error: () => {
         this.loadingUser.set(false);
-        this.showToast('Usuário não encontrado', 'error');
+        alert('Usuário não encontrado');
       }
     });
   }
@@ -360,23 +352,24 @@ export class AdminComponent {
 
   importExamsFromDirectory(): void {
     this.loadingImport.set(true);
-    this.showToast('Importação iniciada! Processando arquivos do diretório...', 'info');
+    alert('Importação iniciada! Processando arquivos do diretório...');
 
     this.examsApi.importFromDirectory().subscribe({
       next: () => {
         this.loadingImport.set(false);
-        this.showToast('Importação concluída com sucesso!', 'success');
+        alert('Importação concluída com sucesso!');
         this.loadExams();
       },
       error: () => {
         this.loadingImport.set(false);
-        this.showToast('Erro ao importar exames. Verifique o console para mais detalhes.', 'error');
+        alert('Erro ao importar exames. Verifique o console para mais detalhes.');
       }
     });
   }
 
   loadUsers(email?: string): void {
     this.loadingUser.set(true);
+
     this.authApi.getUsers(email).subscribe({
       next: (users) => {
         this.users.set(users);
@@ -395,25 +388,27 @@ export class AdminComponent {
       return;
     }
 
+    if (this.authFacade.currentUser()?.id === user?.id) {
+      alert('Não é permitido exclusao do usuario admin');
+      return;
+    }
+
     this.loadingUser.set(true);
+
     const request = user.active
       ? this.authApi.deactivateUser(user.id)
       : this.authApi.activateUser(user.id);
 
     request.subscribe({
       next: () => {
-        this.showToast(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+        this.loadingUser.set(false);
+        alert(`Usuário ${action === 'ativar' ? 'ativado' : 'desativado'} com sucesso!`);
       },
       error: () => {
         this.loadingUser.set(false);
-        this.showToast(`Erro ao ${action} usuário`, 'error');
+        alert(`Erro ao ${action} usuário`);
       }
     });
-  }
-
-  private showToast(message: string, type: 'success' | 'error' | 'info'): void {
-    console.log(`[${type.toUpperCase()}] ${message}`);
-    alert(message);
   }
 }
 

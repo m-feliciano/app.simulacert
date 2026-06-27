@@ -32,15 +32,6 @@
           <button (click)="fontFamily = 'system'" [class.active]="fontFamily === 'system'" style="font-family: var(--font-system)">System</button>
         </div>
       </div>
-      <div class="dropdown-section">
-        <label>{{ 'theme.language' | translate }}</label>
-        <div class="options-grid">
-          <button (click)="language = 'pt-BR'" [class.active]="language === 'pt-BR'">{{ 'theme.portuguese' | translate }}
-          </button>
-          <button (click)="language = 'en-US'" [class.active]="language === 'en-US'">{{ 'theme.english' | translate }}
-          </button>
-        </div>
-      </div>
     </div>
   }
   <button (click)="toggleThemeMenu()" [title]="'theme.customize' | translate" class="floating-btn sc-glass">
