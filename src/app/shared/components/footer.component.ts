@@ -1,18 +1,37 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {RouterLink} from '@angular/router';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {PersonalizationService} from '../../core/theme/personalization.service';
+import {TranslatePipe} from '../pipes/translate.pipe';
+
+type Language = {
+  desc: string,
+  name: string
+}
 
 @Component({
   selector: 'app-footer',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, ReactiveFormsModule, FormsModule, TranslatePipe],
   template: `
     <footer class="app-footer sc-glass">
       <div class="footer-content sc-page">
-        <p class="copyright">© {{ currentYear }} SimulaCert. Todos os direitos reservados.</p>
+        <p class="copyright">{{ 'footer.copyright' | translate: {year: currentYear} }}</p>
         <nav class="footer-links">
-          <a routerLink="/contato" class="footer-link">Contato</a>
-          <a routerLink="/termos-de-uso" class="footer-link">Termos de Uso</a>
-          <a routerLink="/politica-de-privacidade" class="footer-link">Privacidade</a>
+          <select
+            class="form-control"
+            [ngModel]="getLanguage()"
+            (change)="changeLanguage($any($event.target).value)"
+          >
+            @for (lang of languages(); track lang) {
+              <option [value]="lang.name" [selected]="getLanguage() == lang.name">
+                {{ lang.desc }}
+              </option>
+            }
+          </select>
+          <a routerLink="/contato" class="footer-link">{{'footer.contact' | translate}}</a>
+          <a routerLink="/termos-de-uso" class="footer-link">{{'footer.terms' | translate}}</a>
+          <a routerLink="/politica-de-privacidade" class="footer-link">{{'footer.privacy' | translate}}</a>
         </nav>
       </div>
     </footer>
@@ -61,6 +80,14 @@ import {RouterLink} from '@angular/router';
       color: var(--text);
     }
 
+    .form-control {
+      color: var(--text-2);
+      background: var(--surface);
+      border: none;
+      font-size: 14px;
+      cursor: pointer;
+    }
+
     @media (min-width: 640px) {
       .footer-content {
         flex-direction: row;
@@ -70,6 +97,29 @@ import {RouterLink} from '@angular/router';
   `]
 })
 export class FooterComponent {
-  currentYear = new Date().getFullYear();
+  protected readonly personalization = inject(PersonalizationService);
+  protected readonly currentYear = new Date().getFullYear();
+
+  private readonly ENGLISH: Language = {
+    desc: 'English',
+    name: 'en-US',
+  };
+
+  private readonly PORTUGUESE: Language = {
+    desc: 'Português',
+    name: 'pt-BR',
+  };
+
+  protected languages(): Language[] {
+    return [this.ENGLISH, this.PORTUGUESE];
+  }
+
+  protected getLanguage() {
+    return this.personalization.getLanguage();
+  }
+
+  protected changeLanguage(value: string) {
+    return this.personalization.setLanguage(value);
+  }
 }
 

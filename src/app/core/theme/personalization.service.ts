@@ -120,16 +120,21 @@ export class PersonalizationService {
     return (this.storage?.getItem(this.FONT_FAMILY_KEY) as FontFamily) || 'serif';
   }
 
-  setLanguage(lang: string) {
+  setLanguage(lang: string, askConfirmation = false) {
     if (!this.isBrowser) return;
 
-    this.translateService.get('alerts.change_language')
-      .subscribe((message) => {
-        if (confirm(message)) {
-          this.storage?.setItem('language', lang);
-          globalThis.location.reload();
-        }
-      });
+    if (askConfirmation) {
+      this.translateService.get('alerts.change_language')
+        .subscribe((message) => {
+          if (confirm(message)) {
+            this.storage?.setItem('language', lang);
+            globalThis.location.reload();
+          }
+        });
+    } else {
+      this.storage?.setItem('language', lang);
+      globalThis.location.reload();
+    }
   }
 
   getLanguage(): string {

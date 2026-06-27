@@ -297,7 +297,6 @@ import {TranslatePipe} from '../../shared/pipes/translate.pipe';
         left: 0;
         right: 0;
         bottom: 0;
-        background: rgba(17, 24, 39, 0.42);
         backdrop-filter: blur(4px);
         z-index: 999;
         animation: fadeIn 0.2s ease;

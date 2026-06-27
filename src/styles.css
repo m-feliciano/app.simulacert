@@ -694,6 +694,7 @@ button, a {
   text-decoration: none;
   transition: var(--transition-fast);
   position: relative;
+  cursor: pointer;
 }
 
 
